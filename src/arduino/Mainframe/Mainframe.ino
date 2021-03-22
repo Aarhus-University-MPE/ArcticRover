@@ -1,16 +1,19 @@
-//main file with entry point
+/*
+GeoRover mainframe - Manages primary systems as the Rover backbone.
+
+Mads Rosenhøj Jepepsen
+Aarhus University 
+2021
+*/
+
 #include "Pinout.h"
 #include "Constants.h"
 #include <LED.h>
 #include <EEPROM.h>
 #include <TimerOne.h>
-#if defined(DEBUG)
-  #include <MemoryFree.h> //for debug purposes. Read More http://playground.arduino.cc/Code/AvailableMemory
-#endif
 #include <SoftwareServo.h>
 #include <DigitalWriteFast.h>
 #include <MsTimer2.h>
-//compass stuff
 #include <ADXL345.h>
 #include <HMC58X3.h>
 #include <ITG3200.h>
@@ -21,7 +24,7 @@
 
 typedef void (*functionPtr)();
 
-//current and previous robot mode (strategy)
+//current and previous mode (strategy)
 byte mode; 
 byte prevMode;
 boolean isModeUpdated = false;
@@ -36,13 +39,20 @@ LED *statusLED2;
 // [2][MODES_MAX] - finish methods
 functionPtr strategyMethods[3][MODES_MAX];
 
+// ------------------------------------------------------------ //
+//                            SETUP                             //
+// ------------------------------------------------------------ //
 void setup() {
+
+  // Debug
   DBG_ONLY(Serial.begin(38400));
+  DBG_ONLY(while (!Serial));
   DEBUG_PRINTLN("Debug mode. Entered setup...");
-  // put your setup code here, to run once:
-  InitStatusLeds();
+  
+  // System Initialization
   InitAllPins();
-  statusLED1->on(); //indicate serup is running
+  InitStatusLeds();
+  statusLED1->on(); //indicate setup is running
 
   InitModeAndModeButton();
   InitStrategyMethods();
@@ -51,8 +61,10 @@ void setup() {
   CenterHead();
   //InitCompass();
   InitBluetooth();
+
   //setup finished
   statusLED1->off();
+  DEBUG_PRINTLN("Setup complete.");
 }
 
 void loop() {
@@ -120,7 +132,7 @@ void InitStatusLeds() {
   statusLED2->off();
 }
 
-//sets pinmode of all pins and writes initial values for outputs
+// Sets pinmode of all pins and writes initial values for outputs
 void InitAllPins(){
   pinMode(PI_BUTTON_MODE, INPUT);
   

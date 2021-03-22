@@ -1,8 +1,21 @@
-//All our permament constants should be defined here
+/*
+GeoRover system constants
 
-#define DEBUG //debug configuration flag
+Mads Rosenhøj Jepepsen
+Aarhus University 
+2021
+*/
 
-// a macro that executes one line of code only if DEBUG flag is set.
+// #include <_shared.h>
+
+// ------------------------------------------------------------ //
+//                            DEBUG                             //
+// ------------------------------------------------------------ //
+
+// Debug configuration flag - Comment out to unset
+#define DEBUG
+
+// Executes one line of code only if DEBUG flag is set.
 #if defined(DEBUG)
     #define DBG_ONLY(x) (x)
     #define DEBUG_PRINT(x) Serial.print(x)
@@ -12,6 +25,37 @@
     #define DEBUG_PRINT(x)
     #define DEBUG_PRINTLN(x)
 #endif
+
+// ------------------------------------------------------------ //
+//                             PINS                             //
+// ------------------------------------------------------------ //
+
+// External Inputs
+#define inputButton1 = 1
+#define inputButton2 = 2
+
+// Power control (Relays)
+#define pwrMotor    = 40
+#define pwr12VMain  = 42
+#define pwr5VMain   = 44
+#define pwrRF       = 46
+#define pwrIridium  = 48
+
+// Analog Sensors
+#define sensorWind  = PIN_A6
+#define sensorTemp3 = PIN_A5
+#define sensorTemp2 = PIN_A4
+#define sensorTemp1 = PIN_A3
+#define sensorRelH3 = PIN_A2
+#define sensorRelH2 = PIN_A1
+#define sensorRelH1 = PIN_A0
+
+
+
+// ------------------------------------------------------------ //
+//                           SYSTEM                             //
+// ------------------------------------------------------------ //
+
 #define EEPROM_READ_INT(addr) (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00))
 
 #define MODES_MAX 5 //total number of modes
