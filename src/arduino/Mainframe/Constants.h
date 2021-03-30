@@ -31,40 +31,53 @@ Aarhus University
 // ------------------------------------------------------------ //
 
 // External Inputs
-#define inputButton1 = 1
-#define inputButton2 = 2
+#define inputBtn1           1
+#define inputBtn2           2
+#define emergencyStopBtn    3
+
+// Status LED/Sound
+#define ledStatus1  3
+#define ledStatus2  4
+#define alarm1      5
 
 // Power control (Relays)
-#define pwrMotor    = 40
-#define pwr12VMain  = 42
-#define pwr5VMain   = 44
-#define pwrRF       = 46
-#define pwrIridium  = 48
+#define pwrMotor    40
+#define pwr12VMain  42
+#define pwr5VMain   44
+#define pwrRF       46
+#define pwrIridium  48
+
+// Motor Control
+#define motorPWMLeft    13
+#define motorPWMRight   14
 
 // Analog Sensors
-#define sensorWind  = PIN_A6
-#define sensorTemp3 = PIN_A5
-#define sensorTemp2 = PIN_A4
-#define sensorTemp1 = PIN_A3
-#define sensorRelH3 = PIN_A2
-#define sensorRelH2 = PIN_A1
-#define sensorRelH1 = PIN_A0
+#define sensorWind  PIN_A6
+#define sensorTemp3 PIN_A5
+#define sensorTemp2 PIN_A4
+#define sensorTemp1 PIN_A3
+#define sensorRelH3 PIN_A2
+#define sensorRelH2 PIN_A1
+#define sensorRelH1 PIN_A0
 
+// Communication
+#define SD_CS 53
 
 
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
 
-#define EEPROM_READ_INT(addr) (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00))
+// Strategy Modes
+#define MODES_MAX           5 // Total number of modes
+#define MODES_MIN_BROWSABLE 1 // Minimum mode index, that could be set via mode button.
 
-#define MODES_MAX 5 //total number of modes
-#define MODES_MIN_BROWSABLE 1 //minimum mode index, that could be set via mode button.
-#define MODE_FREEIMU_CALIB 0 //compass calibration mode
-#define MODE_BLINKER 1 // genius strategy of blinking with status led 2 
-#define MODE_LIGHTSEEKER 2 // robot will try to turn to strongest light source
-#define MODE_TEST 3
-#define MODE_REMOTECONTROL 4
+#define MODE_EMERGENCY      0 // Emergency Mode
+#define MODE_SYSTEMTEST     1 // Test main systems
+#define MODE_IDLE           2 // Standby mode
+#define MODE_REMOTECONTROL  3 // System remotely controllable 
+#define MODE_AUTONOMOUS     4 // 
+
 
 #define BT_NAME "Rover5"
 #define BT_CODE 7463
@@ -103,14 +116,23 @@ Aarhus University
 //freeimu signature number !important - this constant is also in Freeimu.cpp
 #define FREEIMU_EEPROM_SIGNATURE 0x19
 
-//here go all EEPROM memory addresses
+
+// ------------------------------------------------------------ //
+//                           EEPROM                             //
+// ------------------------------------------------------------ //
+#define EEPROM_READ_INT(addr) (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00))
+
+// Modes
 #define MEMADDR_LASTMODE 0
 // motor calibration cache
+
 #define MEMADDR_MOTORCACHE_START 1 
 #define MEMADDR_MOTORCACHE_END MEMADDR_MOTORCACHE_START + 160
+
 // analog IR cache
 #define MEMADDR_IRCACHE_START MEMADDR_MOTORCACHE_END
 #define MEMADDR_IRCACHE_END MEMADDR_IRCACHE_START + 32
+
 // compass and accelerometer cache
 #define MEMADDR_FREEIMU_START MEMADDR_IRCACHE_END //!important - this constant is also in Freeimu.cpp
 #define MEMADDR_FREEIMU_END MEMADDR_FREEIMU_START + 36 + 1 + 3  //36 bytes for values , 1 for signature, 3 empty space

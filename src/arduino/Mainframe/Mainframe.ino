@@ -6,21 +6,12 @@ Aarhus University
 2021
 */
 
-#include "Pinout.h"
 #include "Constants.h"
-#include <LED.h>
-#include <EEPROM.h>
-#include <TimerOne.h>
-#include <SoftwareServo.h>
-#include <DigitalWriteFast.h>
-#include <MsTimer2.h>
-#include <ADXL345.h>
-#include <HMC58X3.h>
-#include <ITG3200.h>
-#include <FreeIMU.h>
-#include <Wire.h>
-
 #include "_shared.h"
+
+#include <SPI.h>
+#include <SD.h>
+#include <Wire.h>
 
 typedef void (*functionPtr)();
 
@@ -28,15 +19,16 @@ typedef void (*functionPtr)();
 byte mode; 
 byte prevMode;
 boolean isModeUpdated = false;
+boolean EmergencyStop = false;
 
 // LED wrapper ptrs Read more: http://playground.arduino.cc/Code/LED
 LED *statusLED1;
 LED *statusLED2;
 
 // pointers to key strategy methods.
-// [0][MODES_MAX] - start methods
-// [1][MODES_MAX] - main run methods
-// [2][MODES_MAX] - finish methods
+// [0][MODES_MAX] - start sequence
+// [1][MODES_MAX] - main sequence
+// [2][MODES_MAX] - end sequence
 functionPtr strategyMethods[3][MODES_MAX];
 
 // ------------------------------------------------------------ //
@@ -51,41 +43,87 @@ void setup() {
   
   // System Initialization
   InitAllPins();
-  InitStatusLeds();
-  statusLED1->on(); //indicate setup is running
+  InitButtons();
 
-  InitModeAndModeButton();
+  InitMode();
   InitStrategyMethods();
+
+  InitStatusLeds();
+
   InitIRSensor();
   InitServiceInterrupt();
-  CenterHead();
-  //InitCompass();
-  InitBluetooth();
 
-  //setup finished
-  statusLED1->off();
+  // Setup finished
   DEBUG_PRINTLN("Setup complete.");
 }
 
+// ------------------------------------------------------------ //
+//                          MAIN LOOP                           //
+// ------------------------------------------------------------ //
 void loop() {
-  // put your main code here, to run repeatedly:
+
   while (isModeUpdated) {
     isModeUpdated=false;
     statusLED2->blink(100);
-    strategyMethods[2][prevMode](); // finish any operations for prevMode here
+    
+    // Skip finish operation when going to emergency
+    if(mode != MODE_EMERGENCY){ 
+      strategyMethods[2][prevMode](); // finish any operations for prevMode here
+    }
     strategyMethods[0][mode](); // init new strategy according to the new mode value
   }
+
   strategyMethods[1][mode]();
-  //bluetooth receive and send
-  ProcessBluetooth();
 }
 
-//sets pointers for strategies methods
+// ------------------------------------------------------------ //
+//                          FUNCTIONS                           //
+// ------------------------------------------------------------ //
+
+// Sets pinmode of all pins and writes initial values for outputs
+void InitAllPins(){
+  
+  // Power control (Relays)
+  pinMode(pwrMotor,   OUTPUT);
+  pinMode(pwr12VMain, OUTPUT);
+  pinMode(pwr5VMain,  OUTPUT);
+  pinMode(pwrRF,      OUTPUT);
+  pinMode(pwrIridium, OUTPUT);
+
+  digitalWrite(pwrMotor,  LOW);
+  digitalWrite(pwr12VMain,LOW);
+  digitalWrite(pwr5VMain, LOW);
+  digitalWrite(pwrRF,     LOW);
+  digitalWrite(pwrIridium,LOW);
+
+  // Analog Sensors
+  pinMode(sensorWind, INPUT);
+
+  pinMode(sensorTemp1, INPUT);
+  pinMode(sensorTemp2, INPUT);
+  pinMode(sensorTemp3, INPUT);
+
+  pinMode(sensorRelH1, INPUT);
+  pinMode(sensorRelH2, INPUT);
+  pinMode(sensorRelH3, INPUT);
+
+  // External Inputs
+  pinMode(emergencyStopBtn, INPUT_PULLUP)
+  pinMode(inputBtn1, INPUT_PULLUP);
+  pinMode(inputBtn2, INPUT_PULLUP);
+}
+
+
+// Set pointers for strategies methods
 void InitStrategyMethods() {
   
-  strategyMethods[0][MODE_FREEIMU_CALIB] = StartFreeimuCalib;
-  strategyMethods[1][MODE_FREEIMU_CALIB] = RunFreeimuCalib;
-  strategyMethods[2][MODE_FREEIMU_CALIB] = FinishFreeimuCalib;
+  strategyMethods[0][MODE_EMERGENCY] = StartStrategyEmergency;
+  strategyMethods[1][MODE_EMERGENCY] = RunStrategyEmergency;
+  strategyMethods[2][MODE_EMERGENCY] = FinishStrategyEmergency;
+
+  strategyMethods[0][MODE_SYSTEMTEST] = StartStrategySystemTest;
+  strategyMethods[1][MODE_SYSTEMTEST] = RunStrategySystemTest;
+  strategyMethods[2][MODE_SYSTEMTEST] = FinishStrategySystemTest;
   
   strategyMethods[0][MODE_BLINKER] = StartStrategyBlinker;
   strategyMethods[1][MODE_BLINKER] = RunStrategyBlinker;
@@ -104,11 +142,11 @@ void InitStrategyMethods() {
   strategyMethods[2][MODE_REMOTECONTROL] = FinishStrategyRemote;
 }
 
-//loops through button-selectable modes. Triggered by button interrupt
-unsigned long lastMillis = 0;
+// Loops through button-selectable modes. Triggered by button interrupt
+unsigned long lastMillisMode = 0;
 void ModeButtonInterruptHandler() {
-  if (millis() - lastMillis > 300) {
-    lastMillis=millis();
+  if (millis() - lastMillisMode > 300) {
+    lastMillisMode=millis();
     if (mode+1 < MODES_MIN_BROWSABLE || mode+1 >= MODES_MAX)
       SetMode(MODES_MIN_BROWSABLE);
     else 
@@ -116,15 +154,28 @@ void ModeButtonInterruptHandler() {
   }
 }
 
-// set last mode, attach button interrupt
-void InitModeAndModeButton() {
-  attachInterrupt(0, ModeButtonInterruptHandler, FALLING);
+// Set or Unset emergency stop. Triggered by emergency button interupt
+unsigned long lastMillisEmergencyStop = 0;
+void EmergencyStopInterruptHandler() {
+  if (millis() - lastMillisEmergencyStop > 300) {
+    lastMillisEmergencyStop=millis();
+    if (EmergencyStop)
+      EmergencyStop = TRUE;
+      SetMode(MODES_EMERGENCY)
+    else 
+      EmergencyStop = FALSE;
+      SetMode(prevMode)
+  }
+}
+
+// Set last mode from EEPROM
+void InitMode() {
   mode = EEPROM.read(MEMADDR_LASTMODE);
   prevMode = 0;
   isModeUpdated = true;
 }
 
-//set leds
+// Set LED
 void InitStatusLeds() {
   statusLED1 = new LED(PP_LED_STATUS_1);
   statusLED2 = new LED(PP_LED_STATUS_2);
@@ -132,50 +183,9 @@ void InitStatusLeds() {
   statusLED2->off();
 }
 
-// Sets pinmode of all pins and writes initial values for outputs
-void InitAllPins(){
-  pinMode(PI_BUTTON_MODE, INPUT);
-  
-  pinMode(PO_SELF_POWEROFF, OUTPUT);
-  digitalWrite(PO_SELF_POWEROFF,LOW);
-  
-  pinMode(PO_SONICSENSOR_TRIGGER, OUTPUT);
-  digitalWrite(PO_SONICSENSOR_TRIGGER,LOW);
-  
-  pinMode(PO_IRBUMPER_SWITCH,OUTPUT);
-  digitalWrite(PO_IRBUMPER_SWITCH,HIGH);
-  
-  pinMode(PO_IRANALOG_SWITCH,OUTPUT);
-  digitalWrite(PO_IRANALOG_SWITCH,LOW);
-  
-  pinMode(PP_MOTOR_SPD_TL,OUTPUT);
-  pinMode(PP_MOTOR_SPD_TR,OUTPUT);
-  pinMode(PP_MOTOR_SPD_BL,OUTPUT);
-  pinMode(PP_MOTOR_SPD_BR,OUTPUT);
-  digitalWrite(PP_MOTOR_SPD_TL,LOW);
-  digitalWrite(PP_MOTOR_SPD_TR,LOW);
-  digitalWrite(PP_MOTOR_SPD_BL,LOW);
-  digitalWrite(PP_MOTOR_SPD_BR,LOW);
-  
-  pinMode(PO_MOTOR_DIR_TL,OUTPUT);
-  pinMode(PO_MOTOR_DIR_TR,OUTPUT);
-  pinMode(PO_MOTOR_DIR_BL,OUTPUT);
-  pinMode(PO_MOTOR_DIR_BR,OUTPUT);
-  digitalWrite(PO_MOTOR_DIR_TL,MOTOR_FWD_T);
-  digitalWrite(PO_MOTOR_DIR_TR,MOTOR_FWD_T);
-  digitalWrite(PO_MOTOR_DIR_BL,MOTOR_FWD_B);
-  digitalWrite(PO_MOTOR_DIR_BR,MOTOR_FWD_B);
-  
-  pinMode(PI_MOTOR_ENC_TL,INPUT);
-  pinMode(PI_MOTOR_ENC_TR,INPUT);
-  pinMode(PI_MOTOR_ENC_BL,INPUT);
-  pinMode(PI_MOTOR_ENC_BR,INPUT);
-}
+// Reset MCU
+void(* resetFunc) (void) = 0;
 
-void SelfPowerOff()
-{
-  digitalWrite(PO_SELF_POWEROFF,HIGH);
-}
 
 // tries set the mode and isModeUpdated flag
 boolean SetMode(byte newMode) {
