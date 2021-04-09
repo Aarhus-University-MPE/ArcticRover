@@ -1,0 +1,50 @@
+byte currentLedStatus = B000;
+unsigned long lastMillisLed = 0;
+unsigned long millisSinceLast;
+
+// Set LED
+void InitStatusLed() {
+    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_SHORT);
+    LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, 0);
+}
+
+
+// Sets current LED Status from byte 
+// [100] [RED - -]
+// [010] [- YEL -]
+// [001] [- - GRN]
+void LedSet(byte color){
+    // Do nothing if arguments are the same
+    if (color == currentLedStatus)
+      return;
+
+    digitalWrite(PO_LED_STATUS_GRN, (BINARY_CODE_LED_GRN & color) > 0);
+    digitalWrite(PO_LED_STATUS_YEL, (BINARY_CODE_LED_YEL & color) > 0);
+    digitalWrite(PO_LED_STATUS_RED, (BINARY_CODE_LED_RED & color) > 0);
+
+    currentLedStatus = color;
+}
+
+// Sets current LED Status from byte and alternate blink based on input durations
+// [100] [RED - -]
+// [010] [- YEL -]
+// [001] [- - GRN]
+void LedBlink(byte color, unsigned int onDuration, unsigned int offDuration){
+    millisSinceLast = millis() - lastMillisLed;
+    if(currentLedStatus>0 && millisSinceLast > onDuration){
+        LedSet(0);
+        lastMillisLed = millis();
+    }
+    if(currentLedStatus==0 && millisSinceLast > offDuration){
+        LedSet(color);
+        lastMillisLed = millis();
+    }
+}
+
+// Blink in specified color while halting system for duration
+void LedBlinkHalt(byte color, unsigned int duration, unsigned int afterHalt){
+    LedSet(color);
+    delay(duration);
+    LedSet(0);
+    delay(afterHalt);
+}

@@ -27,44 +27,6 @@ Aarhus University
 #endif
 
 // ------------------------------------------------------------ //
-//                             PINS                             //
-// ------------------------------------------------------------ //
-
-// External Inputs
-#define inputBtn1           1
-#define inputBtn2           2
-#define emergencyStopBtn    3
-
-// Status LED/Sound
-#define ledStatus1  3
-#define ledStatus2  4
-#define alarm1      5
-
-// Power control (Relays)
-#define pwrMotor    40
-#define pwr12VMain  42
-#define pwr5VMain   44
-#define pwrRF       46
-#define pwrIridium  48
-
-// Motor Control
-#define motorPWMLeft    13
-#define motorPWMRight   14
-
-// Analog Sensors
-#define sensorWind  PIN_A6
-#define sensorTemp3 PIN_A5
-#define sensorTemp2 PIN_A4
-#define sensorTemp1 PIN_A3
-#define sensorRelH3 PIN_A2
-#define sensorRelH2 PIN_A1
-#define sensorRelH1 PIN_A0
-
-// Communication
-#define SD_CS 53
-
-
-// ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
 
@@ -72,13 +34,24 @@ Aarhus University
 #define MODES_MAX           5 // Total number of modes
 #define MODES_MIN_BROWSABLE 1 // Minimum mode index, that could be set via mode button.
 
-#define MODE_EMERGENCY      0 // Emergency Mode
+#define MODE_EMERGENCY      0 // Emergency Stop Mode
 #define MODE_SYSTEMTEST     1 // Test main systems
 #define MODE_IDLE           2 // Standby mode
 #define MODE_REMOTECONTROL  3 // System remotely controllable 
-#define MODE_AUTONOMOUS     4 // 
+#define MODE_AUTONOMOUS     4 // Autonomous driving mode
 
+// Binary codes for Status LED flags, Red Yellow Green 
+#define BINARY_CODE_LED_GRN 1   // 001
+#define BINARY_CODE_LED_YEL 2   // 010
+#define BINARY_CODE_LED_RED 4   // 100
 
+// LED blink durations (ms)
+#define LED_BLINK_VERY_LONG     2000
+#define LED_BLINK_LONG          1000
+#define LED_BLINK_SHORT         250
+#define LED_BLINK_VERY_SHORT    100
+
+// Bluetooth?
 #define BT_NAME "Rover5"
 #define BT_CODE 7463
 #define BT_COM_BUFFER_SIZE 10
