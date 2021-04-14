@@ -51,6 +51,49 @@ Aarhus University
 #define LED_BLINK_SHORT         250
 #define LED_BLINK_VERY_SHORT    100
 
+// ------------------------------------------------------------ //
+//                         NAVIGATION                           //
+// ------------------------------------------------------------ //
+
+// Orientation calculations
+#define MIN_DISTANCE_VALID_BEARING      1           // min valid distance to calculate bearing (meters)
+#define MAX_DISTANCE_VALID_WAYPOINT     1000        // max valid waypoint distance (meters)
+#define MIN_DISTANCE_WAYPOINT_ACCEPT    5           // max distance in to accept waypoint (meters)
+
+#define EARTH_RADIUS                    6371000     // (meters)
+
+
+
+
+
+// ------------------------------------------------------------ //
+//                           EEPROM                             //
+// ------------------------------------------------------------ //
+#define EEPROM_READ_INT(addr) (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00))
+
+// Modes
+#define MEMADDR_LASTMODE 0
+// motor calibration cache
+
+#define MEMADDR_MOTORCACHE_START 1 
+#define MEMADDR_MOTORCACHE_END MEMADDR_MOTORCACHE_START + 160
+
+// analog IR cache
+#define MEMADDR_IRCACHE_START MEMADDR_MOTORCACHE_END
+#define MEMADDR_IRCACHE_END MEMADDR_IRCACHE_START + 32
+
+// compass and accelerometer cache
+#define MEMADDR_FREEIMU_START MEMADDR_IRCACHE_END //!important - this constant is also in Freeimu.cpp
+#define MEMADDR_FREEIMU_END MEMADDR_FREEIMU_START + 36 + 1 + 3  //36 bytes for values , 1 for signature, 3 empty space
+
+
+
+
+
+
+// ------------------------------------------------------------ //
+//                           EEPROM                             //
+// ------------------------------------------------------------ //
 // Bluetooth?
 #define BT_NAME "Rover5"
 #define BT_CODE 7463
@@ -88,25 +131,3 @@ Aarhus University
 
 //freeimu signature number !important - this constant is also in Freeimu.cpp
 #define FREEIMU_EEPROM_SIGNATURE 0x19
-
-
-// ------------------------------------------------------------ //
-//                           EEPROM                             //
-// ------------------------------------------------------------ //
-#define EEPROM_READ_INT(addr) (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00))
-
-// Modes
-#define MEMADDR_LASTMODE 0
-// motor calibration cache
-
-#define MEMADDR_MOTORCACHE_START 1 
-#define MEMADDR_MOTORCACHE_END MEMADDR_MOTORCACHE_START + 160
-
-// analog IR cache
-#define MEMADDR_IRCACHE_START MEMADDR_MOTORCACHE_END
-#define MEMADDR_IRCACHE_END MEMADDR_IRCACHE_START + 32
-
-// compass and accelerometer cache
-#define MEMADDR_FREEIMU_START MEMADDR_IRCACHE_END //!important - this constant is also in Freeimu.cpp
-#define MEMADDR_FREEIMU_END MEMADDR_FREEIMU_START + 36 + 1 + 3  //36 bytes for values , 1 for signature, 3 empty space
-

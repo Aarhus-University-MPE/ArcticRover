@@ -1,9 +1,11 @@
 // Initialization of the interrupts assigned to buttons
 void InitButtons(){
   
+  // Assign mode button interrupt
+  attachInterrupt(PI_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
+
+
 }
-
-
 
 
 // Loops through button-selectable modes. Triggered by button interrupt
