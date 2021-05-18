@@ -23,7 +23,7 @@ void RunStrategyAutonomous() {
 
 // End sequence of strategy
 void FinishStrategyAutonomous() {
-  DEBUG_PRINTLN("Strategy: Autonomous ending.")
+  DEBUG_PRINTLN("Strategy: Autonomous ending.");
   
   // Disable light
 }

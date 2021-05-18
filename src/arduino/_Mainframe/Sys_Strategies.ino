@@ -9,10 +9,6 @@ void InitStrategyMethods() {
   strategyMethods[1][MODE_SYSTEMTEST] = RunStrategySystemTest;
   strategyMethods[2][MODE_SYSTEMTEST] = FinishStrategySystemTest;
   
-  strategyMethods[0][MODE_IDLE] = StartStrategyBlinker;
-  strategyMethods[1][MODE_IDLE] = RunStrategyBlinker;
-  strategyMethods[2][MODE_IDLE] = FinishStrategyBlinker;
-  
   strategyMethods[0][MODE_REMOTECONTROL] = StartStrategyRemote;
   strategyMethods[1][MODE_REMOTECONTROL] = RunStrategyRemote;
   strategyMethods[2][MODE_REMOTECONTROL] = FinishStrategyRemote;

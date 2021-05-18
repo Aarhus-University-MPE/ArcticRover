@@ -4,7 +4,7 @@
 */
 
 // Start sequence of strategy
-void StartStrategyEmergency() {
+void StartStrategyExample() {
   DEBUG_PRINT("Strategy: Emergency Starting...");
   DBG_ONLY(delay(500));
   
@@ -16,14 +16,14 @@ void StartStrategyEmergency() {
 }
 
 // Main sequence of strategy
-void RunStrategyEmergency() {
+void RunStrategyExample() {
   // Blink light
   
 }
 
 // End sequence of strategy
-void FinishStrategyEmergency() {
-  DEBUG_PRINTLN("Strategy: Emergency ending.")
+void FinishStrategyExample() {
+  DEBUG_PRINTLN("Strategy: Emergency ending.");
   
   // Disable light
 }

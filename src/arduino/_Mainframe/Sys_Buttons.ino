@@ -1,3 +1,4 @@
+
 // Initialization of the interrupts assigned to buttons
 void InitButtons(){
   
@@ -13,10 +14,12 @@ unsigned long lastMillisMode = 0;
 void ModeButtonInterruptHandler() {
   if (millis() - lastMillisMode > 300) {
     lastMillisMode=millis();
-    if (mode+1 < MODES_MIN_BROWSABLE || mode+1 >= MODES_MAX)
+    if (mode+1 < MODES_MIN_BROWSABLE || mode+1 >= MODES_MAX){
       SetMode(MODES_MIN_BROWSABLE);
-    else 
+    }
+    else {
       SetMode(mode+1);
+    }
   }
 }
 
@@ -25,11 +28,13 @@ unsigned long lastMillisEmergencyStop = 0;
 void EmergencyStopInterruptHandler() {
   if (millis() - lastMillisEmergencyStop > 300) {
     lastMillisEmergencyStop=millis();
-    if (EmergencyStop)
-      EmergencyStop = TRUE;
-      SetMode(MODES_EMERGENCY)
-    else 
-      EmergencyStop = FALSE;
-      SetMode(prevMode)
+    if (emergencyStop){
+      emergencyStop = true;
+      SetMode(MODE_EMERGENCY);
+    }
+    else {
+      emergencyStop = false;
+      SetMode(prevMode);
+    }
   }
 }

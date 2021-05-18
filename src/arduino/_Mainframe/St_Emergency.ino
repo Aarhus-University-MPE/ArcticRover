@@ -20,7 +20,7 @@ void StartStrategyEmergency() {
 
   // Disable input buttons
   detachInterrupt(PI_BUTTON_MODE);
-  detachInterrupt(inputBtn2);
+  detachInterrupt(PI_BUTTON_SELECT);
   DEBUG_PRINTLN("Inputs disabled.");
   
 }
@@ -28,7 +28,7 @@ void StartStrategyEmergency() {
 // Main sequence of strategy
 void RunStrategyEmergency() {
   // Blink light
-  LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_VERY_LONG){
+  LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
   
 }
 
@@ -37,15 +37,13 @@ void FinishStrategyEmergency() {
   DEBUG_PRINT("Strategy: Emergency ending... ");
   
   // Enable Power
-  digitalWrite(pwrMotor,   HIGH);
-  digitalWrite(pwr12VMain, HIGH);
-  digitalWrite(pwr5VMain,  HIGH)
+  digitalWrite(PO_POWER_12V,    HIGH);
+  digitalWrite(PO_POWER_5V,     HIGH);
   
-  DEBUG_PRINT("Power enabled... ")
+  DEBUG_PRINT("Power enabled... ");
 
   // Enable input buttons
   attachInterrupt(PI_BUTTON_MODE,ModeButtonInterruptHandler, FALLING);
-  attachInterrupt(inputBtn2,ModeButtonInterruptHandler, FALLING);
   
   DEBUG_PRINTLN("All systems online.");
 

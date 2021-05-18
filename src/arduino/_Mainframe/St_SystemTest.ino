@@ -4,7 +4,7 @@
 */
 
 // Start sequence of strategy
-void StartStrategyEmergency() {
+void StartStrategySystemTest() {
   DEBUG_PRINT("Strategy: System Test starting...");
   DBG_ONLY(delay(500));
   
@@ -14,14 +14,14 @@ void StartStrategyEmergency() {
 }
 
 // Main sequence of strategy
-void RunStrategyEmergency() {
+void RunStrategySystemTest() {
   // Blink light
   
 }
 
 // End sequence of strategy
-void FinishStrategyEmergency() {
-  DEBUG_PRINTLN("Strategy: System Test ending.")
+void FinishStrategySystemTest() {
+  DEBUG_PRINTLN("Strategy: System Test ending.");
   
   // Disable light
 }

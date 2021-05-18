@@ -35,7 +35,7 @@ Aarhus University
 #define PP_MOTOR_R          14
 
 // Analog Sensors
-#define PA_SENSOR_WIND      PIN_A6
+#define PA_SENSOR_WIND     PIN_A6
 #define PA_SENSOR_TEMP3    PIN_A5
 #define PA_SENSOR_TEMP2    PIN_A4
 #define PA_SENSOR_TEMP1    PIN_A3
@@ -45,3 +45,4 @@ Aarhus University
 
 // Communication
 #define PO_SPISS_SDCARD     53
+#define PO_SPISS_CANBUS     00

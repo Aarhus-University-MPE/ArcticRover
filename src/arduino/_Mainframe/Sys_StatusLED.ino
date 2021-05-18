@@ -41,10 +41,34 @@ void LedBlink(byte color, unsigned int onDuration, unsigned int offDuration){
     }
 }
 
-// Blink in specified color while halting system for duration
+// Flash LED in specified color while halting system for specified duration
+void LedBlinkHalt(byte color, unsigned int duration){
+    LedSet(color);
+    delay(duration);
+    LedSet(0);
+}
+
+// Flash LED in specified color while halting system for specified duration, during and after LED duration.
 void LedBlinkHalt(byte color, unsigned int duration, unsigned int afterHalt){
     LedSet(color);
     delay(duration);
     LedSet(0);
     delay(afterHalt);
+}
+
+// Flashes LED once in specified color (very short duration)
+void LedBlinkSingleShort(byte color){
+    LedBlinkHalt(color, LED_BLINK_VERY_SHORT);
+}
+
+// Flashes LED twice in specified color (very short duration)
+void LedBlinkDoubleShort(byte color){
+    LedBlinkHalt(color, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+    LedBlinkHalt(color, LED_BLINK_VERY_SHORT);
+}
+
+// Flashes LED twice in specified colors (very short duration)
+void LedBlinkDoubleShort(byte color1, byte color2){
+    LedBlinkHalt(color1, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+    LedBlinkHalt(color2, LED_BLINK_VERY_SHORT);
 }

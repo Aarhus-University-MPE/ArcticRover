@@ -6,20 +6,11 @@ Aarhus University
 2021
 */
 
-#include "Constants.h"
+#include "_constants.h"
 #include "_shared.h"
-
-#include <SPI.h>
-#include <SD.h>
-#include <Wire.h>
+#include "_pinout.h"
 
 typedef void (*functionPtr)();
-
-//current and previous mode (strategy)
-byte mode; 
-byte prevMode;
-boolean isModeUpdated = false;
-boolean EmergencyStop = false;
 
 // pointers to key strategy methods.
 // [0][MODES_MAX] - start sequence
@@ -34,25 +25,20 @@ void setup() {
 
   // Debug
   DBG_ONLY(Serial.begin(38400));
-  DBG_ONLY(while (!Serial));
+  DBG_ONLY(while(!Serial));
   DEBUG_PRINTLN("Debug mode. Entered setup...");
   
   // System initialization
   InitAllPins();
   InitButtons();
-  InitStatusLeds();
+  InitStatusLed();
 
   // Strategy initialization
   InitMode();
   InitStrategyMethods();
 
-  // Sensor and hardware initialization
-  InitIRSensor();
-  InitServiceInterrupt();
-
   // Setup finished
-  LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
-  LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT, 0);
+  LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
   DEBUG_PRINTLN("Setup complete.");
 }
 
@@ -63,7 +49,7 @@ void loop() {
 
   while (isModeUpdated) {
     isModeUpdated=false;
-    statusLED2->blink(100);
+    LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
     
     // Skip finish operation when going to emergency
     if(mode != MODE_EMERGENCY){ 
@@ -83,7 +69,7 @@ void loop() {
 void InitAllPins(){
   
   // External Inputs
-  pinMode(PI_BUTTON_ESTOP,  INPUT_PULLUP)
+  pinMode(PI_BUTTON_ESTOP,  INPUT_PULLUP);
   pinMode(PI_BUTTON_MODE,   INPUT_PULLUP);
   pinMode(PI_BUTTON_SELECT, INPUT_PULLUP);
 
@@ -112,13 +98,13 @@ void InitAllPins(){
   // Analog Sensors
   pinMode(PA_SENSOR_WIND,   INPUT);
 
-  pinMode(PA_SENSOR_TEMP_1, INPUT);
-  pinMode(PA_SENSOR_TEMP_2, INPUT);
-  pinMode(PA_SENSOR_TEMP_3, INPUT);
+  pinMode(PA_SENSOR_TEMP1, INPUT);
+  pinMode(PA_SENSOR_TEMP2, INPUT);
+  pinMode(PA_SENSOR_TEMP3, INPUT);
 
-  pinMode(PA_SENSOR_RELH_1, INPUT);
-  pinMode(PA_SENSOR_RELH_2, INPUT);
-  pinMode(PA_SENSOR_RELH_3, INPUT);
+  pinMode(PA_SENSOR_RELH1, INPUT);
+  pinMode(PA_SENSOR_RELH2, INPUT);
+  pinMode(PA_SENSOR_RELH3, INPUT);
 }
 
 // Reset MCU

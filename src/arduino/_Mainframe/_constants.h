@@ -17,7 +17,7 @@ Aarhus University
 
 // Executes one line of code only if DEBUG flag is set.
 #if defined(DEBUG)
-    #define DBG_ONLY(x) (x)
+    #define DBG_ONLY(x) x
     #define DEBUG_PRINT(x) Serial.print(x)
     #define DEBUG_PRINTLN(x) Serial.println(x)    
 #else
@@ -41,15 +41,19 @@ Aarhus University
 #define MODE_AUTONOMOUS     4 // Autonomous driving mode
 
 // Binary codes for Status LED flags, Red Yellow Green 
-#define BINARY_CODE_LED_GRN 1   // 001
-#define BINARY_CODE_LED_YEL 2   // 010
-#define BINARY_CODE_LED_RED 4   // 100
+#define BINARY_CODE_LED_GRN B001   // 001
+#define BINARY_CODE_LED_YEL B010   // 010
+#define BINARY_CODE_LED_RED B100   // 100
 
 // LED blink durations (ms)
 #define LED_BLINK_VERY_LONG     2000
 #define LED_BLINK_LONG          1000
 #define LED_BLINK_SHORT         250
 #define LED_BLINK_VERY_SHORT    100
+
+#define BUTTON_TIMEOUT_DURATION 300
+
+
 
 // ------------------------------------------------------------ //
 //                         NAVIGATION                           //
@@ -62,8 +66,30 @@ Aarhus University
 
 #define EARTH_RADIUS                    6371000     // (meters)
 
+#define BINARY_CODE_PRECHECK_REQUIRED   B11111100
+#define BINARY_CODE_PRECHECK_OPTIONAL   B00000011
+#define BINARY_CODE_PRECHECK_FULL       B11111111
+
+#define GNSS_QUERY_UPDATE_FREQUENCY     1000        // in milliseconds
+
+// ------------------------------------------------------------ //
+//                           MOTORS                             //
+// ------------------------------------------------------------ //
+
+#define MOTOR_MAX_SPEED_FWD             10
+#define MOTOR_MAX_SPEED_BWD             5
 
 
+// ------------------------------------------------------------ //
+//                        COMMUNICATION                         //
+// ------------------------------------------------------------ //
+
+// CAN BUS
+
+#define CANBUS_ID_MOTOR1        0x036
+#define CANBUS_ID_MOTOR2        0x037
+
+#define CANBUS_DATA_LENGTH      8
 
 
 // ------------------------------------------------------------ //
@@ -92,7 +118,7 @@ Aarhus University
 
 
 // ------------------------------------------------------------ //
-//                           EEPROM                             //
+//                             OLD                              //
 // ------------------------------------------------------------ //
 // Bluetooth?
 #define BT_NAME "Rover5"

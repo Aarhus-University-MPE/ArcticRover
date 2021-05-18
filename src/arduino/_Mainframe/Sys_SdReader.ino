@@ -2,7 +2,7 @@
 void InitSDReader(){
   DEBUG_PRINT("Initializing SD card...");
 
-  if (!SD.begin(SD_CS)) DEBUG_PRINTLN("initialization failed!")
+  if (!SD.begin(PO_SPISS_SDCARD)) DEBUG_PRINTLN("initialization failed!");
   else DEBUG_PRINTLN("initialization done.");  
 }
 
