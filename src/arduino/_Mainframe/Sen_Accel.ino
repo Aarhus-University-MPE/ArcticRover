@@ -33,15 +33,15 @@ void ReadAccel(){
     //   are in units of g's.
     // Check the two function declarations below for an example
     // of how to use these variables.
-    printCalculatedAccels();
+    //printCalculatedAccels();
     //printAccels(); // Uncomment to print digital readings
     
     // The library also supports the portrait/landscape detection
     //  of the MMA8452Q. Check out this function declaration for
     //  an example of how to use that.
-    printOrientation();
+    //printOrientation();
     
-    Serial.println(); // Print new line every time.
+    //Serial.println(); // Print new line every time.
   }
 }
 
@@ -156,3 +156,4 @@ void printOrientation()
     break;
   }
 }
+*/

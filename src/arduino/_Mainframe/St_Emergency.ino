@@ -8,7 +8,6 @@
 // Start sequence of strategy
 void StartStrategyEmergency() {
   DEBUG_PRINT("Strategy: Emergency starting... ");
-  DBG_ONLY(delay(500));  
   delay(20);
   
   // Disable all outputs
