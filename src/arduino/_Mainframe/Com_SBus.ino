@@ -23,7 +23,7 @@ void InitializeSBUS(){
 
 void TerminateSBUS(){
   DEBUG_PRINT("Terminating RF communication... ");
-  sbus.end();
+  // sbus.deactivate();
   LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
   LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_SHORT, 0);
   DEBUG_PRINTLN("RF communication Terminated. ");

@@ -3,5 +3,6 @@
     "sketch": "src\\arduino\\_Mainframe\\_Mainframe.ino",
     "port": "COM8",
     "programmer": "AVR ISP",
-    "configuration": "cpu=atmega2560"
+    "configuration": "cpu=atmega2560",
+    "output": "src/arduino/Output"
 }

@@ -53,6 +53,13 @@ Aarhus University
 
 #define BUTTON_TIMEOUT_DURATION 300
 
+// Sensor and Modules
+#define MODULE_VOLTAGE = 0x01
+#define MODULE_MOTOR = 0x02
+#define MODULE_GNSS = 0x03
+#define MODULE_SD = 0x04
+#define MODULE_ACCEL = 0x05
+
 
 
 // ------------------------------------------------------------ //

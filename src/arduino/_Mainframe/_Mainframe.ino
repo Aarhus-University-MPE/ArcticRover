@@ -24,7 +24,7 @@ functionPtr strategyMethods[3][MODES_MAX];
 void setup() {
 
   // Debug
-  DBG_ONLY(Serial.begin(38400));
+  DBG_ONLY(Serial.begin(115200));
   DBG_ONLY(while(!Serial));
   DEBUG_PRINTLN("Debug mode. Entered setup...");
   
@@ -59,6 +59,8 @@ void loop() {
   }
 
   strategyMethods[1][mode]();
+
+  RecvWithEndMarker();
 }
 
 // ------------------------------------------------------------ //

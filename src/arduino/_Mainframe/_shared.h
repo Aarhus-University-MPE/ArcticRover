@@ -19,9 +19,17 @@ void InitStrategyMethods();
 void LedBlink(byte color, unsigned int onDuration, unsigned int offDuration);
 void LedSet(byte color);
 void LedBlinkHalt(byte color, unsigned int duration, unsigned int afterHalt);
+void RecvWithEndMarker();
 
 void LedBlinkDoubleShort(byte color);
 void LedBlinkDoubleShort(byte color1, byte color2);
+
+// bool GetStatus(int module){
+//     return SystemStatus[module];
+// } 
+// void SetStatus(int module, bool status) {
+//     SystemStatus[module] = status;
+// }
 
 static double DistanceBetween(double lat1, double long1, double lat2, double long2);
 static double CourseTo(double lat1, double long1, double lat2, double long2);
@@ -31,6 +39,7 @@ boolean SetMode(byte newMode);
 void InitIRSensor();
 
 float rawCompassVals[11];
+bool SystemStatus[8];
 bool isGnssValid = false;
 bool isMotorEnabled = false;
 bool isSystemStable = true;
