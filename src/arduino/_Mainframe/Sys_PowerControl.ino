@@ -1,16 +1,16 @@
 /*
-GeoRover Power control
+  GeoRover Power control
 
-Mads Rosenhøj Jepepsen
-Aarhus University 
-2021
+  Mads Rosenhøj Jepepsen
+  Aarhus University
+  2021
 */
 
 // Checks voltage levels above critical values?
-bool VoltageCheck(){
-    bool valid = true;
+bool VoltageCheck() {
+  bool valid = true;
 
-    // Measure voltage, above critical?
+  // Measure voltage, above critical?
 
-    return valid;
+  return valid;
 }

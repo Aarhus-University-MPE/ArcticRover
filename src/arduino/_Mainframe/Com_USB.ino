@@ -8,115 +8,127 @@
     Query data from Drill Logger SD card
 */
 
-String command;
-bool newCommand = false;
+const byte numChars = 32;
+char receivedCMD[numChars];
 
+void initializeDebugComm() {
+  Serial.begin(DEBUG_BAUDRATE);
+  if (Serial) SetStatus(MODULE_DEBUGCOMM, true);
+  else SetStatus(MODULE_DEBUGCOMM, false);
+}
 
 // Receive Commands
-void RecvWithEndMarker() {
-  while (Serial.available())
-  {
-    char c = Serial.read();
-    //Serial.print(c);              // Uncomment to see command string flow
-    if (c == '<')
-    {
-      newCommand = true;
+void recvWithStartEndMarkers() {
+  static boolean recvInProgress = false;
+  static byte ndx = 0;
+  char startMarker = '<';
+  char endMarker = '>';
+  char rc;
+
+  while (Serial.available() > 0) {
+    rc = Serial.read();
+
+    if (recvInProgress == true) {
+      if (rc != endMarker) {
+        receivedCMD[ndx] = rc;
+        ndx++;
+        if (ndx >= numChars) {
+          ndx = numChars - 1;
+        }
+      }
+      else {
+        receivedCMD[ndx] = '\0'; // terminate the string
+        recvInProgress = false;
+        ndx = 0;
+        parseCommand();
+      }
     }
-    else if (c == '>' && newCommand == true)
-    {
-      newCommand = false;
-      parseCommand(command);
-      command = "";
-    }
-    else if (newCommand == true)
-    {
-      command += c;
+
+    else if (rc == startMarker) {
+      recvInProgress = true;
     }
   }
 }
 
-// Command handler
-void parseCommand(String com)
+// Parse read Command
+void parseCommand() {
+  switch (receivedCMD[0])
+  {
+    case CMD_FILES:
+      parseCommandFiles();
+      break;
+    case CMD_STRATEGY:
+      parseCommandStrategy();
+    case CMD_BACKUP:
+      parseCommandBackup();
+      break;
+    case '\0':
+      break;
+    default:
+      DEBUG_PRINTLN("NACK");
+      break;
+  }
+}
+
+
+void parseCommandFiles() {
+  char* fileNamePtr = receivedCMD + 2;
+  char fileName[numChars] = {0};
+  strcpy(fileName, fileNamePtr);
+
+  switch (receivedCMD[1])
+  {
+    case CMD_FILES_LIST:
+      SDQuery();
+      break;
+    case CMD_FILES_SIZE:
+      SDSize(fileName);
+      break;
+    case CMD_FILES_DOWNLOAD:
+      SDDownload(fileName);
+      break;
+    case CMD_FILES_DELETE:
+      SDDelete(fileName);
+      break;
+    default:
+      DEBUG_PRINTLN("NACK");
+      break;
+  }
+}
+
+void parseCommandStrategy() {
+  switch (receivedCMD[1])
+  {
+    case CMD_STRATEGY_SET:
+      if (!SetMode(receivedCMD[2])) DEBUG_PRINTLN("Mode not found!");
+      break;
+    case CMD_STRATEGY_OVERRIDE:
+      // Override
+      break;
+    default:
+      DEBUG_PRINTLN("NACK");
+      break;
+  }
+}
+
+void parseCommandBackup()
 {
-  String part1;
-  String part2;
-  File file;
-
-  part1 = com.substring(0, com.indexOf('.'));
-  part2 = com.substring(com.indexOf('.') + 1);
-
-//   if (part1.equalsIgnoreCase("files")) {
-//     if (part2.equalsIgnoreCase("query")) {
-//       if (SD.active) {
-//         Serial.println("Files in system:");
-//         file = SD.open("/");
-//         file.rewindDirectory();
-//         printFiles(file, 0);
-//         file.rewindDirectory();
-//         file.close();
-//         Serial.println("End of storage");
-//       }
-//       else Serial.println("SD card connection Error!");
-//     }
-//     else {
-//       Serial.println("NACK");
-//     }
-//   }
-
-//   else if (part1.equalsIgnoreCase("size")) {
-//     // part 2 contains file name
-//     if (systemActive) {
-//       Serial.println("Opening file: " + part2 + ".txt");
-//       file = SD.open(part2 + ".txt");
-//       if (file) {
-//         Serial.println("File size: " + (String)file.size() + " bytes");
-//         file.close();
-//       }
-//       else Serial.println("File not found!");
-//     }
-//     else Serial.println("SD card connection Error!");
-//   }
-//   else if (part1.equalsIgnoreCase("download")) {
-//     if (systemActive) {
-//       Serial.println("Downloading file: " + part2 + ".txt");
-//       Serial.println();
-//       file = SD.open(part2 + ".txt");
-//       if (file) {
-//         while (file.available()) {
-//           Serial.write(file.read());
-//         }
-//         file.close();
-//         Serial.println("End of File");
-//       }
-//       else Serial.println("File not found!");
-//     }
-//     else Serial.println("SD card connection Error!");
-//   }
-//   else if (part1.equalsIgnoreCase("delete")) {
-//     if (systemActive) {
-//       if (SD.exists(part2 + ".txt")) {
-//         Serial.println("Deleting file: " + part2 + ".txt");
-//         Serial.println();
-//         SD.remove(part2 + ".txt");
-//         Serial.println("File Removed");
-//       }
-//       else Serial.println("File not found");
-//     }
-//     else Serial.println("SD card connection Error!");
-//   }
-
-//   else if (part1.equalsIgnoreCase("create")) {
-//     if (systemActive) {
-//       if (SD.exists(part2 + ".txt")) {
-//         Serial.println("File already exist");
-//       }
-//       else {
-//         Serial.println("Creating file: " + part2 + ".txt");
-//         file = SD.open(part2 + ".txt", FILE_WRITE);
-//         file.close();
-//       }
-//     }
-//     else Serial.println("SD card connection Error!");
-//   }
-//   else Serial.println("NACK");
+  switch (receivedCMD[1])
+  {
+  case CMD_BACKUP_RST:
+    DEBUG_PRINTLN("Manual Reset of Backup System.");
+    ResetBackupCPU();
+    break;
+  case CMD_BACKUP_PRIMSTATUS:
+    DEBUG_PRINT("Backup System Status: ");
+    DEBUG_PRINTLN(GetStatus(MODULE_BACKUPCPU));
+    break;
+  case CMD_BACKUP_HB:
+    DEBUG_PRINTLN("Virtual Heartbeat");
+    HeartBeatInInterrupt();
+    break;
+  default:
+    DEBUG_PRINTLN("NACK");
+    break;
+  }
 }

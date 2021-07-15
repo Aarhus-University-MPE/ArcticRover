@@ -1,13 +1,13 @@
 /*
-GeoRover GNSS functionalities, utilizing the ZED-F9P 
-(SparkFun GPS-RTK-SMA Breakout https://www.sparkfun.com/products/16481)
+  GeoRover GNSS functionalities, utilizing the ZED-F9P
+  (SparkFun GPS-RTK-SMA Breakout https://www.sparkfun.com/products/16481)
 
-Primary library used:
+  Primary library used:
     https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library
 
-Mads Rosenhøj Jepepsen
-Aarhus University 
-2021
+  Mads Rosenhøj Jepepsen
+  Aarhus University
+  2021
 */
 
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
@@ -16,7 +16,7 @@ SFE_UBLOX_GNSS myGNSS;
 
 long lastTimeGNSS = 0; // Local timer, limits I2C traffic to u-blox module.
 
-void InitializeGnss(){
+void InitializeGnss() {
   DEBUG_PRINT("Initializing GNSS module... ");
 
   if (myGNSS.begin() == false) //Connect to the u-blox module using Wire port
@@ -33,36 +33,36 @@ void InitializeGnss(){
 }
 
 // Gets positional data in Latitude in degrees * 10^-7
-long GnssGetLat(){
+long GnssGetLat() {
   return myGNSS.getLatitude();
 }
 
 // Gets positional data in Longitude in degrees * 10^-7
-long GnssGetLong(){
+long GnssGetLong() {
   return myGNSS.getLongitude();
 }
 
 // Query module and prints Lat, Long, Alt, Acc
-void QueryGnss(){
-    long latitude = myGNSS.getLatitude();
-    DEBUG_PRINT(F("Lat: "));
-    DEBUG_PRINT(latitude);
-    DEBUG_PRINT(F(" (degrees * 10^-7)"));
+void QueryGnss() {
+  long latitude = myGNSS.getLatitude();
+  DEBUG_PRINT(F("Lat: "));
+  DEBUG_PRINT(latitude);
+  DEBUG_PRINT(F(" (degrees * 10^-7)"));
 
-    long longitude = myGNSS.getLongitude();
-    DEBUG_PRINT(F(" Long: "));
-    DEBUG_PRINT(longitude);
-    DEBUG_PRINT(F(" (degrees * 10^-7)"));
+  long longitude = myGNSS.getLongitude();
+  DEBUG_PRINT(F(" Long: "));
+  DEBUG_PRINT(longitude);
+  DEBUG_PRINT(F(" (degrees * 10^-7)"));
 
-    long altitude = myGNSS.getAltitude();
-    DEBUG_PRINT(F(" Alt: "));
-    DEBUG_PRINT(altitude);
-    DEBUG_PRINT(F(" (mm)"));
+  long altitude = myGNSS.getAltitude();
+  DEBUG_PRINT(F(" Alt: "));
+  DEBUG_PRINT(altitude);
+  DEBUG_PRINT(F(" (mm)"));
 
-    long accuracy = myGNSS.getPositionAccuracy();
-    DEBUG_PRINT(F(" 3D Positional Accuracy: "));
-    DEBUG_PRINT(accuracy);
-    DEBUG_PRINTLN(F(" (mm)"));
+  long accuracy = myGNSS.getPositionAccuracy();
+  DEBUG_PRINT(F(" 3D Positional Accuracy: "));
+  DEBUG_PRINT(accuracy);
+  DEBUG_PRINTLN(F(" (mm)"));
 }
 
 double DistanceBetween(double lat1, double long1, double lat2, double long2)
@@ -72,7 +72,7 @@ double DistanceBetween(double lat1, double long1, double lat2, double long2)
   // distance computation for hypothetical sphere of radius 6372795 meters.
   // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
   // Courtesy of Maarten Lamers
-  double delta = radians(long1-long2);
+  double delta = radians(long1 - long2);
   double sdlong = sin(delta);
   double cdlong = cos(delta);
   lat1 = radians(lat1);
@@ -96,7 +96,7 @@ double CourseTo(double lat1, double long1, double lat2, double long2)
   // both specified as signed decimal-degrees latitude and longitude.
   // Because Earth is no exact sphere, calculated course may be off by a tiny fraction.
   // Courtesy of Maarten Lamers
-  double dlon = radians(long2-long1);
+  double dlon = radians(long2 - long1);
   lat1 = radians(lat1);
   lat2 = radians(lat2);
   double a1 = sin(dlon) * cos(lat2);
@@ -110,41 +110,41 @@ double CourseTo(double lat1, double long1, double lat2, double long2)
   return degrees(a2);
 }
 
-/* 
-Calculates distancebetween coordinate (lat_A, lon_A) and (lat_B, lon_B) [rad], using Pythagoras used on equi­rectangular projec­tion: https://www.movable-type.co.uk/scripts/latlong.html
-- x = Δλ ⋅ cos φm
-- y = Δφ
-- d = R ⋅ √x² + y²
-(φ/λ for lati­tude/longi­tude in radians)
+/*
+  Calculates distancebetween coordinate (lat_A, lon_A) and (lat_B, lon_B) [rad], using Pythagoras used on equi­rectangular projec­tion: https://www.movable-type.co.uk/scripts/latlong.html
+  - x = Δλ ⋅ cos φm
+  - y = Δφ
+  - d = R ⋅ √x² + y²
+  (φ/λ for lati­tude/longi­tude in radians)
 */
-double CoordinateDistance(double lat_A, double lon_A, double lat_B, double lon_B){
-    double x = (lon_B - lon_A) * cos((lat_A + lat_B) / 2); 
-    double y = (lat_B - lat_A);
+double CoordinateDistance(double lat_A, double lon_A, double lat_B, double lon_B) {
+  double x = (lon_B - lon_A) * cos((lat_A + lat_B) / 2);
+  double y = (lat_B - lat_A);
 
-    return EARTH_RADIUS * sqrt(x * x + y * y);
-}
-
-/* 
-Calculates bearing between coordinate (lat_A, lon_A) and (lat_B, lon_B) [rad], using Forward Azimuth https://www.movable-type.co.uk/scripts/latlong.html
-- θ = atan2( sin Δλ ⋅ cos φ2 , cos φ1 ⋅ sin φ2 − sin φ1 ⋅ cos φ2 ⋅ cos Δλ )
-(φ/λ for lati­tude/longi­tude in radians)
-*/
-double CoordinateBearing(double lat_A, double lon_A, double lat_B, double lon_B){
-    double x = sin(lon_B - lon_A) * cos(lat_B);
-    double y = cos(lat_A) * sin(lat_B) - sin(lat_A) * cos(lat_B) * cos(lon_B - lon_A);
-
-    return atan2(x, y);
+  return EARTH_RADIUS * sqrt(x * x + y * y);
 }
 
 /*
-static void AveragingGnss()
-{
+  Calculates bearing between coordinate (lat_A, lon_A) and (lat_B, lon_B) [rad], using Forward Azimuth https://www.movable-type.co.uk/scripts/latlong.html
+  - θ = atan2( sin Δλ ⋅ cos φ2 , cos φ1 ⋅ sin φ2 − sin φ1 ⋅ cos φ2 ⋅ cos Δλ )
+  (φ/λ for lati­tude/longi­tude in radians)
+*/
+double CoordinateBearing(double lat_A, double lon_A, double lat_B, double lon_B) {
+  double x = sin(lon_B - lon_A) * cos(lat_B);
+  double y = cos(lat_A) * sin(lat_B) - sin(lat_A) * cos(lat_B) * cos(lon_B - lon_A);
+
+  return atan2(x, y);
+}
+
+/*
+  static void AveragingGnss()
+  {
   static bool warned = false; // that we're waiting for a valid location
 
   if (fix.valid.location && fix.valid.date && fix.valid.time) {
 
     if (count == 0) {
-    
+
       // Just save the first good fix
       first = fix;
       firstSecs = (clock_t) first.dateTime;
@@ -248,7 +248,7 @@ static void AveragingGnss()
     }
   }
 
-}
+  }
 
 
 */

@@ -1,9 +1,9 @@
 /*
-GeoRover system constants
+  GeoRover system constants
 
-Mads Rosenhøj Jepepsen
-Aarhus University 
-2021
+  Mads Rosenhøj Jepepsen
+  Aarhus University
+  2021
 */
 
 // #include <_shared.h>
@@ -17,30 +17,25 @@ Aarhus University
 
 // Executes one line of code only if DEBUG flag is set.
 #if defined(DEBUG)
-    #define DBG_ONLY(x) x
-    #define DEBUG_PRINT(x) Serial.print(x)
-    #define DEBUG_PRINTLN(x) Serial.println(x)    
+  #define DBG_ONLY(x) x
+  #define DEBUG_PRINT(x) Serial.print(x)
+  #define DEBUG_PRINTLN(x) Serial.println(x)
+  #define DEBUG_PRINTLN2(x,y) Serial.println(x,y)
+  #define DEBUG_WRITE(x) Serial.write(x)
 #else
-    #define DBG_ONLY(x) 
-    #define DEBUG_PRINT(x)
-    #define DEBUG_PRINTLN(x)
+  #define DBG_ONLY(x)
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTLN2(x,y)
+  #define DEBUG_WRITE(x)
 #endif
 
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
+#define SystemVersion   "1.0.0"
 
-// Strategy Modes
-#define MODES_MAX           5 // Total number of modes
-#define MODES_MIN_BROWSABLE 1 // Minimum mode index, that could be set via mode button.
-
-#define MODE_EMERGENCY      0 // Emergency Stop Mode
-#define MODE_SYSTEMTEST     1 // Test main systems
-#define MODE_IDLE           2 // Standby mode
-#define MODE_REMOTECONTROL  3 // System remotely controllable 
-#define MODE_AUTONOMOUS     4 // Autonomous driving mode
-
-// Binary codes for Status LED flags, Red Yellow Green 
+// Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001   // 001
 #define BINARY_CODE_LED_YEL B010   // 010
 #define BINARY_CODE_LED_RED B100   // 100
@@ -51,15 +46,52 @@ Aarhus University
 #define LED_BLINK_SHORT         250
 #define LED_BLINK_VERY_SHORT    100
 
-#define BUTTON_TIMEOUT_DURATION 300
+// Button debounce
+#define BUTTON_DBOUNCE_TIME     300
 
-// Sensor and Modules
-#define MODULE_VOLTAGE = 0x01
-#define MODULE_MOTOR = 0x02
-#define MODULE_GNSS = 0x03
-#define MODULE_SD = 0x04
-#define MODULE_ACCEL = 0x05
+// Sensor and Module status
+#define MODULE_COUNT        10
 
+#define MODULE_VOLTAGE      0
+#define MODULE_MOTOR        1
+#define MODULE_MOTOR_EN     2
+#define MODULE_GNSS         3
+#define MODULE_SD           4
+#define MODULE_ACCEL        5
+#define MODULE_DEBUGCOMM    6
+#define MODULE_BACKUPCPU    7
+#define MODULE_ESTOP        8
+#define MODULE_BLACKBOX     9
+
+
+
+// ------------------------------------------------------------ //
+//                       STRATEGY MODES                         //
+// ------------------------------------------------------------ //
+
+#define MODES_MAX           5 // Total number of modes
+#define MODES_MIN_BROWSABLE 1 // Minimum mode index, that could be set via mode button.
+
+#define MODE_EMERGENCY      0 // Emergency Stop Mode
+#define MODE_IDLE           1 // Standby mode
+#define MODE_SYSTEMTEST     2 // Test main systems
+#define MODE_REMOTECONTROL  3 // System remotely controllable 
+#define MODE_AUTONOMOUS     4 // Autonomous driving mode
+
+// ------------------------------------------------------------ //
+//                         HEARTBEAT                            //
+// ------------------------------------------------------------ //
+#define HRTBEAT_FRQ_OUT     6       // times per minute
+#define HRTBEAT_DT_OUT      60000 / HRTBEAT_FRQ_OUT
+
+#define HRTBEAT_TRESHOLD    60000
+
+#define BACKUP_RST_FRQ      6       // times per minute
+#define BACKUP_RST_DT       60000 / BACKUP_RST_FRQ
+
+// ------------------------------------------------------------ //
+//                          BLACKBOX                            //
+// ------------------------------------------------------------ //
 
 
 // ------------------------------------------------------------ //
@@ -91,6 +123,15 @@ Aarhus University
 //                        COMMUNICATION                         //
 // ------------------------------------------------------------ //
 
+// Buttons
+#define BTN_DEBOUNCE_TIME       300
+#define ESTOP_DEBOUNCE_TIME     1000
+
+
+// DEBUG
+#define DEBUG_BAUDRATE          115200
+
+
 // CAN BUS
 
 #define CANBUS_ID_MOTOR1        0x036
@@ -98,6 +139,7 @@ Aarhus University
 
 #define CANBUS_DATA_LENGTH      8
 
+#define CANBBUS_SPEED           CAN_500KBPS
 
 // ------------------------------------------------------------ //
 //                           EEPROM                             //
@@ -108,7 +150,7 @@ Aarhus University
 #define MEMADDR_LASTMODE 0
 // motor calibration cache
 
-#define MEMADDR_MOTORCACHE_START 1 
+#define MEMADDR_MOTORCACHE_START 1
 #define MEMADDR_MOTORCACHE_END MEMADDR_MOTORCACHE_START + 160
 
 // analog IR cache
@@ -119,9 +161,27 @@ Aarhus University
 #define MEMADDR_FREEIMU_START MEMADDR_IRCACHE_END //!important - this constant is also in Freeimu.cpp
 #define MEMADDR_FREEIMU_END MEMADDR_FREEIMU_START + 36 + 1 + 3  //36 bytes for values , 1 for signature, 3 empty space
 
+// ------------------------------------------------------------ //
+//                          COMMANDS                            //
+// ------------------------------------------------------------ //
+#define CMD_START_MARK          '<'
+#define CMD_END_MARK            '>'
+#define CMD_SPLIT_MARK          ','
 
+#define CMD_FILES               'F'
+#define CMD_FILES_LIST          'L'
+#define CMD_FILES_SIZE          'S'
+#define CMD_FILES_DOWNLOAD      'D'
+#define CMD_FILES_DELETE        'R'
 
+#define CMD_STRATEGY            'S'
+#define CMD_STRATEGY_SET        'C'
+#define CMD_STRATEGY_OVERRIDE   'O'
 
+#define CMD_BACKUP              'B'
+#define CMD_BACKUP_RST          'R'
+#define CMD_BACKUP_PRIMSTATUS   'S'
+#define CMD_BACKUP_HB           'H'
 
 
 // ------------------------------------------------------------ //
@@ -144,7 +204,7 @@ Aarhus University
 #define MOTOR_TIMER_INTERVAL  1000//timer tick interval in MICROseconds
 #define MOTOR_CALIBRATION_TICK 200 // timer tick number to run motor calibration 
 
-//binary codes for flags - TopLeft, TopRight, BottomRight, BottomLeft 
+//binary codes for flags - TopLeft, TopRight, BottomRight, BottomLeft
 #define BINARY_CODE_TL 1
 #define BINARY_CODE_TR 2
 #define BINARY_CODE_BR 4

@@ -1,41 +1,41 @@
 /*
-GeoRover Sensor Stack
+  GeoRover Sensor Stack
 
-Mads Rosenhøj Jepepsen
-Aarhus University 
-2021
+  Mads Rosenhøj Jepepsen
+  Aarhus University
+  2021
 */
 
-void InitializeSensorStack(){
-    DEBUG_PRINT("Initializing Sensor stack... ");
-    DEBUG_PRINT("Initializing Communication... ");
-    Wire.begin();
-    DEBUG_PRINTLN("Communication Active.");
+void InitializeSensorStack() {
+  DEBUG_PRINT("Initializing Sensor stack... ");
+  DEBUG_PRINT("Initializing Communication... ");
+  Wire.begin();
+  DEBUG_PRINTLN("Communication Active.");
 }
 
 // Checks GNSS signal availability
-bool GPSValid(){
-    bool valid = true;
+bool GPSValid() {
+  bool valid = true;
 
-    // Signal valid?
+  // Signal valid?
 
-    return valid;
+  return valid;
 }
 
 // Checks temperature sensor availability
-bool TempSensorCheck(){
-    bool valid = true;
+bool TempSensorCheck() {
+  bool valid = true;
 
-    // Currently measuring?
+  // Currently measuring?
 
-    return valid;
+  return valid;
 }
 
 // Checks accelerometer sensor availability and values within limits
-bool AccelSensorCheck(){
-    bool valid = true;
+bool AccelSensorCheck() {
+  bool valid = true;
 
-    // Currently measurements valid?
+  // Currently measurements valid?
 
-    return valid;
+  return valid;
 }

@@ -1,21 +1,30 @@
 /*
-GeoRover system pinout
+  GeoRover system pinout
 
-Naming pattern (all uppercase):
-P   + <I:input, A:analog input, O:output, P:pwm output>_ 
-    + <general part name>_ 
-    + <purpose>_ 
+  Naming pattern (all uppercase):
+  P   + <I:input, A:analog input, O:output, P:pwm output>_
+    + <general part name>_
+    + <purpose>_
     + <where applicable: left, right, top, bottom, position etc...>
 
-Mads Rosenhøj Jepepsen
-Aarhus University 
-2021
+  Mads Rosenhøj Jepepsen
+  Aarhus University
+  2021
 */
 
 // External Inputs
 #define PI_BUTTON_MODE      2
 #define PI_BUTTON_SELECT    3
 #define PI_BUTTON_ESTOP     18
+
+// Heartbeat
+#define PI_BACKUP_HRTBEAT   2
+#define PO_BACKUP_HRTBEAT   22
+#define PI_INT_HRTBEAT      digitalPinToInterrupt(PI_BACKUP_HRTBEAT)
+
+// Reset pin
+#define PI_BACKUP_RST       RESET
+#define PO_BACKUP_RST       23
 
 // Status LED/Sound
 #define PO_LED_STATUS_RED   11
@@ -46,3 +55,9 @@ Aarhus University
 // Communication
 #define PO_SPISS_SDCARD     53
 #define PO_SPISS_CANBUS     00
+
+#define COM_SERIAL_PC       Serial1
+#define COM_SERIAL_IRID     Serial2
+#define COM_SERIAL_RF       Serial3
+
+// #define COM_SPI_CAN      serial4

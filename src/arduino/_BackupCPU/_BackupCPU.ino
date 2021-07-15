@@ -1,5 +1,7 @@
 /*
-  GeoRover mainframe - Manages primary systems as the Rover backbone.
+  GeoRover Backup CPU
+  Detects and sends heartbeat to mainframe of GeoRover.
+  Resets system if no heartbeat detected within limit.
 
   Mads Rosenhøj Jepepsen
   Aarhus University
@@ -10,7 +12,6 @@
 #include "_shared.h"
 #include "_pinout.h"
 
-
 // ------------------------------------------------------------ //
 //                            SETUP                             //
 // ------------------------------------------------------------ //
@@ -18,20 +19,15 @@ void setup()
 {
   // Debug
   DBG_ONLY(initializeDebugComm());
-  DEBUG_PRINT("Debug mode. Entered setup...");
+  DEBUG_PRINT("Debug mode. Entered Setup... ");
 
   // System initialization
   InitAllPins();
-  InitButtons();
-  InitStatusLed();
-
-  // Strategy initialization
-  InitMode();
-  InitStrategyMethods();
 
   // Setup finished
-  LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
   DEBUG_PRINTLN("Setup complete.");
+
+  delay(1000);
 }
 
 // ------------------------------------------------------------ //
@@ -39,11 +35,9 @@ void setup()
 // ------------------------------------------------------------ //
 void loop()
 {
-  ModeUpdater();
-
-  strategyMethods[1][mode]();
-
   HeartBeat();
 
   recvWithStartEndMarkers();
+
+  delay(100);
 }
