@@ -44,7 +44,9 @@ void appendCsv(char *s);
 void LedBlinkDoubleShort(byte color);
 void LedBlinkDoubleShort(byte color1, byte color2);
 
+bool GetStatus();
 bool GetStatus(int module);
+void SetStatus(bool status);
 void SetStatus(int module, bool status);
 
 
@@ -76,6 +78,11 @@ byte mode;
 byte prevMode;
 boolean isModeUpdated = false;
 
+bool GetStatus()
+{
+  return SystemStatus;
+}
+
 bool GetStatus(int module)
 {
   return SystemStatus[module];
@@ -83,4 +90,11 @@ bool GetStatus(int module)
 void SetStatus(int module, bool status)
 {
   SystemStatus[module] = status;
+}
+void SetStatus(bool status)
+{
+  for (int i = 0; i < MODULE_COUNT; i++)
+  {
+    SystemStatus[i] = status;
+  }
 }

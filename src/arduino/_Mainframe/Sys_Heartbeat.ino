@@ -14,6 +14,8 @@ void HeartBeat()
 {
   HeartBeatOut();
   HeartBeatIn();
+
+  HeartbeatBlackBox();
 }
 
 unsigned long lastMillisHeartbeatOut = 0;
@@ -76,4 +78,18 @@ void ResetBackupCPU()
   digitalWrite(PO_BACKUP_RST, true);
   delay(20);
   digitalWrite(PO_BACKUP_RST, false);
+}
+
+void HeartbeatBlackBox(){
+  BlackBoxAppend(ToByte(GetStatus()));
+}
+
+unsigned int ToByte(bool b[])
+{
+  unsigned int c = 0;
+  for (int i = 0; i < MODULE_COUNT; ++i) {
+    if (b[i])
+      c |= 1 << i;
+  }
+  return c;
 }
