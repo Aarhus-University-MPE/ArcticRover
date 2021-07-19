@@ -27,8 +27,7 @@ void InitStrategyMethods()
 void InitMode()
 {
   mode = EEPROM.read(MEMADDR_LASTMODE);
-  prevMode = 0;
-  isModeUpdated = true;
+  strategyMethods[0][mode]();
 }
 
 // Checks if mode is updated and finish exit operations before changing
@@ -43,7 +42,6 @@ void ModeUpdater()
       strategyMethods[2][prevMode](); // finish any operations for prevMode here
     }
 
-    LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
     strategyMethods[0][mode](); // init new strategy according to the new mode value
   }
 }

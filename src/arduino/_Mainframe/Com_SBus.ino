@@ -13,11 +13,13 @@
 SBUS sbus(COM_SERIAL_RF);
 
 // Initialize RF Communication
-void InitializeSBUS() {
+bool InitializeSBUS() {
   DEBUG_PRINT("Initializing RF communication... ");
+  bool status = true;
   sbus.begin(false);
   LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
   DEBUG_PRINTLN("Sbus Initialized.");
+  return status;
 }
 
 void TerminateSBUS() {

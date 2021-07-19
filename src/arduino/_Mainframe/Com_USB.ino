@@ -52,6 +52,8 @@ void recvWithStartEndMarkers() {
 
 // Parse read Command
 void parseCommand() {
+  Serial.println(receivedCMD);
+  
   switch (receivedCMD[0])
   {
     case CMD_FILES:
@@ -62,6 +64,8 @@ void parseCommand() {
     case CMD_BACKUP:
       parseCommandBackup();
       break;
+    case CMD_MODULE:
+      praseCommandModule();
     case '\0':
       break;
     default:
@@ -100,7 +104,8 @@ void parseCommandStrategy() {
   switch (receivedCMD[1])
   {
     case CMD_STRATEGY_SET:
-      if (!SetMode(receivedCMD[2])) DEBUG_PRINTLN("Mode not found!");
+      DEBUG_PRINTLN("Manual Strategy Set");
+      if (!SetMode((int)(receivedCMD[2] - '0'))) DEBUG_PRINTLN("Mode not found!");
       break;
     case CMD_STRATEGY_OVERRIDE:
       // Override
@@ -126,6 +131,24 @@ void parseCommandBackup()
   case CMD_BACKUP_HB:
     DEBUG_PRINTLN("Virtual Heartbeat");
     HeartBeatInInterrupt();
+    break;
+  default:
+    DEBUG_PRINTLN("NACK");
+    break;
+  }
+}
+
+void praseCommandModule(){
+  switch (receivedCMD[1])
+  {
+  case CMD_MODULE_ENABLE:
+    DEBUG_PRINTLN("Manual Enable of Module.");
+    DEBUG_PRINTLN((int)(receivedCMD[2] - '0'));
+    SystemEnable((int)(receivedCMD[2] - '0'));
+    break;
+  case CMD_MODULE_DISABLE:
+    DEBUG_PRINT("Manual Disable of Module.");
+    SystemDisable((int)receivedCMD[2]);
     break;
   default:
     DEBUG_PRINTLN("NACK");

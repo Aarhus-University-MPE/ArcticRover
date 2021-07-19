@@ -7,29 +7,35 @@
 */
 
 // Initialize SD card reader module.
-void InitSDReader()
+bool InitializeSDReader()
 {
   DEBUG_PRINT("Initializing SD card...");
-
+  bool status;
   if (!SD.begin(PO_SPISS_SDCARD))
   {
     SetStatus(MODULE_SD, false);
+    status = false;
     DEBUG_PRINTLN("initialization failed!");
   }
   else
   {
     SetStatus(MODULE_SD, true);
+    status = true;
     DEBUG_PRINTLN("initialization done.");
   }
+  return status;
 }
 
+void TerminateSDReader(){
+  SD.end();
+}
 // Checks status of SD reader, will try to initialize if not currently active
 bool SDReaderStatus()
 {
   if (!GetStatus(MODULE_SD))
   {
     DEBUG_PRINTLN("SD card not active!");
-    InitSDReader();
+    InitializeSDReader();
   }
 
   return GetStatus(MODULE_SD);

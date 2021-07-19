@@ -16,9 +16,12 @@
 // ------------------------------------------------------------ //
 void setup()
 {
+  InitBlackBox();
+  SetStatus(false);
+
   // Debug
   DBG_ONLY(initializeDebugComm());
-  DEBUG_PRINT("Debug mode. Entered setup...");
+  DEBUG_PRINTLN("## - Debug mode - ##");
 
   // System initialization
   InitAllPins();
@@ -26,12 +29,11 @@ void setup()
   InitStatusLed();
 
   // Strategy initialization
-  InitMode();
   InitStrategyMethods();
+  InitMode();
 
   // Setup finished
   LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
-  DEBUG_PRINTLN("Setup complete.");
 }
 
 // ------------------------------------------------------------ //
@@ -45,5 +47,5 @@ void loop()
 
   HeartBeat();
 
-  recvWithStartEndMarkers();
+  DBG_ONLY(recvWithStartEndMarkers());
 }

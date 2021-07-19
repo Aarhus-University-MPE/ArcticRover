@@ -72,3 +72,28 @@ void LedBlinkDoubleShort(byte color1, byte color2) {
   LedBlinkHalt(color1, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
   LedBlinkHalt(color2, LED_BLINK_VERY_SHORT);
 }
+
+
+void StrategyStartLed(int strategy){
+  switch (strategy)
+  {
+  case MODE_EMERGENCY:
+    LedBlinkDoubleShort(BINARY_CODE_LED_RED, BINARY_CODE_LED_RED);
+    break;
+  case MODE_IDLE:
+    LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_YEL);
+    break;
+  case MODE_REMOTECONTROL:
+    LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_YEL);
+    break;
+  case MODE_AUTONOMOUS:
+    LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_GRN);
+    break;
+  default:
+    break;
+  }
+}
+
+void StrategyFinishLed(int strategy){
+  
+}

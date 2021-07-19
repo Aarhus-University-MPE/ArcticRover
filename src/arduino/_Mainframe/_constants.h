@@ -18,16 +18,18 @@
 // Executes one line of code only if DEBUG flag is set.
 #if defined(DEBUG)
   #define DBG_ONLY(x) x
-  #define DEBUG_PRINT(x) Serial.print(x)
-  #define DEBUG_PRINTLN(x) Serial.println(x)
-  #define DEBUG_PRINTLN2(x,y) Serial.println(x,y)
+  #define DEBUG_PRINT(x) Serial.print(x); BlackBoxAppend(x);
+  #define DEBUG_PRINTLN(x) Serial.println(x); BlackBoxAppend(x);
+  #define DEBUG_PRINTLN2(x,y) Serial.println(x,y); BlackBoxAppend(x,y);
   #define DEBUG_WRITE(x) Serial.write(x)
+  #define RECEIVE_CMDS()  recvWithStartEndMarkers()
 #else
   #define DBG_ONLY(x)
-  #define DEBUG_PRINT(x)
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTLN2(x,y)
+  #define DEBUG_PRINT(x)  BlackBoxAppend(x)
+  #define DEBUG_PRINTLN(x)  BlackBoxAppend(x)
+  #define DEBUG_PRINTLN2(x,y)  BlackBoxAppend(x,y)
   #define DEBUG_WRITE(x)
+  #define RECEIVE_CMDS()  recvWithStartEndMarkers()
 #endif
 
 // ------------------------------------------------------------ //
@@ -50,18 +52,23 @@
 #define BUTTON_DBOUNCE_TIME     300
 
 // Sensor and Module status
-#define MODULE_COUNT        10
+#define MODULE_COUNT        15
 
-#define MODULE_VOLTAGE      0
-#define MODULE_MOTOR        1
-#define MODULE_MOTOR_EN     2
-#define MODULE_GNSS         3
-#define MODULE_SD           4
-#define MODULE_ACCEL        5
-#define MODULE_DEBUGCOMM    6
-#define MODULE_BACKUPCPU    7
-#define MODULE_ESTOP        8
-#define MODULE_BLACKBOX     9
+#define MODULE_PWR_MOTOR      0
+#define MODULE_PWR_12V        1
+#define MODULE_PWR_5V         2
+#define MODULE_RF             3
+#define MODULE_IRIDIUM        4
+#define MODULE_PWR            5
+#define MODULE_MOTOR          6
+#define MODULE_MOTOR_EN       7
+#define MODULE_GNSS           8
+#define MODULE_SD             9
+#define MODULE_ACCEL          10
+#define MODULE_DEBUGCOMM      11
+#define MODULE_BACKUPCPU      12
+#define MODULE_ESTOP          13
+#define MODULE_BLACKBOX       14
 
 
 
@@ -86,7 +93,7 @@
 
 #define HRTBEAT_TRESHOLD    60000
 
-#define BACKUP_RST_FRQ      6       // times per minute
+#define BACKUP_RST_FRQ      1       // times per minute
 #define BACKUP_RST_DT       60000 / BACKUP_RST_FRQ
 
 // ------------------------------------------------------------ //
@@ -166,7 +173,6 @@
 // ------------------------------------------------------------ //
 #define CMD_START_MARK          '<'
 #define CMD_END_MARK            '>'
-#define CMD_SPLIT_MARK          ','
 
 #define CMD_FILES               'F'
 #define CMD_FILES_LIST          'L'
@@ -175,7 +181,7 @@
 #define CMD_FILES_DELETE        'R'
 
 #define CMD_STRATEGY            'S'
-#define CMD_STRATEGY_SET        'C'
+#define CMD_STRATEGY_SET        'S'
 #define CMD_STRATEGY_OVERRIDE   'O'
 
 #define CMD_BACKUP              'B'
@@ -183,44 +189,7 @@
 #define CMD_BACKUP_PRIMSTATUS   'S'
 #define CMD_BACKUP_HB           'H'
 
+#define CMD_MODULE              'M'
+#define CMD_MODULE_ENABLE       'E'
+#define CMD_MODULE_DISABLE      'D'
 
-// ------------------------------------------------------------ //
-//                             OLD                              //
-// ------------------------------------------------------------ //
-// Bluetooth?
-#define BT_NAME "Rover5"
-#define BT_CODE 7463
-#define BT_COM_BUFFER_SIZE 10
-#define BT_START_DELIMITER "<!!"
-#define BT_END_DELIMITER "!!>"
-#define BT_PING_INTERVAL 500 //milliseconds
-#define BT_KEEP_TTL 10 //sets how long the commands are kept in buffer since they were sent
-
-//indicates correct forward direction flag for each shaft.
-#define MOTOR_FWD_T 0
-#define MOTOR_FWD_B 1
-
-#define SERVICE_TIMER_INTERVAL  20//timer tick interval in MILLIseconds
-#define MOTOR_TIMER_INTERVAL  1000//timer tick interval in MICROseconds
-#define MOTOR_CALIBRATION_TICK 200 // timer tick number to run motor calibration 
-
-//binary codes for flags - TopLeft, TopRight, BottomRight, BottomLeft
-#define BINARY_CODE_TL 1
-#define BINARY_CODE_TR 2
-#define BINARY_CODE_BR 4
-#define BINARY_CODE_BL 8
-
-//head servo constants
-#define HEAD_PAN_CENTER 86
-#define HEAD_TILT_CENTER 100
-#define HEAD_ABS_PAN_MAX 178
-#define HEAD_ABS_PAN_MIN 0
-#define HEAD_ABS_TILT_MAX 140
-#define HEAD_ABS_TILT_MIN 15
-#define HEAD_REL_PAN_MAX HEAD_PAN_CENTER - HEAD_ABS_PAN_MIN
-#define HEAD_REL_PAN_MIN HEAD_PAN_CENTER - HEAD_ABS_PAN_MAX
-#define HEAD_REL_TILT_MAX HEAD_ABS_TILT_MAX - HEAD_TILT_CENTER
-#define HEAD_REL_TILT_MIN HEAD_ABS_TILT_MAX - HEAD_TILT_CENTER
-
-//freeimu signature number !important - this constant is also in Freeimu.cpp
-#define FREEIMU_EEPROM_SIGNATURE 0x19

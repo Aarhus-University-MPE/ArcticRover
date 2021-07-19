@@ -12,7 +12,7 @@ void InitBlackBox()
     if (SDReaderStatus())
     {
         File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
-        if (file)
+        if (blackBoxFile)
         {
             DEBUG_PRINTLN("Initializing Blackbox");
             blackBoxFile.println("GeoRover Blackbox");
@@ -35,17 +35,30 @@ void InitBlackBox()
 
 bool BlackBoxStatus()
 {
-    if (SDReaderStatus())
+    return GetStatus(MODULE_BLACKBOX);
+}
+
+
+void BlackBoxAppend()
+{
+    if (BlackBoxStatus())
     {
-        if (!GetStatus(MODULE_BLACKBOX))
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
         {
-            DEBUG_PRINTLN("Blackbox not initialized!");
-            InitBlackBox();
+            DEBUG_PRINTLN("Writing to Blackbox");
+            blackBoxFile.print(millis());
+            blackBoxFile.print(";");
+            blackBoxFile.println();
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
         }
     }
-    else
-        SetStatus(MODULE_BLACKBOX, false);
-    return GetStatus(MODULE_BLACKBOX);
 }
 
 void BlackBoxAppend(String blackBoxInput)
@@ -59,6 +72,138 @@ void BlackBoxAppend(String blackBoxInput)
             blackBoxFile.print(millis());
             blackBoxFile.print(";");
             blackBoxFile.println(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
+void BlackBoxAppend(byte blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            DEBUG_PRINTLN("Writing to Blackbox");
+            blackBoxFile.print(millis());
+            blackBoxFile.print(";");
+            blackBoxFile.println(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+void BlackBoxAppend(char blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            DEBUG_PRINTLN("Writing to Blackbox");
+            blackBoxFile.print(millis());
+            blackBoxFile.print(";");
+            blackBoxFile.println(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
+void BlackBoxAppend(int blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            DEBUG_PRINTLN("Writing to Blackbox");
+            blackBoxFile.print(millis());
+            blackBoxFile.print(";");
+            blackBoxFile.println(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
+void BlackBoxAppend(bool blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            DEBUG_PRINTLN("Writing to Blackbox");
+            blackBoxFile.print(millis());
+            blackBoxFile.print(";");
+            blackBoxFile.println(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
+void BlackBoxAppend(long int blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            DEBUG_PRINTLN("Writing to Blackbox");
+            blackBoxFile.print(millis());
+            blackBoxFile.print(";");
+            blackBoxFile.println(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
+void BlackBoxAppend(long int blackBoxInput, int Type)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            DEBUG_PRINTLN("Writing to Blackbox");
+            blackBoxFile.print(millis());
+            blackBoxFile.print(";");
+            blackBoxFile.print(blackBoxInput, Type);
+            blackBoxFile.println();
             blackBoxFile.close();
         }
         else

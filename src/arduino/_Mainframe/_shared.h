@@ -30,7 +30,9 @@ void SDDelete(char fileName[]);
 void SDCreate(char fileName[]);
 void printFiles(File dir);
 void initializeDebugComm();
+bool InitializeIridium();
 void ModeUpdater();
+unsigned int ToByte(bool b[]);
 
 void HeartBeat();
 void HeartBeatOut();
@@ -78,11 +80,6 @@ byte mode;
 byte prevMode;
 boolean isModeUpdated = false;
 
-bool GetStatus()
-{
-  return SystemStatus;
-}
-
 bool GetStatus(int module)
 {
   return SystemStatus[module];
@@ -98,3 +95,12 @@ void SetStatus(bool status)
     SystemStatus[i] = status;
   }
 }
+
+void BlackBoxAppend();
+void BlackBoxAppend(String blackBoxInput);
+void BlackBoxAppend(byte blackBoxInput);
+void BlackBoxAppend(bool blackBoxInput);
+void BlackBoxAppend(char blackBoxInput);
+void BlackBoxAppend(int blackBoxInput);
+void BlackBoxAppend(long int blackBoxInput);
+void BlackBoxAppend(long int blackBoxInput, int Type);

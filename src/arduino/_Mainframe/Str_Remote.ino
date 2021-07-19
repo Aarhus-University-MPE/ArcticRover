@@ -4,61 +4,74 @@
 */
 
 // Start sequence of strategy
-void StartStrategyRemote() {
-  DEBUG_PRINT("Strategy: Remote Control Starting...");
+void StartStrategyRemote()
+{
+  DEBUG_PRINTLN("Strategy (Remote): Starting.");
 
-  LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, 0);
+  StrategyStartLed(MODE_REMOTECONTROL);
+
+  // Enable Primary System Power
+  SystemEnable(MODULE_PWR_5V);
+  delay(20);
+
+  SystemEnable(MODULE_RF);
+  delay(20);
 
   // Enable motor control
   attachInterrupt(PI_BUTTON_SELECT, SelectButtonRemoteInterruptHandler, FALLING);
-  digitalWrite(PO_POWER_5V,    HIGH);
-  digitalWrite(PO_POWER_RF,    HIGH);
+  DEBUG_PRINTLN("Motor Remote Control ENABLED... Enable/Disable motors with Select Button.");
 
-  LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
-  DEBUG_PRINTLN("motor remote control ENABLED... Enable/Disable motors with Select Button.");
-
+  LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
 }
 
 // Main sequence of strategy
-void RunStrategyRemote() {
+void RunStrategyRemote()
+{
 
   // Read RF signal
-  if (GetStatus(MODULE_MOTOR))  ProcessIncomingCommands();
+  if (GetStatus(MODULE_MOTOR))
+    ProcessIncomingCommands();
 
   HeartbeatRemote();
 }
 
 // End sequence of strategy
-void FinishStrategyRemote() {
+void FinishStrategyRemote()
+{
   DEBUG_PRINT("Strategy: Remote Control ending... ");
 
   detachInterrupt(PI_BUTTON_SELECT);
 
-  if (GetStatus(MODULE_MOTOR_EN)) {
+  if (GetStatus(MODULE_MOTOR_EN))
+  {
     TerminateMotors(true);
     digitalWrite(PO_POWER_MOTOR, LOW);
   }
 
-  digitalWrite(PO_POWER_5V,    LOW);
-  digitalWrite(PO_POWER_RF,    LOW);
+  digitalWrite(PO_POWER_5V, LOW);
+  digitalWrite(PO_POWER_RF, LOW);
 
   LedBlinkDoubleShort(BINARY_CODE_LED_RED);
   DEBUG_PRINTLN("Systems powered down... remote control DISABLED.");
 }
 
 // Enable/Disable motor power
-void SelectButtonRemoteInterruptHandler() {
-  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
+void SelectButtonRemoteInterruptHandler()
+{
+  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME)
+  {
     lastMillisSelect = millis();
 
-    if (!GetStatus(MODULE_MOTOR_EN)) {
+    if (!GetStatus(MODULE_MOTOR_EN))
+    {
       digitalWrite(PO_POWER_MOTOR, HIGH);
       InitializeMotors(true);
 
       LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
       SetStatus(MODULE_MOTOR_EN, true);
     }
-    else {
+    else
+    {
       digitalWrite(PO_POWER_MOTOR, LOW);
       TerminateMotors(true);
 
@@ -69,9 +82,10 @@ void SelectButtonRemoteInterruptHandler() {
 }
 
 // Read RF signal and move motors accordingly
-void ProcessIncomingCommands() {
+void ProcessIncomingCommands()
+{
 
-  sbus.process();       // Read RF data stream
+  sbus.process(); // Read RF data stream
 
   float steer = getChannelFloat(1);
   float throttle = getChannelFloat(0);
@@ -81,19 +95,23 @@ void ProcessIncomingCommands() {
 }
 
 // Runs system checks
-void HeartbeatRemote() {
+void HeartbeatRemote()
+{
   DEBUG_PRINT("Remote heartbeat starting...");
 
-  bool systemStable = true;       // Required
-  bool subSystemStable = true;    // Optional
+  bool systemStable = true;    // Required
+  bool subSystemStable = true; // Optional
   // Check Battery
   // Check Sensors
   // Check Motors
 
-  if (systemStable && subSystemStable) LedBlinkSingleShort(BINARY_CODE_LED_GRN);
-  else if (systemStable) LedBlinkSingleShort(BINARY_CODE_LED_YEL);
-  else LedBlinkSingleShort(BINARY_CODE_LED_RED);
+  if (systemStable && subSystemStable)
+    LedBlinkSingleShort(BINARY_CODE_LED_GRN);
+  else if (systemStable)
+    LedBlinkSingleShort(BINARY_CODE_LED_YEL);
+  else
+    LedBlinkSingleShort(BINARY_CODE_LED_RED);
 
   DEBUG_PRINTLN("System stable.");
-  SetStatus(MODULE_MOTOR,systemStable);
+  SetStatus(MODULE_MOTOR, systemStable);
 }

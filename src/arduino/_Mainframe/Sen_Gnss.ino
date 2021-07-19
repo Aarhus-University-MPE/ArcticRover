@@ -16,12 +16,14 @@ SFE_UBLOX_GNSS myGNSS;
 
 long lastTimeGNSS = 0; // Local timer, limits I2C traffic to u-blox module.
 
-void InitializeGnss() {
+bool InitializeGnss() {
   DEBUG_PRINT("Initializing GNSS module... ");
+  bool status;
 
   if (myGNSS.begin() == false) //Connect to the u-blox module using Wire port
   {
     DEBUG_PRINTLN("GNSS not detected at I2C address... GNSS Initialization Failed");
+    status = false;
   }
   else
   {
@@ -29,8 +31,15 @@ void InitializeGnss() {
     myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
     myGNSS.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY); //Set measurement rate to 1000ms (1Hz update rate)
     DEBUG_PRINTLN("GNSS Initialization Complete.");
+    status = true;
   }
+  return status;
 }
+
+void TerminateGnss(){
+  myGNSS.end();
+}
+
 
 // Gets positional data in Latitude in degrees * 10^-7
 long GnssGetLat() {
