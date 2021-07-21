@@ -6,25 +6,31 @@
 // Start sequence of strategy
 void StartStrategyIdle() {
   DEBUG_PRINTLN("Strategy (Idle): Starting");
-  delay(20);
+  StrategyStartLed(MODE_IDLE);
 
   // Disable all outputs
   SystemDisable();
 
+  AttachSelectButton();
+
   DEBUG_PRINTLN("Strategy (Idle): Initialized");
-  StrategyStartLed(MODE_IDLE);
+  LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
 }
 
 // Main sequence of strategy
 void RunStrategyIdle() {
-  LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
-
+  StrategyRunLed(MODE_IDLE);
 }
 
 // End sequence of strategy
 void FinishStrategyIdle() {
   DEBUG_PRINTLN("Strategy (Idle): Ending");
-  //SystemDisable(MODULE_PWR_MOTOR);
+  SystemDisable();
 
   DEBUG_PRINTLN("Strategy (Idle): Finished");
+}
+
+// Selecet button function
+void SelectFunctionIdle(){
+  StrategyStartLed(MODE_IDLE);
 }

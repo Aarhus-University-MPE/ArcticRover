@@ -15,9 +15,9 @@ void initializeDebugComm()
 {
   Serial.begin(DEBUG_BAUDRATE);
   if (Serial)
-    SetStatus(MODULE_DEBUGCOMM, true);
+    SetStatus(MODULE_DBGCOMM, true);
   else
-    SetStatus(MODULE_DEBUGCOMM, false);
+    SetStatus(MODULE_DBGCOMM, false);
 }
 
 // Receive Commands

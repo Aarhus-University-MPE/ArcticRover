@@ -73,6 +73,20 @@ void LedBlinkDoubleShort(byte color1, byte color2) {
   LedBlinkHalt(color2, LED_BLINK_VERY_SHORT);
 }
 
+// Flashes LED twice in specified color (very short duration)
+void LedBlinkTripleShort(byte color) {
+  LedBlinkHalt(color, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+  LedBlinkHalt(color, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+  LedBlinkHalt(color, LED_BLINK_VERY_SHORT);
+}
+
+// Flashes LED twice in specified colors (very short duration)
+void LedBlinkTripleShort(byte color1, byte color2, byte color3) {
+  LedBlinkHalt(color1, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+  LedBlinkHalt(color2, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+  LedBlinkHalt(color3, LED_BLINK_VERY_SHORT);
+}
+
 
 void StrategyStartLed(int strategy){
   switch (strategy)
@@ -83,8 +97,11 @@ void StrategyStartLed(int strategy){
   case MODE_IDLE:
     LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_YEL);
     break;
+  case MODE_SYSTEMTEST:
+    LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
+    break;
   case MODE_REMOTECONTROL:
-    LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_YEL);
+    LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL);
     break;
   case MODE_AUTONOMOUS:
     LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_GRN);
@@ -94,6 +111,39 @@ void StrategyStartLed(int strategy){
   }
 }
 
+void StrategyRunLed(int strategy){
+  switch (strategy)
+  {
+  case MODE_EMERGENCY:
+    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+    break;
+  case MODE_IDLE:
+    LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+    break;
+  case MODE_SYSTEMTEST:
+    LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_LONG);
+    LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+    break;
+  case MODE_REMOTECONTROL:
+    LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_LONG);
+    LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+    break;
+  case MODE_AUTONOMOUS:
+    LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+    break;
+  default:
+    break;
+  }
+}
+
 void StrategyFinishLed(int strategy){
   
+}
+
+void ModuleStartLed(int module){
+  
+}
+
+void ModuleStopLed(int module){
+
 }

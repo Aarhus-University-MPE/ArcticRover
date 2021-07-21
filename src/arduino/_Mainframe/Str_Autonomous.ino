@@ -35,8 +35,8 @@ void StartStrategyAutonomous() {
   delay(20);
 
   // Attach Select Button
-  attachInterrupt(PI_BUTTON_SELECT,SelectButtonAutonomousInterruptHandler,FALLING);
-
+  AttachSelectButton();
+  
   DEBUG_PRINTLN("System Input Button Enabled.");
   delay(20);
 
@@ -72,6 +72,6 @@ void FinishStrategyAutonomous() {
 
 
 // Enable/Disable motor power
-void SelectButtonAutonomousInterruptHandler() {
+void SelectFunctionAutonomous() {
   
 }

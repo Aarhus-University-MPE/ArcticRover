@@ -19,15 +19,15 @@
 #if defined(DEBUG)
   #define DBG_ONLY(x) x
   #define DEBUG_PRINT(x) Serial.print(x); BlackBoxAppend(x);
-  #define DEBUG_PRINTLN(x) Serial.println(x); BlackBoxAppend(x);
-  #define DEBUG_PRINTLN2(x,y) Serial.println(x,y); BlackBoxAppend(x,y);
+  #define DEBUG_PRINTLN(x) Serial.println(x); BlackBoxAppendln(x);
+  #define DEBUG_PRINTLN2(x,y) Serial.println(x,y); BlackBoxAppendln(x,y);
   #define DEBUG_WRITE(x) Serial.write(x)
   #define RECEIVE_CMDS()  recvWithStartEndMarkers()
 #else
   #define DBG_ONLY(x)
   #define DEBUG_PRINT(x)  BlackBoxAppend(x)
-  #define DEBUG_PRINTLN(x)  BlackBoxAppend(x)
-  #define DEBUG_PRINTLN2(x,y)  BlackBoxAppend(x,y)
+  #define DEBUG_PRINTLN(x)  BlackBoxAppendln(x)
+  #define DEBUG_PRINTLN2(x,y)  BlackBoxAppendln(x,y)
   #define DEBUG_WRITE(x)
   #define RECEIVE_CMDS()  recvWithStartEndMarkers()
 #endif
@@ -35,7 +35,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion   "1.0.0"
+#define SystemVersion   "0.8.49"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001   // 001
@@ -52,7 +52,7 @@
 #define BUTTON_DBOUNCE_TIME     300
 
 // Sensor and Module status
-#define MODULE_COUNT        15
+#define MODULE_COUNT          16
 
 #define MODULE_PWR_MOTOR      0
 #define MODULE_PWR_12V        1
@@ -65,10 +65,11 @@
 #define MODULE_GNSS           8
 #define MODULE_SD             9
 #define MODULE_ACCEL          10
-#define MODULE_DEBUGCOMM      11
+#define MODULE_DBGCOMM        11
 #define MODULE_BACKUPCPU      12
 #define MODULE_ESTOP          13
 #define MODULE_BLACKBOX       14
+#define MODULE_RESERVED       15
 
 
 
@@ -88,13 +89,14 @@
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
 // ------------------------------------------------------------ //
-#define HRTBEAT_FRQ_OUT     6       // times per minute
+#define HRTBEAT_FRQ_OUT     1       // times per minute
 #define HRTBEAT_DT_OUT      60000 / HRTBEAT_FRQ_OUT
 
-#define HRTBEAT_TRESHOLD    60000
+#define HRTBEAT_TRESHOLD    300000  // Treshold for late heartbeat
 
-#define BACKUP_RST_FRQ      1       // times per minute
-#define BACKUP_RST_DT       60000 / BACKUP_RST_FRQ
+#define BACKUP_RST_DT       300000  // Time between each reset attempt
+
+#define HRTBEAT_DT_LOG      300000  // Time between system status log
 
 // ------------------------------------------------------------ //
 //                          BLACKBOX                            //
@@ -182,6 +184,7 @@
 
 #define CMD_STRATEGY            'S'
 #define CMD_STRATEGY_SET        'S'
+#define CMD_STRATEGY_FUNCTION   'F'
 #define CMD_STRATEGY_OVERRIDE   'O'
 
 #define CMD_BACKUP              'B'
@@ -192,4 +195,6 @@
 #define CMD_MODULE              'M'
 #define CMD_MODULE_ENABLE       'E'
 #define CMD_MODULE_DISABLE      'D'
+#define CMD_MODULE_STATUS       'S'
+#define CMD_MODULE_RESET        'R'
 

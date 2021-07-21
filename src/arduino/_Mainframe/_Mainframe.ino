@@ -7,8 +7,8 @@
 */
 
 #include "_constants.h"
-#include "_shared.h"
 #include "_pinout.h"
+#include "_shared.h"
 
 
 // ------------------------------------------------------------ //
@@ -21,7 +21,6 @@ void setup()
 
   // Debug
   DBG_ONLY(initializeDebugComm());
-  DEBUG_PRINTLN("## - Debug mode - ##");
 
   // System initialization
   InitAllPins();
@@ -34,6 +33,7 @@ void setup()
 
   // Setup finished
   LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
+  
 }
 
 // ------------------------------------------------------------ //

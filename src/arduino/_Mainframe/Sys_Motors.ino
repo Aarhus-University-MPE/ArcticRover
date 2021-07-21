@@ -13,7 +13,7 @@ bool InitializeMotors(bool RF_Control) {
   InitializeCanBus();
   if (RF_Control) InitializeSBUS();
 
-  if (MotorCheck()) {
+  if (MotorStatus()) {
     DEBUG_PRINTLN("Motors Initialized.");
     return true;
   }
@@ -65,7 +65,16 @@ void MotorMove(float dir, float speed) {
   // Send command via CanBUS
 }
 
-bool MotorCheck() {
+bool MotorState(){
+  bool motorState = false;
+
+  // motor currently running?
+
+  return motorState;
+}
+
+
+bool MotorStatus() {
   bool valid = true;
 
   // Motors operational?

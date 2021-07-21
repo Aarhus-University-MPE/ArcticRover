@@ -31,6 +31,12 @@ void HeartBeatOut()
   }
 }
 
+bool HeartBeatStatus(){
+  HeartBeatIn();
+
+  return GetStatus(MODULE_BACKUPCPU);
+}
+
 unsigned long lastMillisHeartbeatIn = 0;
 // Checks if time since last heartbeat received > maximum treshold
 // Will attempt to reset backup CPU with a frequency of  BACKUP_RST_FRQ
@@ -80,6 +86,13 @@ void ResetBackupCPU()
   digitalWrite(PO_BACKUP_RST, false);
 }
 
+unsigned long lastMillisHeartbeatBlackbox = 0;
 void HeartbeatBlackBox(){
-  BlackBoxAppend(String(ToByte(SystemStatus)));
+  if (millis() - lastMillisHeartbeatBlackbox > HRTBEAT_DT_LOG)
+  {
+    lastMillisHeartbeatBlackbox = millis();
+    GetStatus();
+    DEBUG_PRINT("Heartbeat System Status: ");
+    DEBUG_PRINTLN(String(ToByte(SystemStatus)));
+  }
 }

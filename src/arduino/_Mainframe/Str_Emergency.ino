@@ -26,7 +26,7 @@ void StartStrategyEmergency() {
 
 // Main sequence of strategy
 void RunStrategyEmergency() {
-  LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+  StrategyRunLed(MODE_EMERGENCY);
 
   // Exit strategy, if emergency not set -> Idle strategy
   if (!digitalRead(PI_BUTTON_ESTOP)) {
@@ -48,4 +48,9 @@ void FinishStrategyEmergency() {
   DEBUG_PRINTLN("Strategy (Emergency): Finished");
 
   // Disable light
+}
+
+
+void SelectFunctionEmergency(){
+
 }

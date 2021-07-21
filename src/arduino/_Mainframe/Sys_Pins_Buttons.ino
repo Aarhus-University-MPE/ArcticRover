@@ -54,10 +54,10 @@ void InitButtons()
 {
 
   // Assign mode button interrupt
-  attachInterrupt(PI_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
+  attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
 
   // Assign Emergency Stop button interrupt
-  attachInterrupt(PI_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
+  attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
 
   // Assign heartbeat interrupt
   attachInterrupt(PI_INT_HRTBEAT, HeartBeatInInterrupt, FALLING);
@@ -87,6 +87,7 @@ void ModeButtonInterruptHandler()
 {
   if (millis() - lastMillisMode > BTN_DEBOUNCE_TIME)
   {
+    DEBUG_PRINTLN("Mode button press, changing mode");
     lastMillisMode = millis();
     if (mode + 1 < MODES_MIN_BROWSABLE || mode + 1 >= MODES_MAX)
     {
@@ -96,5 +97,6 @@ void ModeButtonInterruptHandler()
     {
       SetMode(mode + 1);
     }
+    
   }
 }

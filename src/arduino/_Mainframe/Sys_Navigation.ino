@@ -94,7 +94,7 @@ bool NavigationPreChecks()
 
   // System Checks
   precheckCode[0] = VoltageCheck(); // Required
-  precheckCode[1] = MotorCheck();   // Required
+  precheckCode[1] = MotorStatus();   // Required
   precheckCode[2] = GPSValid();     // Required
 
   // Route Checks

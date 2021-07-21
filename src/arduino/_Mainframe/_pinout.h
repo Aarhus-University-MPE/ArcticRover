@@ -13,9 +13,13 @@
 */
 
 // External Inputs
-#define PI_BUTTON_MODE      2
-#define PI_BUTTON_SELECT    3
-#define PI_BUTTON_ESTOP     18
+#define PI_BUTTON_MODE      3
+#define PI_BUTTON_SELECT    11 // digitalPinToInterrupt(18)
+#define PI_BUTTON_ESTOP     10 // digitalPinToInterrupt(20)
+
+#define PI_INT_BUTTON_MODE      digitalPinToInterrupt(PI_BUTTON_MODE)
+#define PI_INT_BUTTON_SELECT    digitalPinToInterrupt(PI_BUTTON_SELECT)
+#define PI_INT_BUTTON_ESTOP     digitalPinToInterrupt(PI_BUTTON_ESTOP)
 
 // Heartbeat
 #define PI_BACKUP_HRTBEAT   2
@@ -56,7 +60,7 @@
 #define PO_SPISS_SDCARD     53
 #define PO_SPISS_CANBUS     00
 
-#define COM_SERIAL_PC       Serial1
+#define COM_SERIAL_DBG      Serial1
 #define COM_SERIAL_IRID     Serial2
 #define COM_SERIAL_RF       Serial3
 

@@ -11,3 +11,7 @@ bool InitializeIridium(){
     
     return true;
 }
+
+bool IridiumStatus(){
+  return true;
+}

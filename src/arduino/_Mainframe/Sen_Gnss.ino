@@ -18,12 +18,10 @@ long lastTimeGNSS = 0; // Local timer, limits I2C traffic to u-blox module.
 
 bool InitializeGnss() {
   DEBUG_PRINT("Initializing GNSS module... ");
-  bool status;
-
-  if (myGNSS.begin() == false) //Connect to the u-blox module using Wire port
+  bool status = myGNSS.begin();
+  if (!status) //Connect to the u-blox module using Wire port
   {
     DEBUG_PRINTLN("GNSS not detected at I2C address... GNSS Initialization Failed");
-    status = false;
   }
   else
   {
@@ -31,9 +29,14 @@ bool InitializeGnss() {
     myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
     myGNSS.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY); //Set measurement rate to 1000ms (1Hz update rate)
     DEBUG_PRINTLN("GNSS Initialization Complete.");
-    status = true;
   }
+  SetStatus(MODULE_GNSS, status);
   return status;
+}
+
+bool GnssStatus(){
+
+  return myGNSS.isConnected();
 }
 
 void TerminateGnss(){

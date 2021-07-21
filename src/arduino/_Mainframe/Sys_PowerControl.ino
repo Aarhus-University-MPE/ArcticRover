@@ -16,6 +16,13 @@ bool VoltageCheck()
   return valid;
 }
 
+bool BatteryStatus()
+{
+  bool valid = true;
+
+  return valid;
+}
+
 void SystemEnable(int module)
 {
   if (GetStatus(module))
@@ -35,7 +42,7 @@ void SystemEnable(int module)
     break;
   case MODULE_PWR_12V:
     digitalWrite(PO_POWER_12V, HIGH);
-    DEBUG_PRINTLN("Power to Secondary Systems(12V): Enabled");
+    DEBUG_PRINTLN("Power to Secondary Systems (12V): Enabled");
     break;
   case MODULE_RF:
     SystemEnable(MODULE_PWR_5V);
@@ -45,7 +52,9 @@ void SystemEnable(int module)
       DEBUG_PRINTLN("Short Range Communication (RF): Enabled");
     }
     else
+    {
       status = false;
+    }
     break;
   case MODULE_IRIDIUM:
     SystemEnable(MODULE_PWR_5V);
@@ -55,13 +64,26 @@ void SystemEnable(int module)
       DEBUG_PRINTLN("Long Range Communication (Iridium): Enabled");
     }
     else
+    {
       status = false;
+    }
     break;
   case MODULE_SD:
     SystemEnable(MODULE_PWR_5V);
     if (InitializeSDReader())
     {
       DEBUG_PRINTLN("Local Storage: Enabled");
+    }
+    else
+    {
+      status = false;
+    }
+    break;
+  case MODULE_ACCEL:
+    SystemEnable(MODULE_PWR_5V);
+    if (InitializeAccel())
+    {
+      DEBUG_PRINTLN("Accelerometer: Enabled");
     }
     else
       status = false;
@@ -73,7 +95,10 @@ void SystemEnable(int module)
       DEBUG_PRINTLN("Global Positioning System: Enabled")
     }
     else
+    {
       status = false;
+    }
+    break;
   default:
     break;
   }
@@ -97,17 +122,21 @@ void SystemDisable(int module)
     digitalWrite(PO_POWER_5V, LOW);
     break;
   case MODULE_PWR_12V:
-    DEBUG_PRINTLN("Power to Secondary Systems(12V): Disabled");
+    DEBUG_PRINTLN("Power to Secondary Systems (12V): Disabled");
     digitalWrite(PO_POWER_12V, LOW);
     break;
   case MODULE_RF:
     digitalWrite(PO_POWER_RF, LOW);
-    InitializeSBUS();
+    TerminateSBUS();
     DEBUG_PRINTLN("Short Range Communication (RF): Disabled");
     break;
   case MODULE_IRIDIUM:
     digitalWrite(PO_POWER_IRIDIUM, LOW);
     DEBUG_PRINTLN("Long Range Communication (Iridium): Disabled");
+    break;
+  case MODULE_ACCEL:
+    TerminateAccel();
+    DEBUG_PRINTLN("Accelerometer: Disabled");
     break;
   case MODULE_GNSS:
     TerminateGnss();
@@ -120,8 +149,24 @@ void SystemDisable(int module)
   SetStatus(module, false);
 }
 
+void SystemEnable()
+{
+  SystemEnable(MODULE_PWR_MOTOR);
+  SystemEnable(MODULE_PWR_5V);
+  SystemEnable(MODULE_PWR_12V);
+  SystemEnable(MODULE_RF);
+  SystemEnable(MODULE_IRIDIUM);
+  SystemEnable(MODULE_GNSS);
+  SystemEnable(MODULE_SD);
+  SystemEnable(MODULE_ACCEL);
+}
 
-void SystemDisable(){
+void SystemDisable()
+{
+  SystemDisable(MODULE_RF);
+  SystemDisable(MODULE_IRIDIUM);
+  SystemDisable(MODULE_GNSS);
+  SystemDisable(MODULE_ACCEL);
   SystemDisable(MODULE_PWR_MOTOR);
   SystemDisable(MODULE_PWR_5V);
   SystemDisable(MODULE_PWR_12V);
