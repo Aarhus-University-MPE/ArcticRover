@@ -25,10 +25,11 @@ void InitAllPins()
   digitalWrite(PO_LED_STATUS_GRN, LOW);
 
   // Power control (Relays)
-  pinMode(PO_POWER_MOTOR, OUTPUT);
-  pinMode(PO_POWER_12V, OUTPUT);
-  pinMode(PO_POWER_5V, OUTPUT);
-  pinMode(PO_POWER_RF, OUTPUT);
+  pinMode(PO_POWER_MOTOR_ON,  OUTPUT);
+  pinMode(PO_POWER_MOTOR_OFF, OUTPUT);
+  pinMode(PO_POWER_12V,   OUTPUT);
+  pinMode(PO_POWER_5V,    OUTPUT);
+  pinMode(PO_POWER_RF,    OUTPUT);
   pinMode(PO_POWER_IRIDIUM, OUTPUT);
 
   digitalWrite(PO_POWER_MOTOR, LOW);
