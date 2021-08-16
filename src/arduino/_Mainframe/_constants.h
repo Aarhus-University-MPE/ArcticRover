@@ -22,12 +22,14 @@
   #define DEBUG_PRINTLN(x) Serial.println(x); BlackBoxAppendln(x);
   #define DEBUG_PRINTLN2(x,y) Serial.println(x,y); BlackBoxAppendln(x,y);
   #define DEBUG_WRITE(x) Serial.write(x)
+  #define DEBUG_PRINTLINE() DEBUG_PRINTLN("------------------------------------"); BlackBoxAppendln("------------------------------------");
   #define RECEIVE_CMDS()  recvWithStartEndMarkers()
 #else
   #define DBG_ONLY(x)
   #define DEBUG_PRINT(x)  BlackBoxAppend(x)
   #define DEBUG_PRINTLN(x)  BlackBoxAppendln(x)
   #define DEBUG_PRINTLN2(x,y)  BlackBoxAppendln(x,y)
+  #define DEBUG_PRINTLINE() BlackBoxAppendln("------------------------------------");
   #define DEBUG_WRITE(x)
   #define RECEIVE_CMDS()  recvWithStartEndMarkers()
 #endif
@@ -35,7 +37,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion   "0.8.49"
+#define SystemVersion   "0.9.21"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001   // 001
@@ -49,7 +51,8 @@
 #define LED_BLINK_VERY_SHORT    100
 
 // Button debounce
-#define BUTTON_DBOUNCE_TIME     300
+#define BUTTON_DBOUNCE_TIME     200
+#define BTN_DEBOUNCE_TIME_LONG  2500
 
 // Sensor and Module status
 #define MODULE_COUNT          16
@@ -77,14 +80,17 @@
 //                       STRATEGY MODES                         //
 // ------------------------------------------------------------ //
 
-#define MODES_MAX           5 // Total number of modes
-#define MODES_MIN_BROWSABLE 1 // Minimum mode index, that could be set via mode button.
+#define MODES_MAX           6 // Total number of modes
+#define MODES_MIN_BROWSABLE 2 // Minimum mode index, that could be set via mode button.
 
 #define MODE_EMERGENCY      0 // Emergency Stop Mode
-#define MODE_IDLE           1 // Standby mode
-#define MODE_SYSTEMTEST     2 // Test main systems
-#define MODE_REMOTECONTROL  3 // System remotely controllable 
-#define MODE_AUTONOMOUS     4 // Autonomous driving mode
+#define MODE_MODELIBRARY    1 // Mode Library
+#define MODE_IDLE           2 // Standby mode
+#define MODE_SYSTEMTEST     3 // Test main systems
+#define MODE_REMOTECONTROL  4 // System remotely controllable 
+#define MODE_AUTONOMOUS     5 // Autonomous driving mode
+
+#define ModeToString(m) ((m) == 0 ? "Emergency" : ((m) == 1 ? "Mode Library" : ((m) == 2 ? "Idle" : ((m) == 3 ? "System Test" : ((m) == 4 ? "Remote Control" : ((m) == 5 ? "Autonomous" : "Unknown"))))))
 
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
@@ -133,7 +139,7 @@
 // ------------------------------------------------------------ //
 
 // Buttons
-#define BTN_DEBOUNCE_TIME       300
+#define BTN_DEBOUNCE_TIME       500
 #define ESTOP_DEBOUNCE_TIME     1000
 
 

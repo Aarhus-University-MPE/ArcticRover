@@ -92,10 +92,10 @@ void StrategyStartLed(int strategy){
   switch (strategy)
   {
   case MODE_EMERGENCY:
-    LedBlinkDoubleShort(BINARY_CODE_LED_RED, BINARY_CODE_LED_RED);
+    LedBlinkDoubleShort(BINARY_CODE_LED_RED);
     break;
   case MODE_IDLE:
-    LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_YEL);
+    LedBlinkDoubleShort(BINARY_CODE_LED_YEL);
     break;
   case MODE_SYSTEMTEST:
     LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
@@ -104,7 +104,7 @@ void StrategyStartLed(int strategy){
     LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL);
     break;
   case MODE_AUTONOMOUS:
-    LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_GRN);
+    LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
     break;
   default:
     break;
@@ -112,27 +112,31 @@ void StrategyStartLed(int strategy){
 }
 
 void StrategyRunLed(int strategy){
-  switch (strategy)
+  // Blink light of current mode
+  if (millis() - lastMillistModeBlink > LED_BLINK_VERY_LONG)
   {
-  case MODE_EMERGENCY:
-    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
-    break;
-  case MODE_IDLE:
-    LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
-    break;
-  case MODE_SYSTEMTEST:
-    LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_LONG);
-    LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
-    break;
-  case MODE_REMOTECONTROL:
-    LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_LONG);
-    LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
-    break;
-  case MODE_AUTONOMOUS:
-    LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
-    break;
-  default:
-    break;
+    lastMillistModeBlink = millis();
+    
+    switch (strategy)
+    {
+    case MODE_EMERGENCY:
+      LedBlinkDoubleShort(BINARY_CODE_LED_RED);
+      break;
+    case MODE_IDLE:
+      LedBlinkDoubleShort(BINARY_CODE_LED_YEL);
+      break;
+    case MODE_SYSTEMTEST:
+      LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
+      break;
+    case MODE_REMOTECONTROL:
+      LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL);
+      break;
+    case MODE_AUTONOMOUS:
+      LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
+      break;
+    default:
+      break;
+    }
   }
 }
 

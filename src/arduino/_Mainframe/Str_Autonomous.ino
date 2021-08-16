@@ -10,34 +10,15 @@ void StartStrategyAutonomous() {
 
   // Enable Primary System Power
   digitalWrite(PO_POWER_5V,    HIGH);
-
-  DEBUG_PRINTLN("Power to Primary Systems Enabled.");
   delay(20);
 
-  // Enable Secondary System Power
-  digitalWrite(PO_POWER_MOTOR,    HIGH);
-  digitalWrite(PO_POWER_12V,      HIGH);
-
-  DEBUG_PRINTLN("Power to Secondary Systems Enabled.");
-  delay(20);
   
   // Initialize Long Range Communication
-  digitalWrite(PO_POWER_IRIDIUM,  HIGH);
-  InitializeIridium();
-
-  DEBUG_PRINTLN("Long Range Communication Enabled.");
-  delay(20);
-  
-  // Disable RF Communication
-  digitalWrite(PO_POWER_RF,       LOW);
-
-  DEBUG_PRINTLN("Short Range Communication Disabled.");
+  SystemEnable(MODULE_IRIDIUM);
   delay(20);
 
   // Attach Select Button
   AttachSelectButton();
-  
-  DEBUG_PRINTLN("System Input Button Enabled.");
   delay(20);
 
   DEBUG_PRINTLN("Strategy (Autonomous): Initialized.");
@@ -54,13 +35,10 @@ void FinishStrategyAutonomous() {
   DEBUG_PRINTLN("Strategy (Autonomous): Ending.");
   delay(20);
 
-  // Disable all outputs
-  digitalWrite(PO_POWER_MOTOR,    LOW);
-  digitalWrite(PO_POWER_12V,      LOW);
-  digitalWrite(PO_POWER_RF,       LOW);
-  digitalWrite(PO_POWER_IRIDIUM,  LOW);
+  DetachSelectButton();
 
-  DEBUG_PRINTLN("Power to Secondary Systems Disabled.");
+  // Disable all outputs
+  SystemDisable();
   delay(20);
 
   DEBUG_PRINTLN("Strategy (Autonomous): Finished.")

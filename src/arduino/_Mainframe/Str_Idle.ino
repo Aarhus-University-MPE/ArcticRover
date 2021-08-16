@@ -5,6 +5,7 @@
 
 // Start sequence of strategy
 void StartStrategyIdle() {
+  DEBUG_PRINTLINE();
   DEBUG_PRINTLN("Strategy (Idle): Starting");
   StrategyStartLed(MODE_IDLE);
 
@@ -14,6 +15,7 @@ void StartStrategyIdle() {
   AttachSelectButton();
 
   DEBUG_PRINTLN("Strategy (Idle): Initialized");
+  DEBUG_PRINTLINE();
   LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
 }
 
@@ -24,6 +26,7 @@ void RunStrategyIdle() {
 
 // End sequence of strategy
 void FinishStrategyIdle() {
+  DEBUG_PRINTLINE();
   DEBUG_PRINTLN("Strategy (Idle): Ending");
   SystemDisable();
 

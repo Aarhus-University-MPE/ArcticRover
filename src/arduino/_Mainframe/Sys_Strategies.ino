@@ -6,6 +6,11 @@ void InitStrategyMethods()
   strategyMethods[1][MODE_EMERGENCY] = RunStrategyEmergency;
   strategyMethods[2][MODE_EMERGENCY] = FinishStrategyEmergency;
   strategyMethods[3][MODE_EMERGENCY] = SelectFunctionEmergency;
+  
+  strategyMethods[0][MODE_MODELIBRARY] = StartStrategyModeLibrary;
+  strategyMethods[1][MODE_MODELIBRARY] = RunStrategyModeLibrary;
+  strategyMethods[2][MODE_MODELIBRARY] = FinishStrategyModeLibrary;
+  strategyMethods[3][MODE_MODELIBRARY] = SelectFunctionModeLibrary;
 
   strategyMethods[0][MODE_IDLE] = StartStrategyIdle;
   strategyMethods[1][MODE_IDLE] = RunStrategyIdle;
@@ -32,6 +37,7 @@ void InitStrategyMethods()
 void InitMode()
 {
   mode = EEPROM.read(MEMADDR_LASTMODE);
+  modeCycle = mode;
   strategyMethods[0][mode]();
 }
 
@@ -52,7 +58,16 @@ void ModeUpdater()
 }
 
 void AttachSelectButton(){
+  lastMillisSelect = millis();
   attachInterrupt(PI_INT_BUTTON_SELECT, strategyMethods[3][mode], FALLING);
+}
+
+void AttachModeButton(){
+  attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
+}
+
+void DetachModeButton(){
+  detachInterrupt(PI_INT_BUTTON_MODE);
 }
 
 void DetachSelectButton(){
@@ -65,11 +80,12 @@ boolean SetMode(byte newMode)
   if (newMode < MODES_MAX)
   {
     prevMode = mode;
+    modeCycle = mode;
     mode = newMode;
     isModeUpdated = true;
     EEPROM.write(MEMADDR_LASTMODE, mode);
     DEBUG_PRINT("Mode is set to: ");
-    DEBUG_PRINTLN(mode);
+    DEBUG_PRINTLN(ModeToString(mode));
     return true;
   }
   return false;

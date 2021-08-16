@@ -12,17 +12,7 @@ bool InitializeSDReader()
   bool status = false;
   if (!SDReaderStatus())
   {
-    DEBUG_PRINT("Initializing SD card...");
     status = SD.begin(PO_SPISS_SDCARD);
-
-    if (!status)
-    {
-      DEBUG_PRINTLN("initialization failed!");
-    }
-    else
-    {
-      DEBUG_PRINTLN("initialization done.");
-    }
 
     SetStatus(MODULE_SD, status);
   }

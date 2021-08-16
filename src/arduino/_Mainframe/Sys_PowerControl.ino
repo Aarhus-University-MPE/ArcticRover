@@ -33,7 +33,9 @@ void SystemEnable(int module)
   switch (module)
   {
   case MODULE_PWR_MOTOR:
-    digitalWrite(PO_POWER_MOTOR, HIGH);
+    digitalWrite(PO_POWER_MOTOR_ON, HIGH);
+    delay(50);
+    digitalWrite(PO_POWER_MOTOR_ON, LOW);
     DEBUG_PRINTLN("Power to Motors: Enabled.");
     break;
   case MODULE_PWR_5V:
@@ -47,55 +49,65 @@ void SystemEnable(int module)
   case MODULE_RF:
     SystemEnable(MODULE_PWR_5V);
     digitalWrite(PO_POWER_RF, HIGH);
+    DEBUG_PRINT("Short Range Communication (RF): ");
     if (InitializeSBUS())
     {
-      DEBUG_PRINTLN("Short Range Communication (RF): Enabled");
+      DEBUG_PRINTLN("Enabled");
     }
     else
     {
+      DEBUG_PRINTLN("Error");
       status = false;
     }
     break;
   case MODULE_IRIDIUM:
     SystemEnable(MODULE_PWR_5V);
     digitalWrite(PO_POWER_IRIDIUM, HIGH);
+    DEBUG_PRINT("Long Range Communication (Iridium): ");
     if (InitializeIridium())
     {
-      DEBUG_PRINTLN("Long Range Communication (Iridium): Enabled");
+      DEBUG_PRINTLN("Enabled");
     }
     else
     {
+      DEBUG_PRINTLN("Error");
       status = false;
     }
     break;
   case MODULE_SD:
     SystemEnable(MODULE_PWR_5V);
+    DEBUG_PRINT("Local Storage: ");
     if (InitializeSDReader())
     {
-      DEBUG_PRINTLN("Local Storage: Enabled");
+      DEBUG_PRINTLN("Enabled");
     }
     else
     {
+      DEBUG_PRINTLN("Error");
       status = false;
     }
     break;
   case MODULE_ACCEL:
     SystemEnable(MODULE_PWR_5V);
+    DEBUG_PRINT("Accelerometer: ");
     if (InitializeAccel())
     {
-      DEBUG_PRINTLN("Accelerometer: Enabled");
+      DEBUG_PRINTLN("Enabled");
     }
     else
+      DEBUG_PRINTLN("Error");
       status = false;
     break;
   case MODULE_GNSS:
     SystemEnable(MODULE_PWR_5V);
+    DEBUG_PRINT("Global Navigation Satellite Systems: ");
     if (InitializeGnss())
     {
-      DEBUG_PRINTLN("Global Positioning System: Enabled")
+      DEBUG_PRINTLN("Enabled");
     }
     else
     {
+      DEBUG_PRINTLN("Error");
       status = false;
     }
     break;
@@ -104,6 +116,7 @@ void SystemEnable(int module)
   }
 
   SetStatus(module, status);
+  delay(10);
 }
 
 void SystemDisable(int module)
@@ -115,7 +128,9 @@ void SystemDisable(int module)
   {
   case MODULE_PWR_MOTOR:
     DEBUG_PRINTLN("Power to Motors: Disabled.");
-    digitalWrite(PO_POWER_MOTOR, LOW);
+    digitalWrite(PO_POWER_MOTOR_OFF, HIGH);
+    delay(50);
+    digitalWrite(PO_POWER_MOTOR_OFF, LOW);
     break;
   case MODULE_PWR_5V:
     DEBUG_PRINTLN("Power to Secondary Systems (5V): Disabled");
@@ -140,7 +155,7 @@ void SystemDisable(int module)
     break;
   case MODULE_GNSS:
     TerminateGnss();
-    DEBUG_PRINTLN("Global Positioning System: Disabled")
+    DEBUG_PRINTLN("Global Navigation Satellite Systems: Disabled")
     break;
   default:
     break;

@@ -9,30 +9,46 @@
 #include <SBUS.h>
 #include <limits.h>
 
-SBUS sbus(COM_SERIAL_RF);
+SBUS sbus(Serial3);
+
+void setup(){
+  Serial.begin(115200);
+  pinMode(A0,INPUT);
+
+  InitializeSBUS();
+}
+
+void loop(){
+  sbus.process();
+  Serial.println(sbus.getGoodFrames());
+  for (int i = 0; i < 16; i++)
+  {
+    Serial.print(getChannelFloat(i));
+    delay(10);
+  }
+  Serial.println();
+  Serial.print("Analog value: ");
+  Serial.println(analogRead(A0));
+  delay(200);
+}
 
 // Initialize RF Communication
 bool InitializeSBUS()
 {
+  Serial.println("Initializing Short Range Communication... ");
   sbus.begin(false);
-  bool status = COM_SERIAL_RF;
-  LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
-
-  SetStatus(MODULE_RF, status);
+  bool status = Serial3;
+  if (status)
+  {
+    Serial.println("Initialized.");
+  }
+  else
+  {
+    Serial.println("Failed.");
+  }
   return status;
 }
 
-void TerminateSBUS()
-{
-  COM_SERIAL_RF.end();
-  SetStatus(MODULE_RF, false);
-  LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_RED);
-}
-
-bool SBusStatus()
-{
-  return (COM_SERIAL_RF);
-}
 
 static int minChannel = INT_MAX;
 static int maxChannel = INT_MIN;

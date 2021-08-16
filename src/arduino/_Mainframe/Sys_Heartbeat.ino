@@ -49,15 +49,19 @@ void HeartBeatIn()
     {
       lastMillisResetBackup = millis();
       SetStatus(MODULE_BACKUPCPU, false);
+      DEBUG_PRINTLINE();
       DEBUG_PRINTLN("Error: Backup CPU offline, attempting to Reset.");
       ResetBackupCPU();
+      DEBUG_PRINTLINE();
     }
     else
     {
       if (millis() - lastMillisResetBackup > BACKUP_RST_DT)
       {
         lastMillisResetBackup = millis();
+        DEBUG_PRINTLINE();
         DEBUG_PRINTLN("Error: Backup CPU offline, attempting to Reset.");
+        DEBUG_PRINTLINE();
         ResetBackupCPU();
       }
     }
@@ -73,7 +77,9 @@ void HeartBeatInInterrupt()
     if (!GetStatus(MODULE_BACKUPCPU))
     {
       SetStatus(MODULE_BACKUPCPU, true);
+      DEBUG_PRINTLINE();
       DEBUG_PRINTLN("Backup CPU online");
+      DEBUG_PRINTLINE();
     }
   }
 }
@@ -92,7 +98,9 @@ void HeartbeatBlackBox(){
   {
     lastMillisHeartbeatBlackbox = millis();
     GetStatus();
+    DEBUG_PRINTLINE();
     DEBUG_PRINT("Heartbeat System Status: ");
     DEBUG_PRINTLN(String(ToByte(SystemStatus)));
+    DEBUG_PRINTLINE();
   }
 }

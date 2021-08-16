@@ -38,13 +38,12 @@ void RunStrategyRemote()
 void FinishStrategyRemote()
 {
   DEBUG_PRINTLN("Strategy (Remote): Ending");
-
-  detachInterrupt(PI_BUTTON_SELECT);
+  
+  DetachSelectButton();
   
   if (GetStatus(MODULE_MOTOR_EN))
   {
     TerminateMotors(true);
-    digitalWrite(PO_POWER_MOTOR, LOW);
   }
   
   SystemDisable();
@@ -90,7 +89,7 @@ void HeartbeatRemote()
 }
 
 
-// Selecet button function
+// Select button function
 void SelectFunctionRemote(){
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME)
   {
@@ -98,19 +97,15 @@ void SelectFunctionRemote(){
 
     if (!GetStatus(MODULE_MOTOR_EN))
     {
-      digitalWrite(PO_POWER_MOTOR, HIGH);
-      InitializeMotors(true);
+      SystemEnable(MODULE_MOTOR);
 
       LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
-      SetStatus(MODULE_MOTOR_EN, true);
     }
     else
     {
-      digitalWrite(PO_POWER_MOTOR, LOW);
-      TerminateMotors(true);
+      SystemDisable(MODULE_MOTOR);
 
       LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, 0);
-      SetStatus(MODULE_MOTOR_EN, false);
     }
   }
 }

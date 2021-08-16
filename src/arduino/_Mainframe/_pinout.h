@@ -57,5 +57,3 @@
 #define COM_SERIAL_DBG      Serial
 #define COM_SERIAL_IRID     Serial2
 #define COM_SERIAL_RF       Serial3
-
-// #define COM_SPI_CAN      serial4
