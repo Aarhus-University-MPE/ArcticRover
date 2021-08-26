@@ -25,15 +25,23 @@ void RunStrategySystemTest() {
   StrategyRunLed(MODE_SYSTEMTEST);
   
   if(runTest){
-    
     DEBUG_PRINTLN("Running Full System Test");
+
+    DEBUG_PRINTLN("  Enabling all systems");
     DEBUG_PRINTLINE();
 
     SystemEnable();
+    DEBUG_PRINTLINE();
+    
+    DEBUG_PRINTLN("Testing subsystems");
+    DEBUG_PRINTLINE();
 
-    GetStatus();
+    GetStatus(true);
 
     DEBUG_PRINTLINE();
+    DEBUG_PRINTLN("Disabeling all systems");
+    DEBUG_PRINTLINE();
+    
     SystemDisable();
     AttachSelectButton();
     
@@ -67,4 +75,24 @@ void SelectFunctionSystemTest(){
     DetachSelectButton();
   }
 
+}
+
+// Run full system check
+void GetStatus(bool printRes){
+  // SetStatus(MODULE_PWR_MOTOR, digitalRead(PO_POWER_MOTOR_ON)); // Bi-stable relay, so not possible to measure
+  SetStatus(MODULE_PWR_12V,   digitalRead(PO_POWER_12V));
+  SetStatus(MODULE_PWR_5V,    digitalRead(PO_POWER_5V));
+  SetStatus(MODULE_RF,       (digitalRead(PO_POWER_RF)      &&  digitalRead(PO_POWER_5V)   && SBusStatus()));
+  SetStatus(MODULE_IRIDIUM,   IridiumTest(printRes));
+  SetStatus(MODULE_PWR,       BatteryStatus());
+  SetStatus(MODULE_MOTOR,     MotorStatus());
+  SetStatus(MODULE_MOTOR_EN,  MotorState());
+  SetStatus(MODULE_GNSS,      GnssTest(printRes));
+  SetStatus(MODULE_SD,        SDReaderStatus());
+  SetStatus(MODULE_ACCEL,     AccelTest(printRes));
+  SetStatus(MODULE_DBGCOMM,   DebugCommStatus());
+  SetStatus(MODULE_BACKUPCPU, HeartBeatStatus());
+  SetStatus(MODULE_ESTOP,     emergencyStop);
+  SetStatus(MODULE_BLACKBOX,  BlackBoxStatus());
+  SetStatus(MODULE_RESERVED,  true);
 }

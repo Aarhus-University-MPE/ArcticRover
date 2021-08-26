@@ -9,6 +9,8 @@ void StartStrategyRemote()
   DEBUG_PRINTLN("Strategy (Remote): Starting");
   StrategyStartLed(MODE_REMOTECONTROL);
 
+  SystemDisable();
+  
   // Enable Primary System Power
   SystemEnable(MODULE_PWR_5V);
   delay(20);
@@ -28,10 +30,9 @@ void RunStrategyRemote()
 {
 
   // Read RF signal
-  if (GetStatus(MODULE_MOTOR))
+  if (GetStatus(MODULE_MOTOR)){
     ProcessIncomingCommands();
-
-  //HeartbeatRemote();
+  }
 }
 
 // End sequence of strategy

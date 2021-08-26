@@ -16,58 +16,82 @@ SFE_UBLOX_GNSS myGNSS;
 
 long lastTimeGNSS = 0; // Local timer, limits I2C traffic to u-blox module.
 
-bool InitializeGnss() {
+bool InitializeGnss()
+{
   bool status = myGNSS.begin();
-  if(status)
+  if (status)
   {
-    myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
+    myGNSS.setI2COutput(COM_TYPE_UBX);                               //Set the I2C port to output UBX only (turn off NMEA noise)
     myGNSS.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY); //Set measurement rate to 1000ms (1Hz update rate)
   }
   SetStatus(MODULE_GNSS, status);
   return status;
 }
 
-bool GnssStatus(){
+bool GnssStatus()
+{
 
   return myGNSS.isConnected();
 }
 
-void TerminateGnss(){
+bool GnssTest(bool printRes)
+{
+  if (printRes)
+  {
+    QueryGnss();
+  }
+
+  return (digitalRead(PO_POWER_5V) && GnssStatus());
+}
+
+void TerminateGnss()
+{
   myGNSS.end();
 }
 
-
 // Gets positional data in Latitude in degrees * 10^-7
-long GnssGetLat() {
+long GnssGetLat()
+{
   return myGNSS.getLatitude();
 }
 
 // Gets positional data in Longitude in degrees * 10^-7
-long GnssGetLong() {
+long GnssGetLong()
+{
   return myGNSS.getLongitude();
 }
 
 // Query module and prints Lat, Long, Alt, Acc
-void QueryGnss() {
-  long latitude = myGNSS.getLatitude();
-  DEBUG_PRINT(F("Lat: "));
-  DEBUG_PRINT(latitude);
-  DEBUG_PRINT(F(" (degrees * 10^-7)"));
+void QueryGnss()
+{
+  DEBUG_PRINT("GNSS:\t \t \t ");
 
-  long longitude = myGNSS.getLongitude();
-  DEBUG_PRINT(F(" Long: "));
-  DEBUG_PRINT(longitude);
-  DEBUG_PRINT(F(" (degrees * 10^-7)"));
+  if (GnssStatus())
+  {
+    long latitude = myGNSS.getLatitude();
+    DEBUG_PRINT(F("Lat: "));
+    DEBUG_PRINT(latitude);
+    DEBUG_PRINT(F(" (deg * 10^-7)"));
 
-  long altitude = myGNSS.getAltitude();
-  DEBUG_PRINT(F(" Alt: "));
-  DEBUG_PRINT(altitude);
-  DEBUG_PRINT(F(" (mm)"));
+    long longitude = myGNSS.getLongitude();
+    DEBUG_PRINT(F("\tLong: "));
+    DEBUG_PRINT(longitude);
+    DEBUG_PRINT(F(" (deg * 10^-7)"));
 
-  long accuracy = myGNSS.getPositionAccuracy();
-  DEBUG_PRINT(F(" 3D Positional Accuracy: "));
-  DEBUG_PRINT(accuracy);
-  DEBUG_PRINTLN(F(" (mm)"));
+    long altitude = myGNSS.getAltitude();
+    DEBUG_PRINT(F("\tAlt: "));
+    DEBUG_PRINT(altitude);
+    DEBUG_PRINT(F(" (mm)"));
+
+    long accuracy = myGNSS.getPositionAccuracy();
+    DEBUG_PRINT(F("\t3D Positional Accuracy: "));
+    DEBUG_PRINT(accuracy);
+    DEBUG_PRINTLN(F(" (mm)"));
+  }
+  else
+  {
+    DEBUG_PRINTLN("ERROR");
+  }
 }
 
 double DistanceBetween(double lat1, double long1, double lat2, double long2)
@@ -122,7 +146,8 @@ double CourseTo(double lat1, double long1, double lat2, double long2)
   - d = R ⋅ √x² + y²
   (φ/λ for lati­tude/longi­tude in radians)
 */
-double CoordinateDistance(double lat_A, double lon_A, double lat_B, double lon_B) {
+double CoordinateDistance(double lat_A, double lon_A, double lat_B, double lon_B)
+{
   double x = (lon_B - lon_A) * cos((lat_A + lat_B) / 2);
   double y = (lat_B - lat_A);
 
@@ -134,7 +159,8 @@ double CoordinateDistance(double lat_A, double lon_A, double lat_B, double lon_B
   - θ = atan2( sin Δλ ⋅ cos φ2 , cos φ1 ⋅ sin φ2 − sin φ1 ⋅ cos φ2 ⋅ cos Δλ )
   (φ/λ for lati­tude/longi­tude in radians)
 */
-double CoordinateBearing(double lat_A, double lon_A, double lat_B, double lon_B) {
+double CoordinateBearing(double lat_A, double lon_A, double lat_B, double lon_B)
+{
   double x = sin(lon_B - lon_A) * cos(lat_B);
   double y = cos(lat_A) * sin(lat_B) - sin(lat_A) * cos(lat_B) * cos(lon_B - lon_A);
 

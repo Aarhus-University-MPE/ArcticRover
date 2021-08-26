@@ -6,12 +6,56 @@
   2021
 */
 
+#include <IridiumSBD.h>
+
+IridiumSBD modem(COM_SERIAL_IRID);
+
+uint8_t buffer[200];
+int signalQuality = -1;
 
 bool InitializeIridium(){
-    
-    return true;
+  COM_SERIAL_IRID.begin(IRID_BAUDRATE);
+  
+  modem.adjustStartupTimeout(IRID_START_TIMEOUT);
+  modem.adjustATTimeout(IRID_ATT_TIMEOUT);
+
+  bool status = !(modem.begin() != ISBD_SUCCESS);
+  if(status){
+    int err = modem.getSignalQuality(signalQuality);  
+    if(err != 0){
+      status = false;
+    }
+  }
+
+  return status;
+}
+
+void TerminateIridium(){
+  COM_SERIAL_IRID.end();
 }
 
 bool IridiumStatus(){
-  return true;
+  return modem.isConnected();
+}
+
+bool IridiumTest(bool printRes){
+  bool status = true;
+
+  int err = modem.getSignalQuality(signalQuality);  
+  if(err != 0){
+      status = false;
+  }
+
+  if(printRes){
+    DEBUG_PRINT("Iridium: ");
+    if(status){
+      DEBUG_PRINT("Signal Quality: ");
+      DEBUG_PRINTLN(signalQuality);
+    }
+    else{
+      DEBUG_PRINTLN("ERROR");
+    }
+  }
+
+  return status;
 }

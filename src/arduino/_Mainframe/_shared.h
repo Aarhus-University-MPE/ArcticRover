@@ -119,24 +119,9 @@ void SetStatus(bool status)
 
 
 // Run full system check
-void GetStatus(){
-  // SetStatus(MODULE_PWR_MOTOR, digitalRead(PO_POWER_MOTOR_ON)); // Bi-stable relay, so not possible to measure
-  SetStatus(MODULE_PWR_12V,   digitalRead(PO_POWER_12V));
-  SetStatus(MODULE_PWR_5V,    digitalRead(PO_POWER_5V));
-  SetStatus(MODULE_RF,       (digitalRead(PO_POWER_RF)      &&  digitalRead(PO_POWER_5V)   && SBusStatus()));
-  SetStatus(MODULE_IRIDIUM,  (digitalRead(PO_POWER_IRIDIUM) &&  digitalRead(PO_POWER_5V)   && IridiumStatus()));
-  SetStatus(MODULE_PWR,       BatteryStatus());
-  SetStatus(MODULE_MOTOR,    MotorStatus());
-  SetStatus(MODULE_MOTOR_EN, MotorState());
-  SetStatus(MODULE_GNSS,     (digitalRead(PO_POWER_5V)      &&  GnssStatus()));
-  SetStatus(MODULE_SD,       SDReaderStatus());
-  SetStatus(MODULE_ACCEL,    (digitalRead(PO_POWER_5V)      &&  AccelStatus()));
-  SetStatus(MODULE_DBGCOMM,   DebugCommStatus());
-  SetStatus(MODULE_BACKUPCPU, HeartBeatStatus());
-  SetStatus(MODULE_ESTOP,     emergencyStop);
-  SetStatus(MODULE_BLACKBOX,  BlackBoxStatus());
-  SetStatus(MODULE_RESERVED,  true);
-}
+void GetStatus(bool printRes);
+
+bool AccelTest(bool printRes);
 
 
 

@@ -37,7 +37,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion   "0.9.21"
+#define SystemVersion   "0.14.214"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001   // 001
@@ -55,7 +55,7 @@
 #define BTN_DEBOUNCE_TIME_LONG  2500
 
 // Sensor and Module status
-#define MODULE_COUNT          16
+#define MODULE_COUNT          17
 
 #define MODULE_PWR_MOTOR      0
 #define MODULE_PWR_12V        1
@@ -68,11 +68,12 @@
 #define MODULE_GNSS           8
 #define MODULE_SD             9
 #define MODULE_ACCEL          10
-#define MODULE_DBGCOMM        11
-#define MODULE_BACKUPCPU      12
-#define MODULE_ESTOP          13
-#define MODULE_BLACKBOX       14
-#define MODULE_RESERVED       15
+#define MODULE_CANBUS         11
+#define MODULE_DBGCOMM        12
+#define MODULE_BACKUPCPU      13
+#define MODULE_ESTOP          14
+#define MODULE_BLACKBOX       15
+#define MODULE_RESERVED       16
 
 
 
@@ -90,7 +91,8 @@
 #define MODE_REMOTECONTROL  4 // System remotely controllable 
 #define MODE_AUTONOMOUS     5 // Autonomous driving mode
 
-#define ModeToString(m) ((m) == 0 ? "Emergency" : ((m) == 1 ? "Mode Library" : ((m) == 2 ? "Idle" : ((m) == 3 ? "System Test" : ((m) == 4 ? "Remote Control" : ((m) == 5 ? "Autonomous" : "Unknown"))))))
+#define ModeToString(m) ((m) == 0 ? "Emergency" : ((m) == 1 ? "Mode Library" : ((m) == 2 ? "Idle" : \
+((m) == 3 ? "System Test" : ((m) == 4 ? "Remote Control" : ((m) == 5 ? "Autonomous" : "Unknown"))))))
 
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
@@ -103,10 +105,6 @@
 #define BACKUP_RST_DT       300000  // Time between each reset attempt
 
 #define HRTBEAT_DT_LOG      300000  // Time between system status log
-
-// ------------------------------------------------------------ //
-//                          BLACKBOX                            //
-// ------------------------------------------------------------ //
 
 
 // ------------------------------------------------------------ //
@@ -146,9 +144,13 @@
 // DEBUG
 #define DEBUG_BAUDRATE          115200
 
+// Iridium
+#define IRID_BAUDRATE           19200
+#define IRID_START_TIMEOUT      2     // default value = 240 sec
+#define IRID_ATT_TIMEOUT        2     // default value = 20 sec
+
 
 // CAN BUS
-
 #define CANBUS_ID_MOTOR1        0x036
 #define CANBUS_ID_MOTOR2        0x037
 

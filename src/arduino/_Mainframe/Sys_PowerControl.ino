@@ -12,6 +12,7 @@ bool VoltageCheck()
   bool valid = true;
 
   // Measure voltage, above critical?
+  valid = false;
 
   return valid;
 }
@@ -19,6 +20,8 @@ bool VoltageCheck()
 bool BatteryStatus()
 {
   bool valid = true;
+
+  valid = false;
 
   return valid;
 }
@@ -36,7 +39,7 @@ void SystemEnable(int module)
     digitalWrite(PO_POWER_MOTOR_ON, HIGH);
     delay(50);
     digitalWrite(PO_POWER_MOTOR_ON, LOW);
-    DEBUG_PRINTLN("Power to Motors: Enabled.");
+    DEBUG_PRINTLN("Power to Motors: Enabled");
     break;
   case MODULE_PWR_5V:
     digitalWrite(PO_POWER_5V, HIGH);
@@ -74,10 +77,10 @@ void SystemEnable(int module)
       status = false;
     }
     break;
-  case MODULE_SD:
+  case MODULE_CANBUS:
     SystemEnable(MODULE_PWR_5V);
-    DEBUG_PRINT("Local Storage: ");
-    if (InitializeSDReader())
+    DEBUG_PRINT("CanBus Communication: ");
+    if (InitializeCanBus())
     {
       DEBUG_PRINTLN("Enabled");
     }
@@ -155,7 +158,11 @@ void SystemDisable(int module)
     break;
   case MODULE_GNSS:
     TerminateGnss();
-    DEBUG_PRINTLN("Global Navigation Satellite Systems: Disabled")
+    DEBUG_PRINTLN("Global Navigation Satellite Systems: Disabled");
+    break;
+  case MODULE_CANBUS:
+    TerminateCanBus();
+    DEBUG_PRINTLN("CanBus Communication: Disabled");
     break;
   default:
     break;
@@ -172,8 +179,8 @@ void SystemEnable()
   SystemEnable(MODULE_RF);
   SystemEnable(MODULE_IRIDIUM);
   SystemEnable(MODULE_GNSS);
-  SystemEnable(MODULE_SD);
   SystemEnable(MODULE_ACCEL);
+  SystemEnable(MODULE_CANBUS);
 }
 
 void SystemDisable()
@@ -182,6 +189,7 @@ void SystemDisable()
   SystemDisable(MODULE_IRIDIUM);
   SystemDisable(MODULE_GNSS);
   SystemDisable(MODULE_ACCEL);
+  SystemDisable(MODULE_CANBUS);
   SystemDisable(MODULE_PWR_MOTOR);
   SystemDisable(MODULE_PWR_5V);
   SystemDisable(MODULE_PWR_12V);

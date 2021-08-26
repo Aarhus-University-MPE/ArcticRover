@@ -13,8 +13,7 @@ struct can_frame canMsgRight;
 
 MCP2515 mcp2515(PO_SPISS_CANBUS);
 
-void InitializeCanBus() {
-  DEBUG_PRINT("Initializing CAN Bus communication... ");
+bool InitializeCanBus() {
   SPI.begin(); //Begins SPI communication
   mcp2515.reset();
   mcp2515.setBitrate(CANBBUS_SPEED, MCP_8MHZ); //Sets CAN at speed 500KBPS and Clock 8MHz
@@ -26,13 +25,12 @@ void InitializeCanBus() {
   canMsgRight.can_dlc = CANBUS_DATA_LENGTH;
   canMsgRight.can_id = CANBUS_ID_MOTOR2;
 
-  DEBUG_PRINTLN("CAN Bus Initialized.");
+  return mcp2515.checkReceive();
+
 }
 
 void TerminateCanBus() {
-  DEBUG_PRINT("Terminating CAN Bus communication... ");
-
-  DEBUG_PRINTLN("CAN Bus Terminated.");
+  SPI.end();
 }
 
 

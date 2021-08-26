@@ -91,6 +91,31 @@ void BlackBoxAppendln(String blackBoxInput)
     }
 }
 
+void BlackBoxAppendln(float blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            if (newLine)
+            {
+                blackBoxFile.print(millis());
+                blackBoxFile.print(";");
+            }
+            blackBoxFile.println(blackBoxInput);
+            newLine = true;
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
 void BlackBoxAppendln(byte blackBoxInput)
 {
     if (BlackBoxStatus())
@@ -266,6 +291,31 @@ void BlackBoxAppend(String blackBoxInput)
     }
 }
 
+void BlackBoxAppend(float blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            if (newLine)
+            {
+                blackBoxFile.print(millis());
+                blackBoxFile.print(";");
+            }
+            newLine = false;
+            blackBoxFile.print(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
 void BlackBoxAppend(byte blackBoxInput)
 {
     if (BlackBoxStatus())
@@ -290,6 +340,7 @@ void BlackBoxAppend(byte blackBoxInput)
         }
     }
 }
+
 void BlackBoxAppend(char blackBoxInput)
 {
     if (BlackBoxStatus())

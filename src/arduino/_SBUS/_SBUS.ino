@@ -7,29 +7,27 @@
 */
 
 #include <SBUS.h>
-#include <limits.h>
 
 SBUS sbus(Serial3);
 
+
 void setup(){
   Serial.begin(115200);
-  pinMode(A0,INPUT);
 
   InitializeSBUS();
 }
 
+unsigned long lastMillisPost = 0;
+
 void loop(){
-  sbus.process();
-  Serial.println(sbus.getGoodFrames());
-  for (int i = 0; i < 16; i++)
+  
+  if (millis() - lastMillisPost > 200)
   {
-    Serial.print(getChannelFloat(i));
-    delay(10);
+    lastMillisPost = millis();
+    printSBUSStatus();
   }
-  Serial.println();
-  Serial.print("Analog value: ");
-  Serial.println(analogRead(A0));
-  delay(200);
+  sbus.process();
+  //delay(1000);
 }
 
 // Initialize RF Communication
@@ -50,38 +48,81 @@ bool InitializeSBUS()
 }
 
 
-static int minChannel = INT_MAX;
-static int maxChannel = INT_MIN;
 
-// Scale SBUS channel value from range [0, 256] to [-1, 1]
-float getChannelFloat(int channel)
+
+void printSBUSStatus()
 {
-  int value = getChannel(channel);
-
-  float valueFloat = value / 128.0 - 1;
-
-  return valueFloat;
-}
-
-// Scale the S.BUS channel values into the range [0, 256]
-int getChannel(int channel)
-{
-  int value = sbus.getChannel(channel);
-
-  if (value < minChannel)
-  {
-    minChannel = value;
+  Serial.print("Ch1  ");
+  Serial.println(sbus.getNormalizedChannel(1));
+  Serial.print("Ch2  ");
+  Serial.println(sbus.getNormalizedChannel(2));
+  Serial.print("Ch3  ");
+  Serial.println(sbus.getNormalizedChannel(3));
+  Serial.print("Ch4  ");
+  Serial.println(sbus.getNormalizedChannel(4));
+  Serial.print("Ch5  ");
+  Serial.println(sbus.getNormalizedChannel(5));
+  Serial.print("Ch6  ");
+  Serial.println(sbus.getNormalizedChannel(6));
+  Serial.print("Ch7  ");
+  Serial.println(sbus.getNormalizedChannel(7));
+  Serial.print("Ch8  ");
+  Serial.println(sbus.getNormalizedChannel(8));
+  Serial.println();
+  Serial.print("Failsafe: ");
+  if (sbus.getFailsafeStatus() == SBUS_FAILSAFE_ACTIVE) {
+    Serial.println("Active");
   }
-  if (value > maxChannel)
-  {
-    maxChannel = value;
+  if (sbus.getFailsafeStatus() == SBUS_FAILSAFE_INACTIVE) {
+    Serial.println("Not Active");
   }
 
-  float result = value;
+  Serial.print("Data loss on connection: ");
+  Serial.print(sbus.getFrameLoss());
+  Serial.println("%");
 
-  result -= minChannel;
-  result /= (maxChannel - minChannel);
-  result *= 256;
+  Serial.print("Frames: ");
+  Serial.print(sbus.getGoodFrames());
+  Serial.print(" / ");
+  Serial.print(sbus.getLostFrames());
+  Serial.print(" / ");
+  Serial.println(sbus.getDecoderErrorFrames());
 
-  return (int)result;
+  Serial.print("Time diff: ");
+  Serial.println(millis() - (unsigned long)sbus.getLastTime());
 }
+// static int minChannel = INT_MAX;
+// static int maxChannel = INT_MIN;
+
+// // Scale SBUS channel value from range [0, 256] to [-1, 1]
+// float getChannelFloat(int channel)
+// {
+//   int value = getChannel(channel);
+
+//   float valueFloat = value / 128.0 - 1;
+
+//   return valueFloat;
+// }
+
+// // Scale the S.BUS channel values into the range [0, 256]
+// int getChannel(int channel)
+// {
+//   int value = sbus.getChannel(channel);
+
+//   if (value < minChannel)
+//   {
+//     minChannel = value;
+//   }
+//   if (value > maxChannel)
+//   {
+//     maxChannel = value;
+//   }
+
+//   float result = value;
+
+//   result -= minChannel;
+//   result /= (maxChannel - minChannel);
+//   result *= 256;
+
+//   return (int)result;
+// }

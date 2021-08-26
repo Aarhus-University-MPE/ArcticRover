@@ -22,9 +22,9 @@ void initializeDebugComm()
   DEBUG_PRINTLN("#---------------------------#");
   DEBUG_PRINTLN("#     GeoRover Firmware     #");
   DBG_ONLY(DEBUG_PRINTLN("#       #DEBUG MODE#        #"));
-  DEBUG_PRINT("#   System Version: ");
+  DEBUG_PRINT("#  System Version: ");
   DEBUG_PRINT(SystemVersion);
-  DEBUG_PRINTLN("  #");
+  DEBUG_PRINTLN(" #");
   DEBUG_PRINTLN("#---------------------------#");
   DEBUG_PRINTLN();
 }
@@ -211,7 +211,7 @@ void praseCommandModule()
     break;
   case CMD_MODULE_STATUS:
     DEBUG_PRINTLN("Manual System Status Check");
-    GetStatus();
+    GetStatus(true);
     DEBUG_PRINT("System Status: ");
     DEBUG_PRINTLN(String(ToByte(SystemStatus)));
     break;
