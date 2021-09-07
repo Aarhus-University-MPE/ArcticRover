@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:mega",
-    "sketch": "src\\arduino\\_SBUS\\_SBUS.ino",
+    "sketch": "src\\arduino\\_Mainframe\\_Mainframe.ino",
     "port": "COM12",
     "programmer": "AVR ISP",
     "output": "src/arduino/Output",

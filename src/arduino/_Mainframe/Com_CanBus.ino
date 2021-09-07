@@ -25,6 +25,8 @@ bool InitializeCanBus() {
   canMsgRight.can_dlc = CANBUS_DATA_LENGTH;
   canMsgRight.can_id = CANBUS_ID_MOTOR2;
 
+  delay(20);
+
   return mcp2515.checkReceive();
 
 }
@@ -49,4 +51,10 @@ void PopulateCanMsg(struct can_frame canMsg, unsigned int _data) {
   for (int i = 0; i < CANBUS_DATA_LENGTH; i++) {
     canMsg.data[i] = (_data >> 8 * i) & 0xFF;
   }
+}
+
+bool InitializeMotor(bool motor){
+  bool status = true;
+
+  return status;
 }

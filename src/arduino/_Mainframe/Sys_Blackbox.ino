@@ -240,6 +240,32 @@ void BlackBoxAppendln(long int blackBoxInput)
     }
 }
 
+void BlackBoxAppendln(unsigned long blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            if (newLine)
+            {
+                blackBoxFile.print(millis());
+                blackBoxFile.print(";");
+            }
+            blackBoxFile.println(blackBoxInput);
+            newLine = true;
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
+
 void BlackBoxAppendln(long int blackBoxInput, int Type)
 {
     if (BlackBoxStatus())
@@ -417,6 +443,31 @@ void BlackBoxAppend(bool blackBoxInput)
 }
 
 void BlackBoxAppend(long int blackBoxInput)
+{
+    if (BlackBoxStatus())
+    {
+        File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+        if (blackBoxFile)
+        {
+            if (newLine)
+            {
+                blackBoxFile.print(millis());
+                blackBoxFile.print(";");
+            }
+            newLine = false;
+            blackBoxFile.print(blackBoxInput);
+            blackBoxFile.close();
+        }
+        else
+        {
+            DEBUG_PRINTLN("Blackbox Error");
+
+            SetStatus(MODULE_BLACKBOX, false);
+        }
+    }
+}
+
+void BlackBoxAppend(unsigned long blackBoxInput)
 {
     if (BlackBoxStatus())
     {

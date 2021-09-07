@@ -1,30 +1,10 @@
 /*
-  GeoRover Power control
+  GeoRover System control
 
   Mads Rosenhøj Jepepsen
   Aarhus University
   2021
 */
-
-// Checks voltage levels above critical values?
-bool VoltageCheck()
-{
-  bool valid = true;
-
-  // Measure voltage, above critical?
-  valid = false;
-
-  return valid;
-}
-
-bool BatteryStatus()
-{
-  bool valid = true;
-
-  valid = false;
-
-  return valid;
-}
 
 void SystemEnable(int module)
 {
@@ -35,6 +15,9 @@ void SystemEnable(int module)
 
   switch (module)
   {
+  case MODULE_PWR:
+    status = BatteryStatus();
+    break;
   case MODULE_PWR_MOTOR:
     digitalWrite(PO_POWER_MOTOR_ON, HIGH);
     delay(50);
@@ -90,6 +73,19 @@ void SystemEnable(int module)
       status = false;
     }
     break;
+  case MODULE_MOTORS:
+    SystemEnable(MODULE_PWR_MOTOR);
+    DEBUG_PRINT("Motors: ");
+    if (InitializeMotors(false))
+    {
+      DEBUG_PRINTLN("Enabled");
+    }
+    else
+    {
+      DEBUG_PRINTLN("Error");
+      status = false;
+    }
+    break;
   case MODULE_ACCEL:
     SystemEnable(MODULE_PWR_5V);
     DEBUG_PRINT("Accelerometer: ");
@@ -114,12 +110,57 @@ void SystemEnable(int module)
       status = false;
     }
     break;
+  case MODULE_SD:
+    SystemEnable(MODULE_PWR_5V);
+    DEBUG_PRINT("Local Storage: ");
+    if (InitializeSDReader())
+    {
+      DEBUG_PRINTLN("Enabled");
+    }
+    else
+    {
+      DEBUG_PRINTLN("Error");
+      status = false;
+    }
+    break;
   default:
     break;
   }
 
   SetStatus(module, status);
   delay(10);
+}
+
+void SystemEnable()
+{
+  SystemEnable(MODULE_PWR_MOTOR);
+  SystemEnable(MODULE_PWR_5V);
+  SystemEnable(MODULE_PWR_12V);
+  SystemEnable(MODULE_RF);
+  SystemEnable(MODULE_IRIDIUM);
+  SystemEnable(MODULE_GNSS);
+  SystemEnable(MODULE_ACCEL);
+  SystemEnable(MODULE_CANBUS);
+  SystemEnable(MODULE_MOTORS);
+  SystemEnable(MODULE_SD);
+}
+
+void SystemEnableMode(int mode){
+  switch (mode)
+  {
+  case MODE_REMOTECONTROL:
+    SystemEnable(MODULE_PWR);
+    SystemEnable(MODULE_PWR_MOTOR);
+    SystemEnable(MODULE_CANBUS);
+    SystemEnable(MODULE_MOTORS);
+    SystemEnable(MODULE_RF);
+    break;
+  case MODE_AUTONOMOUS:
+    //SystemEnable();
+    break;
+  default:
+    break;
+  }
 }
 
 void SystemDisable(int module)
@@ -164,23 +205,15 @@ void SystemDisable(int module)
     TerminateCanBus();
     DEBUG_PRINTLN("CanBus Communication: Disabled");
     break;
+  case MODULE_MOTORS:
+    TerminateMotors(false);
+    DEBUG_PRINTLN("Motors: Disabled");
+    break;
   default:
     break;
   }
 
   SetStatus(module, false);
-}
-
-void SystemEnable()
-{
-  SystemEnable(MODULE_PWR_MOTOR);
-  SystemEnable(MODULE_PWR_5V);
-  SystemEnable(MODULE_PWR_12V);
-  SystemEnable(MODULE_RF);
-  SystemEnable(MODULE_IRIDIUM);
-  SystemEnable(MODULE_GNSS);
-  SystemEnable(MODULE_ACCEL);
-  SystemEnable(MODULE_CANBUS);
 }
 
 void SystemDisable()
@@ -189,8 +222,56 @@ void SystemDisable()
   SystemDisable(MODULE_IRIDIUM);
   SystemDisable(MODULE_GNSS);
   SystemDisable(MODULE_ACCEL);
+  SystemDisable(MODULE_MOTORS);
   SystemDisable(MODULE_CANBUS);
   SystemDisable(MODULE_PWR_MOTOR);
   SystemDisable(MODULE_PWR_5V);
   SystemDisable(MODULE_PWR_12V);
+}
+
+bool SystemCheck(int mode){
+  static bool status = false;
+  SystemTest(false);
+  
+  switch (mode)
+  {
+  case MODE_REMOTECONTROL:
+    status = (((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) & SYSREQ_REMOTE_CONTROL) | (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED);
+    if(!status){
+      DEBUG_PRINT("ERROR Code: ")
+      DEBUG_PRINTLN(String(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) & SYSREQ_REMOTE_CONTROL) | (1L << MODULE_RESERVED)));
+    }
+    break;
+  case MODE_AUTONOMOUS:
+    status = (((ToLong(SystemStatus) ^ SYSREQ_AUTONOMOUS) & SYSREQ_AUTONOMOUS) | (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED);
+    if(!status){
+      DEBUG_PRINT("ERROR Code: ")
+      DEBUG_PRINTLN(String(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) & SYSREQ_REMOTE_CONTROL) | (1L << MODULE_RESERVED)));
+    }
+    break;
+  default:
+    break;
+  }
+
+  return status;
+}
+
+// Run full system check
+void SystemTest(bool printRes){
+  // SetStatus(MODULE_PWR_MOTOR, digitalRead(PO_POWER_MOTOR_ON)); // Bi-stable relay, so not possible to measure
+  SetStatus(MODULE_PWR_12V,   digitalRead(PO_POWER_12V));
+  SetStatus(MODULE_PWR_5V,    digitalRead(PO_POWER_5V));
+  SetStatus(MODULE_RF,       (digitalRead(PO_POWER_RF)      &&  digitalRead(PO_POWER_5V)   && SBusStatus()));
+  SetStatus(MODULE_IRIDIUM,   IridiumTest(printRes));
+  SetStatus(MODULE_PWR,       BatteryStatus());
+  SetStatus(MODULE_MOTORS,    MotorStatus());
+  SetStatus(MODULE_MOTOR_ACT, MotorState());
+  SetStatus(MODULE_GNSS,      GnssTest(printRes));
+  SetStatus(MODULE_SD,        SDReaderStatus());
+  SetStatus(MODULE_ACCEL,     AccelTest(printRes));
+  SetStatus(MODULE_DBGCOMM,   DebugCommStatus());
+  SetStatus(MODULE_BACKUPCPU, HeartBeatStatus());
+  SetStatus(MODULE_ESTOP,     EmergencyStopStatus());
+  SetStatus(MODULE_BLACKBOX,  BlackBoxStatus());
+  SetStatus(MODULE_RESERVED,  true);
 }

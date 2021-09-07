@@ -58,6 +58,7 @@ void InitButtons()
 
   // Assign Emergency Stop button interrupt
   attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
+  SetStatus(MODULE_ESTOP, true);
 
   // Assign heartbeat interrupt
   attachInterrupt(PI_INT_HRTBEAT, HeartBeatInInterrupt, FALLING);
@@ -73,10 +74,6 @@ void EstopButtonInterruptHandler()
     {
       SetMode(MODE_EMERGENCY);
     }
-    else
-    {
-      DEBUG_PRINTLN("Emergency Already Set");
-    }
   }
 }
 
@@ -87,8 +84,16 @@ void ModeButtonInterruptHandler()
 {
   if (millis() - lastMillisMode > BTN_DEBOUNCE_TIME_LONG)
   {
-    DEBUG_PRINTLN("Mode button press, changing mode to Mode Library");
-    lastMillisMode = millis();
-    SetMode(MODE_MODELIBRARY);    
+    if(GetStatus(MODE_EMERGENCY)){
+      DEBUG_PRINTLN("Mode button press, changing mode to Mode Library");
+      lastMillisMode = millis();
+      SetMode(MODE_MODELIBRARY);    
+    }
+    else
+    {
+      DEBUG_PRINTLN("Emergency Mode!");
+    }
+    
+    
   }
 }

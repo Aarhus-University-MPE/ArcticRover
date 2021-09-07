@@ -30,11 +30,12 @@ void printFiles(File dir);
 void initializeDebugComm();
 bool InitializeIridium();
 void ModeUpdater();
-unsigned int ToByte(bool b[]);
+unsigned long ToLong(bool b[]);
 bool AccelStatus();
 void CountDownPrint();
+bool SystemCheck(int mode);
+void SystemEnableMode(int mode);
 
-bool InitializeIridium();
 bool IridiumStatus();
 bool GnssStatus();
 void TerminateAccel();
@@ -70,6 +71,7 @@ typedef void (*functionPtr)();
 // [0][MODES_MAX] - start sequence
 // [1][MODES_MAX] - main sequence
 // [2][MODES_MAX] - end sequence
+// [2][MODES_MAX] - Select button function
 functionPtr strategyMethods[4][MODES_MAX];
 
 static double DistanceBetween(double lat1, double long1, double lat2, double long2);
@@ -79,7 +81,6 @@ static const char Cardinal(double course);
 boolean SetMode(byte newMode);
 bool SystemStatus[MODULE_COUNT];
 
-bool emergencyStop = false;
 bool HeartBeatStatus();
 bool BlackBoxStatus();
 
@@ -93,6 +94,7 @@ unsigned long lastMillisSelect = 0;
 unsigned long lastMillisMode = 0;
 unsigned long lastMillisEstop = 0;
 unsigned long lastMillistModeBlink = 0;
+unsigned long lastSystemReboot = 9999999;
 
 byte mode;
 byte modeCycle;
@@ -115,6 +117,8 @@ void SetStatus(bool status)
   {
     SystemStatus[i] = status;
   }
+  SystemStatus[MODULE_ESTOP] = digitalRead(PIN_ESTOP); // E_STOP STAUTS FUNCTION()?
+  SystemStatus[MODULE_RESERVED] = true;
 }
 
 
@@ -132,6 +136,7 @@ void BlackBoxAppendln(bool blackBoxInput);
 void BlackBoxAppendln(char blackBoxInput);
 void BlackBoxAppendln(int blackBoxInput);
 void BlackBoxAppendln(long int blackBoxInput);
+void BlackBoxAppendln(unsigned long blackBoxInput);
 void BlackBoxAppendln(long int blackBoxInput, int Type);
 
 
@@ -142,4 +147,5 @@ void BlackBoxAppend(bool blackBoxInput);
 void BlackBoxAppend(char blackBoxInput);
 void BlackBoxAppend(int blackBoxInput);
 void BlackBoxAppend(long int blackBoxInput);
+void BlackBoxAppend(unsigned long blackBoxInput);
 void BlackBoxAppend(long int blackBoxInput, int Type);

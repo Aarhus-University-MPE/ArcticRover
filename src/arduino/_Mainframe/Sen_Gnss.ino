@@ -64,7 +64,7 @@ long GnssGetLong()
 // Query module and prints Lat, Long, Alt, Acc
 void QueryGnss()
 {
-  DEBUG_PRINT("GNSS:\t \t \t ");
+  DEBUG_PRINT("GNSS: ");
 
   if (GnssStatus())
   {

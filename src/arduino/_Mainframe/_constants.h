@@ -34,10 +34,11 @@
   #define RECEIVE_CMDS()  recvWithStartEndMarkers()
 #endif
 
+#define ToBoolString(m) ((m) == 1 ? "T" : ((m) == 0 ? "F" : "Unknown"))
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion   "0.14.214"
+#define SystemVersion   "0.21.121"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001   // 001
@@ -55,26 +56,49 @@
 #define BTN_DEBOUNCE_TIME_LONG  2500
 
 // Sensor and Module status
+#define SYSTEM_CHECK_DT       1000
+#define SYSTEM_REBOOT_DT      5000
+
 #define MODULE_COUNT          17
 
-#define MODULE_PWR_MOTOR      0
-#define MODULE_PWR_12V        1
-#define MODULE_PWR_5V         2
-#define MODULE_RF             3
-#define MODULE_IRIDIUM        4
-#define MODULE_PWR            5
-#define MODULE_MOTOR          6
-#define MODULE_MOTOR_EN       7
-#define MODULE_GNSS           8
-#define MODULE_SD             9
+#define MODULE_PWR            0
+#define MODULE_PWR_5V         1
+#define MODULE_PWR_12V        2
+#define MODULE_PWR_MOTOR      3
+#define MODULE_MOTORS         4
+#define MODULE_MOTOR_ACT      5
+#define MODULE_CANBUS         6
+#define MODULE_RF             7
+#define MODULE_IRIDIUM        8
+#define MODULE_GNSS           9
 #define MODULE_ACCEL          10
-#define MODULE_CANBUS         11
-#define MODULE_DBGCOMM        12
-#define MODULE_BACKUPCPU      13
-#define MODULE_ESTOP          14
-#define MODULE_BLACKBOX       15
+#define MODULE_SD             11
+#define MODULE_BLACKBOX       12
+#define MODULE_DBGCOMM        13
+#define MODULE_BACKUPCPU      14
+#define MODULE_ESTOP          15
 #define MODULE_RESERVED       16
 
+const unsigned long SYSREQ_REMOTE_CONTROL = \
+(1L << MODULE_PWR)             + \
+(1L << MODULE_PWR_MOTOR)       + \
+(1L << MODULE_MOTORS)          + \
+(1L << MODULE_CANBUS)          + \
+(1L << MODULE_RF)              + \
+(1L << MODULE_ESTOP);
+
+const unsigned long SYSREQ_AUTONOMOUS =  \
+(1L << MODULE_PWR)           + \
+(1L << MODULE_PWR_MOTOR)     + \
+(1L << MODULE_MOTORS)        + \
+(1L << MODULE_CANBUS)        + \
+(1L << MODULE_IRIDIUM)       + \
+(1L << MODULE_GNSS)          + \
+(1L << MODULE_ACCEL)         + \
+(1L << MODULE_SD)            + \
+(1L << MODULE_BLACKBOX)      + \
+(1L << MODULE_BACKUPCPU)     + \
+(1L << MODULE_ESTOP);
 
 
 // ------------------------------------------------------------ //
@@ -124,12 +148,28 @@
 
 #define GNSS_QUERY_UPDATE_FREQUENCY     1000        // in milliseconds
 
+
+// ------------------------------------------------------------ //
+//                       REMOTE CONTROL                         //
+// ------------------------------------------------------------ //
+#define REMOTE_CHANNEL_THROTTLE   0
+#define REMOTE_CHANNEL_STEER      1
+#define REMOTE_CHANNEL_ENABLE     2
+
+#define REMOTE_PROCESS_DT         250
+
+#define REMOTE_SIGNAL_SCALE       100.0/87.0
+
+
 // ------------------------------------------------------------ //
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
 
 #define MOTOR_MAX_SPEED_FWD             10
 #define MOTOR_MAX_SPEED_BWD             5
+#define MOTOR_LEFT                      true
+#define MOTOR_RIGHT                     false
+
 
 
 // ------------------------------------------------------------ //
@@ -203,6 +243,7 @@
 #define CMD_MODULE              'M'
 #define CMD_MODULE_ENABLE       'E'
 #define CMD_MODULE_DISABLE      'D'
+#define CMD_MODULE_OVERRIDE     'O'
 #define CMD_MODULE_STATUS       'S'
 #define CMD_MODULE_RESET        'R'
 

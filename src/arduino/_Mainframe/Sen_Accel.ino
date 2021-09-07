@@ -47,7 +47,7 @@ bool AccelStatus(){
 
 bool AccelTest(bool printRes){
   if(printRes){
-    DEBUG_PRINT("Accelerometer: \t "); 
+    DEBUG_PRINT("Accelerometer: "); 
     if(AccelStatus()){
       ReadAccel();
       DEBUG_PRINT("x: ");

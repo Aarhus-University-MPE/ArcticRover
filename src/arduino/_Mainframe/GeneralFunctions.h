@@ -35,12 +35,12 @@ void appendCsv(char* s) {
 }
 
 
-unsigned int ToByte(bool b[])
+unsigned long ToLong(bool b[])
 {
-  unsigned int c = 0;
+  unsigned long c = 0;
   for (int i = 0; i < MODULE_COUNT; ++i) {
     if (b[i])
-      c |= 1 << i;
+      c |= 1L << i;
   }
   return c;
 }

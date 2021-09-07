@@ -97,10 +97,9 @@ void HeartbeatBlackBox(){
   if (millis() - lastMillisHeartbeatBlackbox > HRTBEAT_DT_LOG)
   {
     lastMillisHeartbeatBlackbox = millis();
-    GetStatus(false);
     DEBUG_PRINTLINE();
     DEBUG_PRINT("Heartbeat System Status: ");
-    DEBUG_PRINTLN(String(ToByte(SystemStatus)));
+    DEBUG_PRINTLN(String(ToLong(SystemStatus)));
     DEBUG_PRINTLINE();
   }
 }

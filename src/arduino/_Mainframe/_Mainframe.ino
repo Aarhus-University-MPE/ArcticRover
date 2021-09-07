@@ -24,9 +24,7 @@ void setup()
 
   // System initialization
   InitAllPins();
-  delay(50);
   InitButtons();
-  delay(50);
   InitStatusLed();
 
   // Strategy initialization

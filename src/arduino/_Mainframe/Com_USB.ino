@@ -93,7 +93,7 @@ void parseCommand()
     parseCommandBackup();
     break;
   case CMD_MODULE:
-    praseCommandModule();
+    parseCommandModule();
   case '\0':
     break;
   default:
@@ -178,8 +178,14 @@ void parseCommandBackup()
   }
 }
 
-void praseCommandModule()
+void parseCommandModule()
 {
+  char *modulePtr = receivedCMD + 2;
+  char moduleChar[numChars] = {0};
+  strcpy(moduleChar, modulePtr);
+
+  int moduleSlct = atoi(moduleChar);
+
   switch (receivedCMD[1])
   {
   case CMD_MODULE_ENABLE:
@@ -191,10 +197,11 @@ void praseCommandModule()
       SystemEnable();
       break;
     default:
-      DEBUG_PRINTLN((int)(receivedCMD[2] - '0'));
-      SystemEnable((int)(receivedCMD[2] - '0'));
+      DEBUG_PRINTLN(moduleSlct);
+      SystemEnable(moduleSlct);
       break;
     }
+    break;
   case CMD_MODULE_DISABLE:
     DEBUG_PRINT("Manual Disable of Module: ");
     switch (receivedCMD[2])
@@ -204,16 +211,32 @@ void praseCommandModule()
       SystemDisable();
       break;
     default:
-      DEBUG_PRINTLN((int)(receivedCMD[2] - '0'));
-      SystemDisable((int)(receivedCMD[2] - '0'));
+      DEBUG_PRINTLN(moduleSlct);
+      SystemDisable(moduleSlct);
+      break;
+    }
+    break;
+  case CMD_MODULE_OVERRIDE:
+    DEBUG_PRINT("Manual Override of Module: ");
+    switch (receivedCMD[2])
+    {
+    case '\0':
+      DEBUG_PRINTLN("NACK");
+      //SystemDisable();
+      break;
+    default:
+      DEBUG_PRINT(moduleSlct);
+      DEBUG_PRINT("\t");
+      DEBUG_PRINTLN(ToBoolString(!GetStatus(moduleSlct)));
+      SetStatus(moduleSlct,!GetStatus(moduleSlct));
       break;
     }
     break;
   case CMD_MODULE_STATUS:
     DEBUG_PRINTLN("Manual System Status Check");
-    GetStatus(true);
+    //GetStatus(true);
     DEBUG_PRINT("System Status: ");
-    DEBUG_PRINTLN(String(ToByte(SystemStatus)));
+    DEBUG_PRINTLN(String(ToLong(SystemStatus)));
     break;
   case CMD_MODULE_RESET:
     DEBUG_PRINT("Manual System Reset in: ");

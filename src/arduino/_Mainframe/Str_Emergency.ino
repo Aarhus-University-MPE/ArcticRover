@@ -7,21 +7,20 @@
 
 // Start sequence of strategy
 void StartStrategyEmergency() {
+  DEBUG_PRINTLINE();
   DEBUG_PRINTLN("Strategy (Emergency): Starting");
-  delay(20);
 
   // Disable all outputs
   SystemDisable();
-  delay(20);
+  SetStatus(MODULE_ESTOP, false);
 
   // Disable input buttons
   detachInterrupt(PI_BUTTON_MODE);
   detachInterrupt(PI_BUTTON_SELECT);
-  
-  DEBUG_PRINTLN("Strategy (Emergency): System Inputs Disabled");
-  delay(20);
+  DEBUG_PRINTLN("Strategy (Emergency): Systems Disabled");
 
   DEBUG_PRINTLN("Strategy (Emergency): Initialized");
+  DEBUG_PRINTLINE();
 }
 
 // Main sequence of strategy
@@ -29,9 +28,9 @@ void RunStrategyEmergency() {
   StrategyRunLed(MODE_EMERGENCY);
 
   // Exit strategy, if emergency not set -> Idle strategy
-  if (!digitalRead(PI_BUTTON_ESTOP)) {
+  if (EmergencyStopStatus()) {
     LedBlink(BINARY_CODE_LED_GRN, ESTOP_DEBOUNCE_TIME / 2, ESTOP_DEBOUNCE_TIME / 2);
-    if (!digitalRead(PI_BUTTON_ESTOP)) {
+    if (EmergencyStopStatus()) {
       LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
       SetMode(MODE_IDLE);
     }
@@ -40,10 +39,19 @@ void RunStrategyEmergency() {
 
 // End sequence of strategy
 void FinishStrategyEmergency() {
+  DEBUG_PRINTLINE();
   DEBUG_PRINTLN("Strategy (Emergency): Ending");
+
+  lastMillisMode = millis();
+  lastMillisEstop = millis();
 
   // Enable input buttons
   attachInterrupt(PI_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
+
+  // Assign Emergency Stop button interrupt
+  attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
+  SetStatus(MODULE_ESTOP, true);
+
 
   DEBUG_PRINTLN("Strategy (Emergency): Finished");
 
@@ -53,4 +61,10 @@ void FinishStrategyEmergency() {
 
 void SelectFunctionEmergency(){
 
+}
+
+// Returns TRUE if Emergency Button is NOT pressed
+// Returns FALSE if Emergency Button IS pressed 
+bool EmergencyStopStatus(){
+  return digitalRead(PI_BUTTON_ESTOP);
 }

@@ -9,16 +9,13 @@
 #include <mcp2515.h> //Library for using CAN Communication
 
 bool InitializeMotors(bool RF_Control) {
-  DEBUG_PRINT("Initializing Motors... ");
   InitializeCanBus();
   if (RF_Control) InitializeSBUS();
 
   if (MotorStatus()) {
-    DEBUG_PRINTLN("Motors Initialized.");
     return true;
   }
   else {
-    DEBUG_PRINTLN("Motors Error.");
     return false;
   }
 
@@ -27,16 +24,14 @@ bool InitializeMotors(bool RF_Control) {
 
 
 void TerminateMotors(bool RF_Control) {
-  DEBUG_PRINT("Terminating Motors... ");
   TerminateCanBus();
   if (RF_Control) TerminateSBUS();
-  DEBUG_PRINTLN("Motors Terminated.");
 }
 
 // Moves motors based on direction and speed input within the range of [-1 and 1]
 // -1 full left, 1 full right (dir)
 // -1 full reverse, 1 full forward (speed)
-void MotorMove(float dir, float speed) {
+void MotorMove(float dir, float speed, float enable) {
   // Move, handle direction
   float steerFactorLeft = 1;
   float steerFactorRight = 1;

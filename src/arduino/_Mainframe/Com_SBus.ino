@@ -16,17 +16,13 @@ bool InitializeSBUS()
 {
   sbus.begin(false);
   bool status = COM_SERIAL_RF;
-  LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
 
-  SetStatus(MODULE_RF, status);
   return status;
 }
 
 void TerminateSBUS()
 {
   COM_SERIAL_RF.end();
-  SetStatus(MODULE_RF, false);
-  LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_RED);
 }
 
 bool SBusStatus()
