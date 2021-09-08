@@ -91,7 +91,7 @@ void ModeButtonInterruptHandler()
     }
     else
     {
-      DEBUG_PRINTLN("Emergency Mode!");
+      DEBUG_PRINTLN("Emergency Mode, Input Blocked!");
     }
     
     
