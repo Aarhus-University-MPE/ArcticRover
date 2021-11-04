@@ -38,7 +38,7 @@ bool IridiumStatus(){
   return modem.isConnected();
 }
 
-bool IridiumTest(bool printRes){
+bool IridiumTest(){
   bool status = true;
 
   int err = modem.getSignalQuality(signalQuality);  
@@ -46,16 +46,13 @@ bool IridiumTest(bool printRes){
       status = false;
   }
 
-  if(printRes){
-    DEBUG_PRINT("Iridium: ");
-    if(status){
-      DEBUG_PRINT("Signal Quality: ");
-      DEBUG_PRINTLN(signalQuality);
-    }
-    else{
-      DEBUG_PRINTLN("ERROR");
-    }
+  DEBUG_PRINT("Iridium: ");
+  if(status){
+    DEBUG_PRINT("Signal Quality: ");
+    DEBUG_PRINTLN(signalQuality);
   }
-
+  else{
+    DEBUG_PRINTLN("ERROR");
+  }
   return status;
 }

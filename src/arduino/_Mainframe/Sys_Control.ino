@@ -20,7 +20,7 @@ void SystemEnable(int module)
     break;
   case MODULE_PWR_MOTOR:
     digitalWrite(PO_POWER_MOTOR_ON, HIGH);
-    delay(50);
+    delay(RELAY_SWITCHING_TIME);
     digitalWrite(PO_POWER_MOTOR_ON, LOW);
     DEBUG_PRINTLN("Power to Motors: Enabled");
     break;
@@ -76,7 +76,7 @@ void SystemEnable(int module)
   case MODULE_MOTORS:
     SystemEnable(MODULE_PWR_MOTOR);
     DEBUG_PRINT("Motors: ");
-    if (InitializeMotors(false))
+    if (InitializeMotors())
     {
       DEBUG_PRINTLN("Enabled");
     }
@@ -123,6 +123,18 @@ void SystemEnable(int module)
       status = false;
     }
     break;
+  case MODULE_BLACKBOX:
+    SystemEnable(MODULE_SD);
+    DEBUG_PRINT("Blackbox : ");
+    if(BlackBoxStatus()){
+      DEBUG_PRINTLN("Enabled");
+    }
+    else
+    {
+      DEBUG_PRINTLN("Error");
+      status = false;
+    }
+    
   default:
     break;
   }
@@ -131,32 +143,34 @@ void SystemEnable(int module)
   delay(10);
 }
 
-void SystemEnable()
-{
-  SystemEnable(MODULE_PWR_MOTOR);
-  SystemEnable(MODULE_PWR_5V);
-  SystemEnable(MODULE_PWR_12V);
-  SystemEnable(MODULE_RF);
-  SystemEnable(MODULE_IRIDIUM);
-  SystemEnable(MODULE_GNSS);
-  SystemEnable(MODULE_ACCEL);
-  SystemEnable(MODULE_CANBUS);
-  SystemEnable(MODULE_MOTORS);
-  SystemEnable(MODULE_SD);
-}
+// void SystemEnable()
+// {
+//   SystemEnable(MODULE_PWR_MOTOR);
+//   SystemEnable(MODULE_PWR_5V);
+//   SystemEnable(MODULE_PWR_12V);
+//   SystemEnable(MODULE_RF);
+//   SystemEnable(MODULE_IRIDIUM);
+//   SystemEnable(MODULE_GNSS);
+//   SystemEnable(MODULE_ACCEL);
+//   SystemEnable(MODULE_CANBUS);
+//   SystemEnable(MODULE_MOTORS);
+//   SystemEnable(MODULE_SD);
+// }
 
 void SystemEnableMode(int mode){
   switch (mode)
   {
   case MODE_REMOTECONTROL:
     SystemEnable(MODULE_PWR);
-    SystemEnable(MODULE_PWR_MOTOR);
-    SystemEnable(MODULE_CANBUS);
-    SystemEnable(MODULE_MOTORS);
+    // SystemEnable(MODULE_PWR_MOTOR); // <-- Enabled by user input (along with motor initialization)
+    // SystemEnable(MODULE_MOTORS); // <-- Enabled by user input 
     SystemEnable(MODULE_RF);
     break;
   case MODE_AUTONOMOUS:
     //SystemEnable();
+    break;
+  case MODE_SYSTEMTEST:
+    //
     break;
   default:
     break;
@@ -173,7 +187,7 @@ void SystemDisable(int module)
   case MODULE_PWR_MOTOR:
     DEBUG_PRINTLN("Power to Motors: Disabled.");
     digitalWrite(PO_POWER_MOTOR_OFF, HIGH);
-    delay(50);
+    delay(RELAY_SWITCHING_TIME);
     digitalWrite(PO_POWER_MOTOR_OFF, LOW);
     break;
   case MODULE_PWR_5V:
@@ -206,7 +220,8 @@ void SystemDisable(int module)
     DEBUG_PRINTLN("CanBus Communication: Disabled");
     break;
   case MODULE_MOTORS:
-    TerminateMotors(false);
+    SystemDisable(MODULE_PWR_MOTOR);
+    TerminateMotors();
     DEBUG_PRINTLN("Motors: Disabled");
     break;
   default:
@@ -231,7 +246,7 @@ void SystemDisable()
 
 bool SystemCheck(int mode){
   static bool status = false;
-  SystemTest(false);
+  SystemTest();
   
   switch (mode)
   {
@@ -254,24 +269,4 @@ bool SystemCheck(int mode){
   }
 
   return status;
-}
-
-// Run full system check
-void SystemTest(bool printRes){
-  // SetStatus(MODULE_PWR_MOTOR, digitalRead(PO_POWER_MOTOR_ON)); // Bi-stable relay, so not possible to measure
-  SetStatus(MODULE_PWR_12V,   digitalRead(PO_POWER_12V));
-  SetStatus(MODULE_PWR_5V,    digitalRead(PO_POWER_5V));
-  SetStatus(MODULE_RF,       (digitalRead(PO_POWER_RF)      &&  digitalRead(PO_POWER_5V)   && SBusStatus()));
-  SetStatus(MODULE_IRIDIUM,   IridiumTest(printRes));
-  SetStatus(MODULE_PWR,       BatteryStatus());
-  SetStatus(MODULE_MOTORS,    MotorStatus());
-  SetStatus(MODULE_MOTOR_ACT, MotorState());
-  SetStatus(MODULE_GNSS,      GnssTest(printRes));
-  SetStatus(MODULE_SD,        SDReaderStatus());
-  SetStatus(MODULE_ACCEL,     AccelTest(printRes));
-  SetStatus(MODULE_DBGCOMM,   DebugCommStatus());
-  SetStatus(MODULE_BACKUPCPU, HeartBeatStatus());
-  SetStatus(MODULE_ESTOP,     EmergencyStopStatus());
-  SetStatus(MODULE_BLACKBOX,  BlackBoxStatus());
-  SetStatus(MODULE_RESERVED,  true);
 }

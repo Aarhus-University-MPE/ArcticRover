@@ -27,18 +27,13 @@ void RunStrategySystemTest() {
   if(runTest){
     DEBUG_PRINTLN("Running Full System Test");
 
-    DEBUG_PRINTLN("  Enabling all systems");
-    DEBUG_PRINTLINE();
-
-    SystemEnable();
     DEBUG_PRINTLINE();
     
     DEBUG_PRINTLN("Testing subsystems");
     DEBUG_PRINTLINE();
 
-    SystemTest(true);
+    SystemTest();
 
-    DEBUG_PRINTLINE();
     DEBUG_PRINTLN("Disabeling all systems");
     DEBUG_PRINTLINE();
 
@@ -76,6 +71,98 @@ void SelectFunctionSystemTest(){
     runTest = true;
     DetachSelectButton();
   }
-
 }
 
+// Enable all systems
+void SystemTestEnable(){
+  
+}
+
+// Run full system check
+void SystemTest(){
+  // SetStatus(MODULE_PWR_MOTOR, digitalRead(PO_POWER_MOTOR_ON)); // Bi-stable relay, so not possible to measure
+  DEBUG_PRINTLN("Running test (1/4) - Power Systems");
+  SystemTestModule(MODULE_PWR_12V, false);
+  SystemTestModule(MODULE_PWR_5V, false);
+  SystemTestModule(MODULE_PWR_MOTOR, false);
+  SystemTestModule(MODULE_PWR, false);
+  DEBUG_PRINTLN("Test (1/4) - Power Systems (Complete)");
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN("Running test (2/4) - Communication");
+  SystemTestModule(MODULE_RF, false);
+  SystemTestModule(MODULE_IRIDIUM, false);
+  SystemTestModule(MODULE_BACKUPCPU, false);
+  DEBUG_PRINTLN("Test (2/4) - Communication (Complete)");
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN("Running test (3/4) - Subsystems");
+  SystemTestModule(MODULE_ACCEL, false);
+  SystemTestModule(MODULE_SD, false);
+  SystemTestModule(MODULE_BLACKBOX, false);
+  DEBUG_PRINTLN("Test (3/4) - Subsystems (Complete)");
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN("Running test (4/4) - Motors");
+  SystemTestModule(MODULE_MOTORS, false);
+  DEBUG_PRINTLN("Test (4/4) - Motors (Complete)");
+  DEBUG_PRINTLINE();
+  
+  SetStatus(MODULE_ESTOP,     EmergencyStopStatus());
+  SetStatus(MODULE_RESERVED,  true);
+}
+
+
+
+void SystemTestModule(byte module, bool disableAfterTest){
+  SystemEnable(module);
+  bool status = false;
+
+  switch (module)
+  {
+  case MODULE_PWR:
+    status = BatteryStatus();
+    break;
+  case MODULE_PWR_12V:
+    status = digitalRead(PO_POWER_12V);
+    break;
+  case MODULE_PWR_5V:
+    status = digitalRead(PO_POWER_5V);
+    break;
+  case MODULE_PWR_MOTOR:
+    status = MotorStatus();
+    break;
+  case MODULE_RF:
+    status = (digitalRead(PO_POWER_RF)      &&  digitalRead(PO_POWER_5V)   && SBusStatus());
+    break;
+  case MODULE_IRIDIUM:
+    status = IridiumTest();
+    break;
+  case MODULE_DBGCOMM:
+    status = DebugCommStatus();
+    break;
+  case MODULE_BACKUPCPU:
+    status = HeartBeatStatus();
+    break;
+  case MODULE_ACCEL:
+    status = GnssTest(true);
+    break;
+  case MODULE_SD:
+    status = SDReaderStatus();
+    break;
+  case MODULE_BLACKBOX:
+    status = BlackBoxStatus();
+    break;
+  case MODULE_MOTORS:
+    DEBUG_PRINTLINE();
+    MotorTest();
+    DEBUG_PRINTLINE();
+    status = digitalRead(PO_MOTOR_EN_LEFT)  && digitalRead(PO_MOTOR_EN_RIGHT);
+    break;
+  default:
+    break;
+  }
+
+  SetStatus(module, status);
+
+  if(disableAfterTest){
+    SystemDisable(module);
+  } 
+}

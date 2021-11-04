@@ -31,13 +31,12 @@ void RunStrategyRemote()
   
   if (systemActive)
   {
+    // System Check
     if(millis() - lastSystemCheck > SYSTEM_CHECK_DT){
       lastSystemCheck = millis();
       systemActive = SystemCheck(MODE_REMOTECONTROL);
     }
-  }
-  if (systemActive)
-  {
+
     //Read RF signal
     sbus.process();
 
@@ -45,6 +44,7 @@ void RunStrategyRemote()
   }
   else
   {
+    // Attempt rebooting systems
     if (millis() - lastSystemReboot > SYSTEM_REBOOT_DT)
     {
       DEBUG_PRINTLN("Rebooting Subsystems");
@@ -72,7 +72,7 @@ void FinishStrategyRemote()
 
   if (GetStatus(MODULE_MOTOR_ACT))
   {
-    TerminateMotors(true);
+    TerminateMotors();
   }
 
   SystemDisable();

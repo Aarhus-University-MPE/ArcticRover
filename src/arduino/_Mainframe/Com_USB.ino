@@ -194,7 +194,6 @@ void parseCommandModule()
     {
     case '\0':
       DEBUG_PRINTLN("ALL SYSTEMS");
-      SystemEnable();
       break;
     default:
       DEBUG_PRINTLN(moduleSlct);

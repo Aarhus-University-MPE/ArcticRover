@@ -7,7 +7,6 @@
 */
 
 #include <SBUS.h>
-#include <limits.h>
 
 SBUS sbus(COM_SERIAL_RF);
 
@@ -30,8 +29,6 @@ bool SBusStatus()
   return (COM_SERIAL_RF);
 }
 
-static int minChannel = INT_MAX;
-static int maxChannel = INT_MIN;
 
 // Scale SBUS channel value from range [0, 256] to [-1, 1]
 float getChannelFloat(int channel)
@@ -43,10 +40,12 @@ float getChannelFloat(int channel)
   return valueFloat;
 }
 
+int minChannel = 0;
+int maxChannel = 128;
 // Scale the S.BUS channel values into the range [0, 256]
 int getChannel(int channel)
 {
-  int value = sbus.getChannel(channel);
+  int value = sbus.getNormalizedChannel(channel);
 
   if (value < minChannel)
   {

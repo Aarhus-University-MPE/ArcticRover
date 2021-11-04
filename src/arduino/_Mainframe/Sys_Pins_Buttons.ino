@@ -46,6 +46,17 @@ void InitAllPins()
 
   pinMode(PA_SENSOR_RELH1, INPUT);
   pinMode(PA_SENSOR_RELH2, INPUT);
+
+  // Motor Control
+  pinMode(PO_MOTOR_EN_LEFT,     OUTPUT);
+  pinMode(PO_MOTOR_EN_RIGHT,    OUTPUT);
+  digitalWrite(PO_MOTOR_EN_LEFT,  false);
+  digitalWrite(PO_MOTOR_EN_RIGHT, false);
+
+  pinMode(PP_MOTOR_THRTL_LEFT,  OUTPUT);
+  pinMode(PP_MOTOR_THRTL_RIGHT, OUTPUT);
+  analogWrite(PP_MOTOR_THRTL_LEFT,  0);
+  analogWrite(PP_MOTOR_THRTL_RIGHT, 0);
 }
 
 // Initialization of the interrupts assigned to buttons
@@ -58,7 +69,6 @@ void InitButtons()
 
   // Assign Emergency Stop button interrupt
   attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
-  SetStatus(MODULE_ESTOP, true);
 
   // Assign heartbeat interrupt
   attachInterrupt(PI_INT_HRTBEAT, HeartBeatInInterrupt, FALLING);
@@ -67,14 +77,7 @@ void InitButtons()
 // Activates Emergency Strategy. Triggered by Estop button interrupt.
 void EstopButtonInterruptHandler()
 {
-  if (millis() - lastMillisEstop > BTN_DEBOUNCE_TIME)
-  {
-    lastMillisEstop = millis();
-    if (mode != MODE_EMERGENCY)
-    {
-      SetMode(MODE_EMERGENCY);
-    }
-  }
+  systemReset();
 }
 
 
@@ -84,7 +87,7 @@ void ModeButtonInterruptHandler()
 {
   if (millis() - lastMillisMode > BTN_DEBOUNCE_TIME_LONG)
   {
-    if(GetStatus(MODE_EMERGENCY)){
+    if(GetStatus(MODULE_ESTOP)){
       DEBUG_PRINTLN("Mode button press, changing mode to Mode Library");
       lastMillisMode = millis();
       SetMode(MODE_MODELIBRARY);    

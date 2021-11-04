@@ -6,13 +6,17 @@
   2021
 */
 
-#include <mcp2515.h> //Library for using CAN Communication
+// Initialize motor power
+bool InitializeMotors() {
 
-bool InitializeMotors(bool RF_Control) {
-  InitializeCanBus();
-  if (RF_Control) InitializeSBUS();
+  if (MotorStatus()) {    
+    analogWrite(PP_MOTOR_THRTL_RIGHT, 0);
+    analogWrite(PP_MOTOR_THRTL_LEFT,  0);
+    
+    delay(10);
 
-  if (MotorStatus()) {
+    digitalWrite(PO_MOTOR_EN_LEFT,  true);
+    digitalWrite(PO_MOTOR_EN_RIGHT, true);
     return true;
   }
   else {
@@ -22,16 +26,25 @@ bool InitializeMotors(bool RF_Control) {
 }
 
 
+// Cut motor Power and disable control outputs
+void TerminateMotors() {
+  digitalWrite(PO_MOTOR_EN_LEFT,  false);
+  digitalWrite(PO_MOTOR_EN_RIGHT, false);
 
-void TerminateMotors(bool RF_Control) {
-  TerminateCanBus();
-  if (RF_Control) TerminateSBUS();
+  analogWrite(PP_MOTOR_THRTL_RIGHT, 0);
+  analogWrite(PP_MOTOR_THRTL_LEFT,  0);
 }
 
 // Moves motors based on direction and speed input within the range of [-1 and 1]
 // -1 full left, 1 full right (dir)
 // -1 full reverse, 1 full forward (speed)
 void MotorMove(float dir, float speed, float enable) {
+  if(!enable){
+    // Stop motors
+    DEBUG_PRINTLN("Motor Halt");
+
+    return;
+  }
   // Move, handle direction
   float steerFactorLeft = 1;
   float steerFactorRight = 1;
@@ -57,7 +70,12 @@ void MotorMove(float dir, float speed, float enable) {
   if (speedRight < 0)  velocityRight = MOTOR_MAX_SPEED_BWD * speedRight;
   else                velocityRight = MOTOR_MAX_SPEED_FWD * speedRight;
 
-  // Send command via CanBUS
+  // Send command
+  DEBUG_PRINT("Motor Move: ");
+  DEBUG_PRINT("Left: ");
+  DEBUG_PRINT(velocityLeft);;
+  DEBUG_PRINT("\t Right: ");
+  DEBUG_PRINTLN(velocityRight);  
 }
 
 bool MotorState(){
@@ -88,4 +106,24 @@ float steerFactor(float dir) {
   else scale = -2.0 * (dir * dir) + 1;
 
   return scale;
+}
+
+// Runs motor test, ramps each motor up and down
+void MotorTest(){
+  if (GetStatus(MODULE_MOTORS)){
+    float speed = 0;
+    for (size_t i = 0; i < 100; i++)
+    {
+      MotorMove(0,speed,true);
+      speed += 0.01;
+      delay(MOTOR_RAMP_TIME);
+    }
+    for (size_t i = 0; i < 100; i++)
+    {
+      MotorMove(0,speed,true);
+      speed -= 0.01;
+      delay(MOTOR_RAMP_TIME);
+    }
+    
+  }
 }

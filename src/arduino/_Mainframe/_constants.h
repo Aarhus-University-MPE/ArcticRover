@@ -55,6 +55,9 @@
 #define BUTTON_DBOUNCE_TIME     200
 #define BTN_DEBOUNCE_TIME_LONG  2500
 
+// Relay
+#define RELAY_SWITCHING_TIME  10
+
 // Sensor and Module status
 #define SYSTEM_CHECK_DT       1000
 #define SYSTEM_REBOOT_DT      5000
@@ -83,7 +86,6 @@ const unsigned long SYSREQ_REMOTE_CONTROL = \
 (1L << MODULE_PWR)             + \
 (1L << MODULE_PWR_MOTOR)       + \
 (1L << MODULE_MOTORS)          + \
-(1L << MODULE_CANBUS)          + \
 (1L << MODULE_RF)              + \
 (1L << MODULE_ESTOP);
 
@@ -91,7 +93,6 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 (1L << MODULE_PWR)           + \
 (1L << MODULE_PWR_MOTOR)     + \
 (1L << MODULE_MOTORS)        + \
-(1L << MODULE_CANBUS)        + \
 (1L << MODULE_IRIDIUM)       + \
 (1L << MODULE_GNSS)          + \
 (1L << MODULE_ACCEL)         + \
@@ -142,10 +143,6 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 
 #define EARTH_RADIUS                    6371000     // (meters)
 
-#define BINARY_CODE_PRECHECK_REQUIRED   B11111100
-#define BINARY_CODE_PRECHECK_OPTIONAL   B00000011
-#define BINARY_CODE_PRECHECK_FULL       B11111111
-
 #define GNSS_QUERY_UPDATE_FREQUENCY     1000        // in milliseconds
 
 
@@ -165,10 +162,13 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
 
+
 #define MOTOR_MAX_SPEED_FWD             10
 #define MOTOR_MAX_SPEED_BWD             5
 #define MOTOR_LEFT                      true
 #define MOTOR_RIGHT                     false
+
+#define MOTOR_RAMP_TIME                 20
 
 
 

@@ -23,12 +23,12 @@
 
 // Heartbeat
 #define PI_BACKUP_HRTBEAT     3
-#define PO_BACKUP_HRTBEAT     7
+#define PO_BACKUP_HRTBEAT     9
 #define PI_INT_HRTBEAT        digitalPinToInterrupt(PI_BACKUP_HRTBEAT)
 
 // Reset pin
 #define PI_BACKUP_RST       RESET
-#define PO_BACKUP_RST       6
+#define PO_BACKUP_RST       8
 
 // Status LED/Sound
 #define PO_LED_STATUS_RED   32
@@ -49,6 +49,12 @@
 #define PA_SENSOR_TEMP1    PIN_A2
 #define PA_SENSOR_TEMP2    PIN_A3
 #define PA_SENSOR_TEMP3    PIN_A4
+
+// Motor Control
+#define PP_MOTOR_THRTL_LEFT   8
+#define PP_MOTOR_THRTL_RIGHT  9
+#define PO_MOTOR_EN_LEFT      10
+#define PO_MOTOR_EN_RIGHT     11
 
 // Communication
 #define PO_SPISS_SDCARD     28

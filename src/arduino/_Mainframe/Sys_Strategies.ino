@@ -37,6 +37,9 @@ void InitStrategyMethods()
 void InitMode()
 {
   mode = EEPROM.read(MEMADDR_LASTMODE);
+  if(!digitalRead(PI_BUTTON_ESTOP)){
+    mode = MODE_EMERGENCY;
+  }
   modeCycle = mode;
   strategyMethods[0][mode]();
 }

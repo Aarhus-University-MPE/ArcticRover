@@ -117,7 +117,7 @@ void SetStatus(bool status)
   {
     SystemStatus[i] = status;
   }
-  SystemStatus[MODULE_ESTOP] = digitalRead(PI_BUTTON_ESTOP); // E_STOP STAUTS FUNCTION()?
+  SystemStatus[MODULE_ESTOP] = true;
   SystemStatus[MODULE_RESERVED] = true;
 }
 

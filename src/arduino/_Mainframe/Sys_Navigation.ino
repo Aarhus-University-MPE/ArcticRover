@@ -109,16 +109,8 @@ bool NavigationPreChecks()
   byte precheckCodeByte = boolarr_to_byte(precheckCode);
 
   // Compare precheck with required
-  precheck = ((precheckCodeByte | BINARY_CODE_PRECHECK_OPTIONAL) == BINARY_CODE_PRECHECK_FULL);
-
-  if (precheck)
-  {
-    DEBUG_PRINTLN("System ready, Precheck Code: " + precheckCodeByte);
-  }
-  else
-  {
-    DEBUG_PRINTLN("System Error, Precheck Code: " + precheckCodeByte);
-  }
+  precheck = SystemCheck(MODE_AUTONOMOUS);
+  
   return precheck;
 }
 
