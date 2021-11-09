@@ -124,7 +124,7 @@ void SystemEnable(int module)
     }
     break;
   case MODULE_BLACKBOX:
-    SystemEnable(MODULE_SD);
+    InitBlackBox();
     DEBUG_PRINT("Blackbox : ");
     if(BlackBoxStatus()){
       DEBUG_PRINTLN("Enabled");
@@ -143,19 +143,13 @@ void SystemEnable(int module)
   delay(10);
 }
 
-// void SystemEnable()
-// {
-//   SystemEnable(MODULE_PWR_MOTOR);
-//   SystemEnable(MODULE_PWR_5V);
-//   SystemEnable(MODULE_PWR_12V);
-//   SystemEnable(MODULE_RF);
-//   SystemEnable(MODULE_IRIDIUM);
-//   SystemEnable(MODULE_GNSS);
-//   SystemEnable(MODULE_ACCEL);
-//   SystemEnable(MODULE_CANBUS);
-//   SystemEnable(MODULE_MOTORS);
-//   SystemEnable(MODULE_SD);
-// }
+// Enables Primary Systems
+void SystemEnablePrimary()
+{
+  SystemEnable(MODULE_SD);
+  SystemEnable(MODULE_GNSS);
+  SystemEnable(MODULE_IRIDIUM);
+}
 
 void SystemEnableMode(int mode){
   switch (mode)
@@ -231,11 +225,12 @@ void SystemDisable(int module)
   SetStatus(module, false);
 }
 
+// Disable all secondary systems
 void SystemDisable()
 {
   SystemDisable(MODULE_RF);
-  SystemDisable(MODULE_IRIDIUM);
-  SystemDisable(MODULE_GNSS);
+  // SystemDisable(MODULE_IRIDIUM); 
+  // SystemDisable(MODULE_GNSS);
   SystemDisable(MODULE_ACCEL);
   SystemDisable(MODULE_MOTORS);
   SystemDisable(MODULE_CANBUS);

@@ -1,6 +1,7 @@
 /*
   GeoRover SBUS communication protocols for RF communication
-
+  using: https://github.com/zendes/SBUS
+  
   Mads Rosenhøj Jepepsen
   Aarhus University
   2021
@@ -27,6 +28,12 @@ void TerminateSBUS()
 bool SBusStatus()
 {
   return (COM_SERIAL_RF);
+}
+
+bool SBusTest(){
+  bool status = sbus.getGoodFrames() > 0;
+
+  return status;
 }
 
 

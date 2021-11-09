@@ -28,9 +28,6 @@ void RunStrategySystemTest() {
     DEBUG_PRINTLN("Running Full System Test");
 
     DEBUG_PRINTLINE();
-    
-    DEBUG_PRINTLN("Testing subsystems");
-    DEBUG_PRINTLINE();
 
     SystemTest();
 
@@ -111,58 +108,68 @@ void SystemTest(){
 
 
 
-void SystemTestModule(byte module, bool disableAfterTest){
+bool SystemTestModule(byte module, bool disableAfterTest){
   SystemEnable(module);
   bool status = false;
 
-  switch (module)
-  {
-  case MODULE_PWR:
-    status = BatteryStatus();
-    break;
-  case MODULE_PWR_12V:
-    status = digitalRead(PO_POWER_12V);
-    break;
-  case MODULE_PWR_5V:
-    status = digitalRead(PO_POWER_5V);
-    break;
-  case MODULE_PWR_MOTOR:
-    status = MotorStatus();
-    break;
-  case MODULE_RF:
-    status = (digitalRead(PO_POWER_RF)      &&  digitalRead(PO_POWER_5V)   && SBusStatus());
-    break;
-  case MODULE_IRIDIUM:
-    status = IridiumTest();
-    break;
-  case MODULE_DBGCOMM:
-    status = DebugCommStatus();
-    break;
-  case MODULE_BACKUPCPU:
-    status = HeartBeatStatus();
-    break;
-  case MODULE_ACCEL:
-    status = GnssTest(true);
-    break;
-  case MODULE_SD:
-    status = SDReaderStatus();
-    break;
-  case MODULE_BLACKBOX:
-    status = BlackBoxStatus();
-    break;
-  case MODULE_MOTORS:
-    DEBUG_PRINTLINE();
-    MotorTest();
-    DEBUG_PRINTLINE();
-    status = digitalRead(PO_MOTOR_EN_LEFT)  && digitalRead(PO_MOTOR_EN_RIGHT);
-    break;
-  default:
-    break;
+  if(GetStatus(module)){
+    switch (module)
+    {
+    case MODULE_PWR:
+      status = BatteryStatus();
+      break;
+    case MODULE_PWR_12V:
+      status = digitalRead(PO_POWER_12V);
+      break;
+    case MODULE_PWR_5V:
+      status = digitalRead(PO_POWER_5V);
+      break;
+    case MODULE_PWR_MOTOR:
+      status = MotorStatus();
+      break;
+    case MODULE_GNSS:
+      status = GnssTest(true);
+      break;
+    case MODULE_RF:
+      status = SBusTest();
+      break;
+    case MODULE_IRIDIUM:
+      status = IridiumTest();
+      break;
+    case MODULE_DBGCOMM:
+      status = DebugCommStatus();
+      break;
+    case MODULE_BACKUPCPU:
+      status = HeartBeatStatus();
+      break;
+    case MODULE_ACCEL:
+      status = AccelTest(true);
+      break;
+    case MODULE_SD:
+      status = SDReaderStatus();
+      break;
+    case MODULE_BLACKBOX:
+      status = BlackBoxStatus();
+      break;
+    case MODULE_MOTORS:
+      DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
+      MotorTest1();
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("Motor Test 2 - Steering");
+      MotorTest2();
+      status = digitalRead(PO_MOTOR_EN_LEFT)  && digitalRead(PO_MOTOR_EN_RIGHT);
+      break;
+    default:
+      break;
+    }
   }
+  
 
   SetStatus(module, status);
 
   if(disableAfterTest){
     SystemDisable(module);
   } 
+
+  return status;
 }

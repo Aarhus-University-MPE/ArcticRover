@@ -38,7 +38,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion   "0.21.121"
+#define SystemVersion   "0.24.118"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001   // 001
@@ -82,6 +82,26 @@
 #define MODULE_ESTOP          15
 #define MODULE_RESERVED       16
 
+#define ModuleToString(m) \
+((m) == 0 ? "Primary Power" : \
+((m) == 1 ? "Secondary Power (5V)" : \
+((m) == 2 ? "Secondary Power (12V)" : \
+((m) == 3 ? "Secondary Power (Motors)" : \
+((m) == 4 ? "Motors" : \
+((m) == 5 ? "Motor Active" : \
+((m) == 6 ? "CAN-bus" : \
+((m) == 7 ? "Long Range Communication (RF)" : \
+((m) == 8 ? "Long Range Communication (Iridium)" : \
+((m) == 9 ? "Global Navigation Satellite System" : \
+((m) == 10 ? "Accelerometer" : \
+((m) == 11 ? "Local Storage" : \
+((m) == 12 ? "Blackbox" : \
+((m) == 13 ? "Debug Comm." : \
+((m) == 14 ? "Backup CPU" : \
+((m) == 15 ? "Emergency Stop" : \
+((m) == 16 ? "Reserved" : \
+"Unknown")))))))))))))))))
+
 const unsigned long SYSREQ_REMOTE_CONTROL = \
 (1L << MODULE_PWR)             + \
 (1L << MODULE_PWR_MOTOR)       + \
@@ -116,8 +136,14 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 #define MODE_REMOTECONTROL  4 // System remotely controllable 
 #define MODE_AUTONOMOUS     5 // Autonomous driving mode
 
-#define ModeToString(m) ((m) == 0 ? "Emergency" : ((m) == 1 ? "Mode Library" : ((m) == 2 ? "Idle" : \
-((m) == 3 ? "System Test" : ((m) == 4 ? "Remote Control" : ((m) == 5 ? "Autonomous" : "Unknown"))))))
+#define ModeToString(m) \
+((m) == 0 ? "Emergency" : \
+((m) == 1 ? "Mode Library" : \
+((m) == 2 ? "Idle" : \
+((m) == 3 ? "System Test" : \
+((m) == 4 ? "Remote Control" : \
+((m) == 5 ? "Autonomous" : \
+"Unknown"))))))
 
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
@@ -163,8 +189,8 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 // ------------------------------------------------------------ //
 
 
-#define MOTOR_MAX_SPEED_FWD             10
-#define MOTOR_MAX_SPEED_BWD             5
+#define MOTOR_MAX_SPEED_FWD             0.5f
+#define MOTOR_MAX_SPEED_BWD             0.5f
 #define MOTOR_LEFT                      true
 #define MOTOR_RIGHT                     false
 
@@ -246,4 +272,6 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 #define CMD_MODULE_OVERRIDE     'O'
 #define CMD_MODULE_STATUS       'S'
 #define CMD_MODULE_RESET        'R'
+#define CMD_MODULE_TEST         'T'
+
 

@@ -242,6 +242,18 @@ void parseCommandModule()
     CountDownPrint();
     systemReset();
     break;
+  case CMD_MODULE_TEST:
+    DEBUG_PRINT("Testing Module: ");
+    DEBUG_PRINTLN(ModuleToString(moduleSlct));
+    DEBUG_PRINTLINE();
+    if(SystemTestModule(moduleSlct, true)){
+      DEBUG_PRINTLN("Test Success");
+    }
+    else{
+      DEBUG_PRINTLN("Test Failed!");
+    } 
+    DEBUG_PRINTLINE();
+    break;
   case '\0':
     break;
   default:

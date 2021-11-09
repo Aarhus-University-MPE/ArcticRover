@@ -33,11 +33,13 @@ void InitAllPins()
   pinMode(PO_POWER_IRIDIUM,   OUTPUT);
 
   digitalWrite(PO_POWER_MOTOR_ON,   LOW);
-  digitalWrite(PO_POWER_MOTOR_OFF,  LOW);
   digitalWrite(PO_POWER_12V,        LOW);
   digitalWrite(PO_POWER_5V,         LOW);
   digitalWrite(PO_POWER_RF,         LOW);
   digitalWrite(PO_POWER_IRIDIUM,    LOW);
+
+  SetStatus(MODULE_PWR_MOTOR,true);
+  SystemDisable(MODULE_PWR_MOTOR);
 
   // Analog Sensors
   pinMode(PA_SENSOR_TEMP1, INPUT);

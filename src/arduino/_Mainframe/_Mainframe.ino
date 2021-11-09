@@ -16,7 +16,6 @@
 // ------------------------------------------------------------ //
 void setup()
 {
-  InitBlackBox();
   SetStatus(false);
 
   // Debug
@@ -26,6 +25,8 @@ void setup()
   InitAllPins();
   InitButtons();
   InitStatusLed();
+  
+  SystemEnablePrimary();
 
   // Strategy initialization
   InitStrategyMethods();

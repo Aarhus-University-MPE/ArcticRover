@@ -24,13 +24,11 @@ bool InitializeGnss()
     myGNSS.setI2COutput(COM_TYPE_UBX);                               //Set the I2C port to output UBX only (turn off NMEA noise)
     myGNSS.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY); //Set measurement rate to 1000ms (1Hz update rate)
   }
-  SetStatus(MODULE_GNSS, status);
   return status;
 }
 
 bool GnssStatus()
 {
-
   return myGNSS.isConnected();
 }
 
@@ -42,6 +40,36 @@ bool GnssTest(bool printRes)
   }
 
   return (digitalRead(PO_POWER_5V) && GnssStatus());
+}
+
+bool GnssTime(){
+  DEBUG_PRINT("Time and Date is: ");
+  if (!myGNSS.getTimeValid() || !myGNSS.getDateValid())
+  {
+    DEBUG_PRINTLN("not valid");
+  }
+  else
+  {
+    DEBUG_PRINTLN("valid");
+    int year = myGNSS.getYear();
+    int month = myGNSS.getMonth();
+    int day = myGNSS.getDay();
+    int hour = myGNSS.getHour();
+    int minute = myGNSS.getMinute();
+
+    DEBUG_PRINT("Current time: ");
+    DEBUG_PRINT(year);
+    DEBUG_PRINT("-");
+    DEBUG_PRINT(month);
+    DEBUG_PRINT("-");
+    DEBUG_PRINT(day);
+    DEBUG_PRINT("-");
+    DEBUG_PRINT(hour);
+    DEBUG_PRINT(":");
+    DEBUG_PRINTLN(minute);
+  }
+
+  return true;
 }
 
 void TerminateGnss()

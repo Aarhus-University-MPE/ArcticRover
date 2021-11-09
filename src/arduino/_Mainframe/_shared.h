@@ -7,6 +7,7 @@
 
 void(* systemReset) (void) = 0;
 
+void SystemEnablePrimary();
 bool MotorState();
 void InitAllPins();
 void InitButtons();
