@@ -6,9 +6,7 @@
   2021
 */
 
-/*
-  Algorithm:
-
+/* Algorithm:  
   1. Check coordinates valid
     1.1 Format correct?
     1.2 Distance < min distance?
@@ -31,16 +29,16 @@
 #include "GeneralFunctions.h"
 
 // Target coordinate (read from EEPROM)
-double lat_target = 0;
-double lon_target = 0;
+long lat_target = 0;
+long lon_target = 0;
 
 // Current coordinate (From GNSS)
-double lat_current = 0;
-double lon_current = 0;
+long lat_current = 0;
+long lon_current = 0;
 
 // Previous coordinate (From GNSS, updated when distance between last point > threshold)
-double lat_previous = 0;
-double lon_previous = 0;
+long lat_previous = 0;
+long lon_previous = 0;
 
 // Validity flags
 bool validCoordinate = false;
@@ -115,10 +113,22 @@ bool NavigationPreChecks()
 }
 
 // Checks if route is present (and loadable)
+// Load route from SD card and compare with EEPROM route
 bool RouteFileCheck()
 {
   bool validity = true;
-  // Load route
+  
+
+  int routeLen = EEPROM_READ_INT(MEMADR_ROUTELEN_START);
+
+  if(routeLen <= 0){
+    // LoadRoute(); // Load route from SD card
+  }
+  for (int i = 0; i < routeLen; i++)
+  {
+    // load value 
+  }
+  
 
   return validity;
 }
@@ -156,7 +166,7 @@ bool CoordinateValiditiy()
 }
 
 // Checks validity of coordinate format (-90 <= lat <= 90 && -180 <= lon <= 180)
-bool CoordinateValidityFormat(double lat, double lon)
+bool CoordinateValidityFormat(long lat, long lon)
 {
   DEBUG_PRINT("Checking format of coordinates... lat: " + String(lat, DEC) + ", lon: " + String(lon, DEC) + " ... ");
   bool validity = true;
@@ -166,13 +176,13 @@ bool CoordinateValidityFormat(double lat, double lon)
     DEBUG_PRINT("coordinates must be non zero ... ");
   }
 
-  if (lat < -90 || lat > 90)
+  if (lat < -MAX_LAT_VALUE || lat > MAX_LAT_VALUE)
   {
     validity = false;
     DEBUG_PRINT("latitude range must be (-90 < lat < 90) ... ");
   }
 
-  if (lon < -180 || lon > 180)
+  if (lon < -MAX_LONG_VALUE || lon > MAX_LONG_VALUE)
   {
     validity = false;
     DEBUG_PRINT("longitude range must be (-180 < lon < 180) ... ");

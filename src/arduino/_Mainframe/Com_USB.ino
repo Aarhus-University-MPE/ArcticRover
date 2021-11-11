@@ -94,6 +94,10 @@ void parseCommand()
     break;
   case CMD_MODULE:
     parseCommandModule();
+    break;
+  case CMD_ROUTE:
+    parseCommandRoute();
+    break;
   case '\0':
     break;
   default:
@@ -260,6 +264,56 @@ void parseCommandModule()
     DEBUG_PRINTLN("NACK");
     break;
   }
+}
+
+void parseCommandRoute(){
+  char tempChars[numChars];
+  char * strtokIndx;
+  strcpy(tempChars, receivedCMD);
+
+  long latInt;
+  long lonInt;
+
+  strtokIndx = strtok(tempChars,",");
+  strtokIndx = strtok(NULL, ",");
+  latInt = atol(strtokIndx);
+  strtokIndx = strtok(NULL, ",");
+  lonInt = atol(strtokIndx);
+
+  switch (receivedCMD[1])
+  {
+  case CMD_ROUTE_SET:
+    // write coordinate
+    DEBUG_PRINT("Lat: ");
+    DEBUG_PRINT(latInt);
+    DEBUG_PRINT(" Lon: ");
+    DEBUG_PRINTLN(lonInt);
+
+    EEPROM_WRITE_LAT((long)(receivedCMD[2] - '0'), latInt);
+    EEPROM_WRITE_LON((long)(receivedCMD[2] - '0'), lonInt);
+    break;
+  case CMD_ROUTE_PRINT:
+    EEPROM_READ_LAT((long)(receivedCMD[2] - '0'), latInt);
+    EEPROM_READ_LON((long)(receivedCMD[2] - '0'), lonInt);
+
+    DEBUG_PRINT("Lat: ");
+    DEBUG_PRINT(latInt);
+    DEBUG_PRINT(" Lon: ");
+    DEBUG_PRINTLN(lonInt);
+    break;
+  default:
+    break;
+  }
+}
+
+
+
+
+void parseData() {      // split the data into its parts
+
+    char * strtokIndx; // this is used by strtok() as an index
+
+    
 }
 
 void CountDownPrint(){

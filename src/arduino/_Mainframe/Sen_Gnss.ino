@@ -39,7 +39,9 @@ bool GnssTest(bool printRes)
     QueryGnss();
   }
 
-  return (digitalRead(PO_POWER_5V) && GnssStatus());
+  bool status = (GnssStatus() && GnssTime()) 
+
+  return status;
 }
 
 bool GnssTime(){
@@ -174,10 +176,10 @@ double CourseTo(double lat1, double long1, double lat2, double long2)
   - d = R ⋅ √x² + y²
   (φ/λ for lati­tude/longi­tude in radians)
 */
-double CoordinateDistance(double lat_A, double lon_A, double lat_B, double lon_B)
+long CoordinateDistance(long lat_A, long lon_A, long lat_B, long lon_B)
 {
-  double x = (lon_B - lon_A) * cos((lat_A + lat_B) / 2);
-  double y = (lat_B - lat_A);
+  long x = (lon_B - lon_A) * cos((lat_A + lat_B) / 2);
+  long y = (lat_B - lat_A);
 
   return EARTH_RADIUS * sqrt(x * x + y * y);
 }
@@ -187,7 +189,7 @@ double CoordinateDistance(double lat_A, double lon_A, double lat_B, double lon_B
   - θ = atan2( sin Δλ ⋅ cos φ2 , cos φ1 ⋅ sin φ2 − sin φ1 ⋅ cos φ2 ⋅ cos Δλ )
   (φ/λ for lati­tude/longi­tude in radians)
 */
-double CoordinateBearing(double lat_A, double lon_A, double lat_B, double lon_B)
+double CoordinateBearing(long lat_A, long lon_A, long lat_B, long lon_B)
 {
   double x = sin(lon_B - lon_A) * cos(lat_B);
   double y = cos(lat_A) * sin(lat_B) - sin(lat_A) * cos(lat_B) * cos(lon_B - lon_A);

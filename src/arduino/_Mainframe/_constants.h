@@ -171,6 +171,9 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 
 #define GNSS_QUERY_UPDATE_FREQUENCY     1000        // in milliseconds
 
+#define MAX_LAT_VALUE                   900000000   // deg * 10^-7
+#define MAX_LONG_VALUE                  1800000000  // deg * 10^-7
+
 
 // ------------------------------------------------------------ //
 //                       REMOTE CONTROL                         //
@@ -227,10 +230,29 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 // ------------------------------------------------------------ //
 //                           EEPROM                             //
 // ------------------------------------------------------------ //
-#define EEPROM_READ_INT(addr) (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00))
+#define EEPROM_READ_INT(addr)   (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00))
+
+// #define EEPROM_READ_FLOAT(addr, flt) (float)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00) + ((EEPROM.read(addr+2) << 16) & 0xFF0000) + ((EEPROM.read(addr+3) << 24) & 0xFF000000))
 
 // Modes
 #define MEMADDR_LASTMODE 0
+
+// Navigation
+#define MEMADDR_HOME_START        1
+#define MEMADDR_HOME_END          MEMADDR_HOME_START + 8
+
+#define MEMADDR_ROUTELEN_START    MEMADDR_HOME_END
+#define MEMADDR_ROUTELEN_END      MEMADDR_ROUTELEN_START + 2   
+
+#define MEMADDR_ROUTE_START       MEMADDR_ROUTELEN_END
+
+// Read write
+#define EEPROM_READ_LAT(index, latInt)    EEPROM.get(MEMADDR_ROUTE_START + index * 8, latInt)
+#define EEPROM_READ_LON(index, lonInt)    EEPROM.get(MEMADDR_ROUTE_START + 4 + index * 8, lonInt)
+
+#define EEPROM_WRITE_LAT(index, latInt)   EEPROM.put(MEMADDR_ROUTE_START + index * 8, latInt)
+#define EEPROM_WRITE_LON(index, lonInt)   EEPROM.put(MEMADDR_ROUTE_START + 4 + index * 8, lonInt)
+
 // motor calibration cache
 
 #define MEMADDR_MOTORCACHE_START 1
@@ -273,5 +295,9 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 #define CMD_MODULE_STATUS       'S'
 #define CMD_MODULE_RESET        'R'
 #define CMD_MODULE_TEST         'T'
+
+#define CMD_ROUTE               'R'
+#define CMD_ROUTE_SET           'S'
+#define CMD_ROUTE_PRINT         'P'
 
 
