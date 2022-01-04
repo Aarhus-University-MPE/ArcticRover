@@ -119,7 +119,7 @@ bool RouteFileCheck()
   bool validity = true;
   
 
-  int routeLen = EEPROM_READ_INT(MEMADR_ROUTELEN_START);
+  int routeLen = EEPROM_READ_INT(MEMADDR_ROUTELEN_START);
 
   if(routeLen <= 0){
     // LoadRoute(); // Load route from SD card

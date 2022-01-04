@@ -39,7 +39,7 @@ bool GnssTest(bool printRes)
     QueryGnss();
   }
 
-  bool status = (GnssStatus() && GnssTime()) 
+  bool status = (GnssStatus() && GnssTime());
 
   return status;
 }
