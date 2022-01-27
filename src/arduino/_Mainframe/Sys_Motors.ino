@@ -57,13 +57,13 @@ void MotorMove(float dir, float speed, float enable) {
   
 
   // Send command
-  analogWrite(PP_MOTOR_THRTL_LEFT,  velocityLeft);
-  analogWrite(PP_MOTOR_THRTL_RIGHT, velocityRight);
+  analogWrite(PP_MOTOR_THRTL_LEFT,  ToAnalogWrite(velocityLeft));
+  analogWrite(PP_MOTOR_THRTL_RIGHT, ToAnalogWrite(velocityRight));
   DEBUG_PRINT("Motor Move: ");
   DEBUG_PRINT("Left: ");
-  DEBUG_PRINT(velocityLeft);;
+  DEBUG_PRINT(ToAnalogWrite(velocityLeft));;
   DEBUG_PRINT("\t Right: ");
-  DEBUG_PRINTLN(velocityRight);  
+  DEBUG_PRINTLN(ToAnalogWrite(velocityRight));  
 }
 
 void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight){
@@ -88,6 +88,9 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
 
   if (speedRight < 0)  velocityRight = MOTOR_MAX_SPEED_BWD * speedRight;
   else                velocityRight = MOTOR_MAX_SPEED_FWD * speedRight;
+
+  if (velocityLeft < MOTOR_MIN_SPEED) velocityLeft = 0;
+  if (velocityRight < MOTOR_MIN_SPEED) velocityRight = 0;
 }
 
 
@@ -138,7 +141,7 @@ void MotorTest1(){
 // Runs motor test, ramps each right, left and back to center
 void MotorTest2(){
   if (GetStatus(MODULE_MOTORS)){
-    float speed = 0.25;
+    float speed = MOTOR_MAX_SPEED_FWD * 0.25;
     float dir = -0.02;
     DEBUG_PRINTLN("Turning Right");
     for (size_t i = 0; i < 51; i++)

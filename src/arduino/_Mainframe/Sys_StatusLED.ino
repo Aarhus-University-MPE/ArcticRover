@@ -4,8 +4,8 @@ unsigned long millisSinceLast;
 
 // Set LED
 void InitStatusLed() {
-  LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_SHORT);
-  LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, 0);
+  // LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_SHORT);
+  // LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, 0);
 }
 
 
@@ -150,4 +150,28 @@ void ModuleStartLed(int module){
 
 void ModuleStopLed(int module){
 
+}
+
+void LedTest(){
+  LedBlinkHalt(BINARY_CODE_LED_RED,LED_BLINK_VERY_LONG,LED_BLINK_LONG);
+  LedBlinkHalt(BINARY_CODE_LED_YEL,LED_BLINK_VERY_LONG,LED_BLINK_LONG);
+  LedBlinkHalt(BINARY_CODE_LED_GRN,LED_BLINK_VERY_LONG,LED_BLINK_LONG);
+  
+  // LedBlinkDoubleShort(BINARY_CODE_LED_RED,BINARY_CODE_LED_RED);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_RED,BINARY_CODE_LED_YEL);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_RED,BINARY_CODE_LED_GRN);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_YEL,BINARY_CODE_LED_RED);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_YEL,BINARY_CODE_LED_YEL);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_YEL,BINARY_CODE_LED_GRN);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_GRN,BINARY_CODE_LED_RED);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_GRN,BINARY_CODE_LED_YEL);
+  // delay(LED_BLINK_SHORT);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_GRN,BINARY_CODE_LED_GRN);
 }

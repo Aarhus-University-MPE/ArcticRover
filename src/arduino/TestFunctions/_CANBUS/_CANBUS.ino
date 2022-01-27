@@ -1,88 +1,45 @@
-/*
-  GeoRover CanBUS communication protocols for openCAN communication (Motors)
-  https://github.com/autowp/arduino-mcp2515
-
-  Mads Rosenhøj Jepepsen
-  Aarhus University
-  2021
-*/
-
+#include <SPI.h>
 #include <mcp2515.h>
 
-struct can_frame canMsgLeft;
-struct can_frame canMsgRight;
 struct can_frame canMsg;
 struct can_frame canTestMsg;
+MCP2515 mcp2515(30);
 
-MCP2515 mcp2515(PO_SPISS_CANBUS);
 
-bool InitializeCanBus() {
-  SPI.begin(); //Begins SPI communication
-  // mcp2515.reset();
-  mcp2515.setBitrate(CANBBUS_SPEED, MCP_8MHZ);
-  mcp2515.setNormalMode();
 
-  canMsgLeft.can_dlc = CANBUS_DATA_LENGTH;
-  canMsgLeft.can_id = CANBUS_ID_MOTOR1;
+void setup() {
+  Serial.begin(115200);
+  SPI.begin();
+  mcp2515.reset();
+  Serial.print("setBitrate: ");
+  Serial.println(mcp2515.setBitrate(CAN_125KBPS, MCP_8MHZ));
 
-  canMsgRight.can_dlc = CANBUS_DATA_LENGTH;
-  canMsgRight.can_id = CANBUS_ID_MOTOR2;
-
-  delay(20);
-
-  return mcp2515.checkReceive();
-
-}
-
-void TerminateCanBus() {
-  SPI.end();
-}
-
-void CanBusProcess(){
-  if (millis() - CanBusTxLast < CANBUS_TX_PERIOD){
-    mcp2515.sendMessage(&canMsgLeft);
-    mcp2515.sendMessage(&canMsgRight);
-    CanBusTxLast = millis();
-  }
   
-  if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
-    status = ParseData();
-  }
-}
-
-bool CanBusTest(){
-  bool status = false;
-  DEBUG_PRINTLN("------- CAN Read ----------");
-  DEBUG_PRINTLN("ID  DLC   DATA");
+  Serial.print("setNormalMode: ");
+  Serial.println(mcp2515.setNormalMode());
 
   canTestMsg.can_id = 0x12;
   canTestMsg.can_dlc = 3;
-  canTestMsg.data[0] = 0;
-  canTestMsg.data[1] = 0;
-  canTestMsg.data[2] = 0;
+  canTestMsg.data[0] = 0xE8;
+  canTestMsg.data[1] = 0x03;
+  canTestMsg.data[2] = 80;
 
   mcp2515.sendMessage(&canTestMsg);
-
-  long CanBusTxLast = millis();
-  long CanBusTestStart = millis();
   
-  while (millis() - CanBusTestStart < COM_TEST_PERIOD)
-  {
-    if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
-      StreamData();
-      status = ParseData();
+  Serial.println("------- CAN Read ----------");
+  Serial.println("ID  DLC   DATA");
+}
 
-      Serial.println();      
-    }
-    else if (millis() - CanBusTxLast < CANBUS_TX_PERIOD)
-    {
-      mcp2515.sendMessage(&canTestMsg);
-      CanBusTxLast = millis();
-    }
+void loop() {
+  if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) { 
+    // StreamData()
+    ParseData();
   }
-
-  return status;
-  
+  else{
+    
+    mcp2515.sendMessage(&canTestMsg);
+    delay(100);
+  }
 }
 
 // Stream all data in raw HEX
@@ -100,9 +57,8 @@ void StreamData(){
   Serial.println();     
 }
 
-bool ParseData(){
+void ParseData(){
   char buffer[100];
-  bool status = false;
 
   if(canMsg.can_id == 0x64){
     int control_value = (int)((canMsg.data[1] << 8) | canMsg.data[0]);
@@ -118,8 +74,6 @@ bool ParseData(){
     Serial.print(rpm);
     Serial.print("\t Temperature: ");
     Serial.println(temperature);
-
-    status = true;
   }
   
   if(canMsg.can_id == 0x65){
@@ -181,29 +135,4 @@ bool ParseData(){
 
     Serial.println();
   }
-
-  return status;
-}
-
-void CanBusTransmit(struct can_frame canMsg) {
-  DEBUG_PRINT("Transmitting CAN Bus message... ");
-
-  mcp2515.sendMessage(&canMsg); //Sends the CAN message
-
-  DEBUG_PRINTLN("CAN Bus message sent.");
-}
-
-
-void PopulateCanMsg(struct can_frame canMsg, unsigned int _data) {
-  uint8_t dataArray[CANBUS_DATA_LENGTH];
-
-  for (int i = 0; i < CANBUS_DATA_LENGTH; i++) {
-    canMsg.data[i] = (_data >> 8 * i) & 0xFF;
-  }
-}
-
-bool InitializeMotor(bool motor){
-  bool status = true;
-
-  return status;
 }

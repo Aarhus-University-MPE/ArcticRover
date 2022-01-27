@@ -32,8 +32,32 @@ bool SBusStatus()
 
 bool SBusTest(){
   bool status = sbus.getGoodFrames() > 0;
+  long SBusTestStart = millis();
+  long SBusRxLast = 0;
+
+  while (millis() - SBusTestStart < COM_TEST_PERIOD)
+  {
+    sbus.process();
+    if (millis() - SBusRxLast > SBUS_RX_PERIOD)
+    {
+      printChannels();
+      SBusRxLast = millis();
+    }
+  }
 
   return status;
+}
+
+void printChannels(){
+  for (int i = 0; i < 8; i++)
+  {
+    DEBUG_PRINT("CH ");
+    DEBUG_PRINT(i);
+    DEBUG_PRINT(": ");
+    DEBUG_PRINT(getChannel(i));
+    DEBUG_PRINT("\t");
+  }
+  DEBUG_PRINTLN();
 }
 
 

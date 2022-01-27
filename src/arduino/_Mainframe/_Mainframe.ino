@@ -31,9 +31,9 @@ void setup()
   // Strategy initialization
   InitStrategyMethods();
   InitMode();
-
+ 
   // Setup finished
-  LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
+  // LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
   
 }
 

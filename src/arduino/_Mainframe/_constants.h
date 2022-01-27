@@ -6,8 +6,6 @@
   2021
 */
 
-// #include <_shared.h>
-
 // ------------------------------------------------------------ //
 //                            DEBUG                             //
 // ------------------------------------------------------------ //
@@ -35,10 +33,12 @@
 #endif
 
 #define ToBoolString(m) ((m) == 1 ? "T" : ((m) == 0 ? "F" : "Unknown"))
+
+#define ToAnalogWrite(x)    ((x) * 255.0f/1.0f)
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion   "0.24.118"
+#define SystemVersion   "0.28.116"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001   // 001
@@ -81,6 +81,7 @@
 #define MODULE_BACKUPCPU      14
 #define MODULE_ESTOP          15
 #define MODULE_RESERVED       16
+#define MODULE_LED            17
 
 #define ModuleToString(m) \
 ((m) == 0 ? "Primary Power" : \
@@ -90,7 +91,7 @@
 ((m) == 4 ? "Motors" : \
 ((m) == 5 ? "Motor Active" : \
 ((m) == 6 ? "CAN-bus" : \
-((m) == 7 ? "Long Range Communication (RF)" : \
+((m) == 7 ? "Short Range Communication (RF)" : \
 ((m) == 8 ? "Long Range Communication (Iridium)" : \
 ((m) == 9 ? "Global Navigation Satellite System" : \
 ((m) == 10 ? "Accelerometer" : \
@@ -192,8 +193,9 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 // ------------------------------------------------------------ //
 
 
-#define MOTOR_MAX_SPEED_FWD             0.5f
-#define MOTOR_MAX_SPEED_BWD             0.5f
+#define MOTOR_MAX_SPEED_FWD             1.0f
+#define MOTOR_MAX_SPEED_BWD             1.0f
+#define MOTOR_MIN_SPEED                 0.05f
 #define MOTOR_LEFT                      true
 #define MOTOR_RIGHT                     false
 
@@ -218,14 +220,18 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 #define IRID_START_TIMEOUT      2     // default value = 240 sec
 #define IRID_ATT_TIMEOUT        2     // default value = 20 sec
 
+// SBUS
+#define SBUS_RX_PERIOD          300
 
 // CAN BUS
-#define CANBUS_ID_MOTOR1        0x036
-#define CANBUS_ID_MOTOR2        0x037
+#define CANBUS_ID_MOTOR1        0x012
+#define CANBUS_ID_MOTOR2        0x022
 
 #define CANBUS_DATA_LENGTH      8
 
-#define CANBBUS_SPEED           CAN_500KBPS
+#define CANBBUS_SPEED           CAN_125KBPS
+#define COM_TEST_PERIOD         5000
+#define CANBUS_TX_PERIOD        100
 
 // ------------------------------------------------------------ //
 //                           EEPROM                             //

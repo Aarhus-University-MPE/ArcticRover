@@ -37,15 +37,7 @@
             "includePath": [
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\mega",
-                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI\\src",
-                "C:\\Program Files (x86)\\Arduino\\libraries\\SD\\src",
-                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\Wire\\src",
-                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\EEPROM\\src",
-                "C:\\Program Files (x86)\\Arduino\\libraries\\arduino-mcp2515-master",
-                "C:\\Program Files (x86)\\Arduino\\libraries\\SparkFun_IridiumSBD_I2C_Arduino_Library\\src",
                 "C:\\Program Files (x86)\\Arduino\\libraries\\SBUS-master",
-                "C:\\Program Files (x86)\\Arduino\\libraries\\SparkFun_MMA8452Q_Arduino_Library\\src",
-                "C:\\Program Files (x86)\\Arduino\\libraries\\SparkFun_u-blox_GNSS_Arduino_Library\\src",
                 "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\lib\\gcc\\avr\\7.3.0\\include",
                 "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\lib\\gcc\\avr\\7.3.0\\include-fixed",
                 "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\avr\\include"

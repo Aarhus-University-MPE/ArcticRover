@@ -133,6 +133,9 @@ bool SystemTestModule(byte module, bool disableAfterTest){
     case MODULE_RF:
       status = SBusTest();
       break;
+    case MODULE_CANBUS:
+      status = CanBusTest();
+      break;
     case MODULE_IRIDIUM:
       status = IridiumTest();
       break;
@@ -158,6 +161,12 @@ bool SystemTestModule(byte module, bool disableAfterTest){
       DEBUG_PRINTLN("Motor Test 2 - Steering");
       MotorTest2();
       status = digitalRead(PO_MOTOR_EN_LEFT)  && digitalRead(PO_MOTOR_EN_RIGHT);
+      break;
+    case MODULE_LED:
+      DEBUG_PRINTLN("LED Cycle Test");
+      LedTest();
+      DEBUG_PRINTLINE();
+      status = true;
       break;
     default:
       break;
