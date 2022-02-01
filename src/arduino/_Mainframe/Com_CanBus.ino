@@ -13,6 +13,8 @@ struct can_frame canMsgLeft;
 struct can_frame canMsgRight;
 struct can_frame canMsg;
 struct can_frame canTestMsg;
+long CanBusTxLast;
+bool canStatusLeft = false;
 
 MCP2515 mcp2515(PO_SPISS_CANBUS);
 
@@ -23,10 +25,10 @@ bool InitializeCanBus() {
   mcp2515.setNormalMode();
 
   canMsgLeft.can_dlc = CANBUS_DATA_LENGTH;
-  canMsgLeft.can_id = CANBUS_ID_MOTOR1;
+  canMsgLeft.can_id = CANBUS_TX_MOTOR_LEFT;
 
   canMsgRight.can_dlc = CANBUS_DATA_LENGTH;
-  canMsgRight.can_id = CANBUS_ID_MOTOR2;
+  canMsgRight.can_id = CANBUS_TX_MOTOR_RIGHT;
 
   delay(20);
 
@@ -39,14 +41,19 @@ void TerminateCanBus() {
 }
 
 void CanBusProcess(){
-  if (millis() - CanBusTxLast < CANBUS_TX_PERIOD){
-    mcp2515.sendMessage(&canMsgLeft);
-    mcp2515.sendMessage(&canMsgRight);
-    CanBusTxLast = millis();
+  if (!canStatusLeft && (millis() - CanBusTxLast < CANBUS_TX_PERIOD)){
+    if(!canStatusLeft){
+      mcp2515.sendMessage(&canMsgLeft);
+    }
+    else{
+      mcp2515.sendMessage(&canMsgRight);
+      canStatusLeft = false;
+      CanBusTxLast = millis();
+    }    
   }
   
   if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
-    status = ParseData();
+    ParseData();
   }
 }
 
@@ -104,6 +111,25 @@ bool ParseData(){
   char buffer[100];
   bool status = false;
 
+  if(canMsg.can_id == CANBUS_RX_MOTOR_LEFT || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 1 \
+  || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 3){
+    canStatusLeft = true;
+    status = true;
+
+    ParseCanMsg(MOTOR_LEFT);
+  }
+
+  else if(canMsg.can_id == CANBUS_RX_MOTOR_RIGHT || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 1 \
+  || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 3){
+
+    status = true;
+    ParseCanMsg(MOTOR_RIGHT);
+  }
+  
+  return status;
+}
+
+void ParseCanMsg(bool motor){
   if(canMsg.can_id == 0x64){
     int control_value = (int)((canMsg.data[1] << 8) | canMsg.data[0]);
     int motor_state = (int)(canMsg.data[3] >> 6); 
@@ -118,8 +144,6 @@ bool ParseData(){
     Serial.print(rpm);
     Serial.print("\t Temperature: ");
     Serial.println(temperature);
-
-    status = true;
   }
   
   if(canMsg.can_id == 0x65){
@@ -182,7 +206,6 @@ bool ParseData(){
     Serial.println();
   }
 
-  return status;
 }
 
 void CanBusTransmit(struct can_frame canMsg) {
@@ -192,7 +215,6 @@ void CanBusTransmit(struct can_frame canMsg) {
 
   DEBUG_PRINTLN("CAN Bus message sent.");
 }
-
 
 void PopulateCanMsg(struct can_frame canMsg, unsigned int _data) {
   uint8_t dataArray[CANBUS_DATA_LENGTH];

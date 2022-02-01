@@ -6,6 +6,11 @@
   2021
 */
 
+#include "_motor.h"
+
+_motor MotorLeft = _motor(MOTOR_LEFT,CANBUS_TX_MOTOR_LEFT,CANBUS_RX_MOTOR_LEFT);
+_motor MotorRight = _motor(MOTOR_RIGHT,CANBUS_TX_MOTOR_RIGHT,CANBUS_RX_MOTOR_RIGHT);
+
 // Initialize motor power
 bool InitializeMotors() {
 

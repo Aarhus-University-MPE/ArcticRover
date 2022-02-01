@@ -224,8 +224,10 @@ const unsigned long SYSREQ_AUTONOMOUS =  \
 #define SBUS_RX_PERIOD          300
 
 // CAN BUS
-#define CANBUS_ID_MOTOR1        0x012
-#define CANBUS_ID_MOTOR2        0x022
+#define CANBUS_TX_MOTOR_LEFT    0x12
+#define CANBUS_RX_MOTOR_LEFT    0x64
+#define CANBUS_TX_MOTOR_RIGHT   0x22
+#define CANBUS_RX_MOTOR_RIGHT   0x74
 
 #define CANBUS_DATA_LENGTH      8
 

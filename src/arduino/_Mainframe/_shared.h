@@ -50,6 +50,7 @@ bool BatteryStatus();
 
 bool MotorState();
 bool MotorStatus();
+void ParseCanMsg(bool motor);
 
 void HeartBeat();
 void HeartBeatOut();
@@ -102,6 +103,7 @@ byte modeCycle;
 byte prevMode;
 
 boolean isModeUpdated = false;
+
 
 
 bool GetStatus(int module)
