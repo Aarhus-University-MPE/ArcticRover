@@ -23,8 +23,8 @@ bool runTest = false;
 void RunStrategySystemTest() {
   // Blink light
   StrategyRunLed(MODE_SYSTEMTEST);
-  
-  if(runTest){
+
+  if (runTest) {
     DEBUG_PRINTLN("Running Full System Test");
 
     DEBUG_PRINTLINE();
@@ -35,10 +35,10 @@ void RunStrategySystemTest() {
     DEBUG_PRINTLINE();
 
     unsigned long testResults = ToLong(SystemStatus);
-    
+
     SystemDisable();
     AttachSelectButton();
-    
+
     DEBUG_PRINTLINE();
     DEBUG_PRINTLN("System Test Complete");
     DEBUG_PRINT("  Results: ");
@@ -46,14 +46,13 @@ void RunStrategySystemTest() {
     DEBUG_PRINTLINE();
     runTest = false;
   }
-  
 }
 
 // End sequence of strategy
 void FinishStrategySystemTest() {
   DEBUG_PRINTLINE();
   DEBUG_PRINTLN("Strategy (System Test): Ending");
-  
+
   DetachSelectButton();
   SystemDisable();
 
@@ -61,9 +60,8 @@ void FinishStrategySystemTest() {
 }
 
 // Selecet button function
-void SelectFunctionSystemTest(){
-  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME)
-  {
+void SelectFunctionSystemTest() {
+  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
     runTest = true;
     DetachSelectButton();
@@ -71,12 +69,11 @@ void SelectFunctionSystemTest(){
 }
 
 // Enable all systems
-void SystemTestEnable(){
-  
+void SystemTestEnable() {
 }
 
 // Run full system check
-void SystemTest(){
+void SystemTest() {
   // SetStatus(MODULE_PWR_MOTOR, digitalRead(PO_POWER_MOTOR_ON)); // Bi-stable relay, so not possible to measure
   DEBUG_PRINTLN("Running test (1/4) - Power Systems");
   SystemTestModule(MODULE_PWR_12V, false);
@@ -101,84 +98,80 @@ void SystemTest(){
   SystemTestModule(MODULE_MOTORS, false);
   DEBUG_PRINTLN("Test (4/4) - Motors (Complete)");
   DEBUG_PRINTLINE();
-  
-  SetStatus(MODULE_ESTOP,     EmergencyStopStatus());
-  SetStatus(MODULE_RESERVED,  true);
+
+  SetStatus(MODULE_ESTOP, EmergencyStopStatus());
+  SetStatus(MODULE_RESERVED, true);
 }
 
-
-
-bool SystemTestModule(byte module, bool disableAfterTest){
+bool SystemTestModule(byte module, bool disableAfterTest) {
   SystemEnable(module);
   bool status = false;
 
-  if(GetStatus(module)){
-    switch (module)
-    {
-    case MODULE_PWR:
-      status = BatteryStatus();
-      break;
-    case MODULE_PWR_12V:
-      status = digitalRead(PO_POWER_12V);
-      break;
-    case MODULE_PWR_5V:
-      status = digitalRead(PO_POWER_5V);
-      break;
-    case MODULE_PWR_MOTOR:
-      status = MotorStatus();
-      break;
-    case MODULE_GNSS:
-      status = GnssTest(true);
-      break;
-    case MODULE_RF:
-      status = SBusTest();
-      break;
-    case MODULE_CANBUS:
-      status = CanBusTest();
-      break;
-    case MODULE_IRIDIUM:
-      status = IridiumTest();
-      break;
-    case MODULE_DBGCOMM:
-      status = DebugCommStatus();
-      break;
-    case MODULE_BACKUPCPU:
-      status = HeartBeatStatus();
-      break;
-    case MODULE_ACCEL:
-      status = AccelTest(true);
-      break;
-    case MODULE_SD:
-      status = SDReaderStatus();
-      break;
-    case MODULE_BLACKBOX:
-      status = BlackBoxStatus();
-      break;
-    case MODULE_MOTORS:
-      DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
-      MotorTest1();
-      DEBUG_PRINTLINE();
-      DEBUG_PRINTLN("Motor Test 2 - Steering");
-      MotorTest2();
-      status = digitalRead(PO_MOTOR_EN_LEFT)  && digitalRead(PO_MOTOR_EN_RIGHT);
-      break;
-    case MODULE_LED:
-      DEBUG_PRINTLN("LED Cycle Test");
-      LedTest();
-      DEBUG_PRINTLINE();
-      status = true;
-      break;
-    default:
-      break;
+  if (GetStatus(module)) {
+    switch (module) {
+      case MODULE_PWR:
+        status = BatteryStatus();
+        break;
+      case MODULE_PWR_12V:
+        status = digitalRead(PO_POWER_12V);
+        break;
+      case MODULE_PWR_5V:
+        status = digitalRead(PO_POWER_5V);
+        break;
+      case MODULE_PWR_MOTOR:
+        status = MotorStatus();
+        break;
+      case MODULE_GNSS:
+        status = GnssTest(true);
+        break;
+      case MODULE_RF:
+        status = SBusTest();
+        break;
+      case MODULE_CANBUS:
+        status = CanBusTest();
+        break;
+      case MODULE_IRIDIUM:
+        status = IridiumTest();
+        break;
+      case MODULE_DBGCOMM:
+        status = DebugCommStatus();
+        break;
+      case MODULE_BACKUPCPU:
+        status = HeartBeatStatus();
+        break;
+      case MODULE_ACCEL:
+        status = AccelTest(true);
+        break;
+      case MODULE_SD:
+        status = SDReaderStatus();
+        break;
+      case MODULE_BLACKBOX:
+        status = BlackBoxStatus();
+        break;
+      case MODULE_MOTORS:
+        DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
+        MotorTest1();
+        DEBUG_PRINTLINE();
+        DEBUG_PRINTLN("Motor Test 2 - Steering");
+        MotorTest2();
+        status = MotorStatus();  // <-- CAN ERROR MSG
+        break;
+      case MODULE_LED:
+        DEBUG_PRINTLN("LED Cycle Test");
+        LedTest();
+        DEBUG_PRINTLINE();
+        status = true;
+        break;
+      default:
+        break;
     }
   }
-  
 
   SetStatus(module, status);
 
-  if(disableAfterTest){
+  if (disableAfterTest) {
     SystemDisable(module);
-  } 
+  }
 
   return status;
 }

@@ -6,51 +6,34 @@
   2021
 */
 
-#include "_motor.h"
-
-_motor MotorLeft = _motor(MOTOR_LEFT,CANBUS_TX_MOTOR_LEFT,CANBUS_RX_MOTOR_LEFT);
-_motor MotorRight = _motor(MOTOR_RIGHT,CANBUS_TX_MOTOR_RIGHT,CANBUS_RX_MOTOR_RIGHT);
 
 // Initialize motor power
 bool InitializeMotors() {
-
-  if (GetStatus(MODULE_PWR_MOTOR)) {    
-    analogWrite(PP_MOTOR_THRTL_RIGHT, 0);
-    analogWrite(PP_MOTOR_THRTL_LEFT,  0);
-    
+  if (GetStatus(MODULE_PWR_MOTOR)) {
     delay(10);
 
-    digitalWrite(PO_MOTOR_EN_LEFT,  true);
-    digitalWrite(PO_MOTOR_EN_RIGHT, true);
+    digitalWrite(PO_MOTOR_EN, true);
     return true;
-  }
-  else {
+  } else {
     DEBUG_PRINTLN("MOTOR POWER ERROR!");
     return false;
   }
-
 }
 
-
-// Cut motor Power and disable control outputs
+// Disable Motor HW Enable
 void TerminateMotors() {
-  digitalWrite(PO_MOTOR_EN_LEFT,  false);
-  digitalWrite(PO_MOTOR_EN_RIGHT, false);
-
-  analogWrite(PP_MOTOR_THRTL_RIGHT, 0);
-  analogWrite(PP_MOTOR_THRTL_LEFT,  0);
+  digitalWrite(PO_MOTOR_EN, false);
 }
 
 // Moves motors based on direction and speed input within the range of [-1 and 1]
 // -1 full left, 1 full right (dir)
 // -1 full reverse, 1 full forward (speed)
 void MotorMove(float dir, float speed, float enable) {
-  if(!enable){
+  if (!enable) {
     // Stop motors
     SystemDisable(MODULE_MOTORS);
     return;
-  }
-  else{
+  } else {
     // Start motors
     SystemEnable(MODULE_MOTORS);
   }
@@ -59,24 +42,24 @@ void MotorMove(float dir, float speed, float enable) {
   float velocityRight;
 
   SpeedCalculation(dir, speed, velocityLeft, velocityRight);
-  
 
   // Send command
-  analogWrite(PP_MOTOR_THRTL_LEFT,  ToAnalogWrite(velocityLeft));
-  analogWrite(PP_MOTOR_THRTL_RIGHT, ToAnalogWrite(velocityRight));
+  motorLeft.Update(velocityLeft);
+  motorRight.Update(velocityRight);
+
   DEBUG_PRINT("Motor Move: ");
   DEBUG_PRINT("Left: ");
-  DEBUG_PRINT(ToAnalogWrite(velocityLeft));;
+  DEBUG_PRINT(velocityLeft);
   DEBUG_PRINT("\t Right: ");
-  DEBUG_PRINTLN(ToAnalogWrite(velocityRight));  
+  DEBUG_PRINTLN(velocityRight);
 }
 
-void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight){
+void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight) {
   // Move, handle direction
   float steerFactorLeft = 1;
   float steerFactorRight = 1;
 
-  // turn right, right wheel moves slower 
+  // turn right, right wheel moves slower
   if (dir > 0) {
     steerFactorRight = steerFactor(dir);
   }
@@ -88,17 +71,19 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
   float speedLeft = speed * steerFactorLeft;
   float speedRight = speed * steerFactorRight;
 
-  if (speedLeft < 0) velocityLeft = MOTOR_MAX_SPEED_BWD * speedLeft;
-  else              velocityLeft = MOTOR_MAX_SPEED_FWD * speedLeft;
+  if (speedLeft < 0)
+    velocityLeft = MOTOR_MAX_SPEED_BWD * speedLeft;
+  else
+    velocityLeft = MOTOR_MAX_SPEED_FWD * speedLeft;
 
-  if (speedRight < 0)  velocityRight = MOTOR_MAX_SPEED_BWD * speedRight;
-  else                velocityRight = MOTOR_MAX_SPEED_FWD * speedRight;
+  if (speedRight < 0)
+    velocityRight = MOTOR_MAX_SPEED_BWD * speedRight;
+  else
+    velocityRight = MOTOR_MAX_SPEED_FWD * speedRight;
 
-  if (velocityLeft < MOTOR_MIN_SPEED) velocityLeft = 0;
-  if (velocityRight < MOTOR_MIN_SPEED) velocityRight = 0;
+  if (abs(velocityLeft) < MIN_VELOCITY) velocityLeft = 0;
+  if (abs(velocityRight) < MIN_VELOCITY) velocityRight = 0;
 }
-
-
 
 bool MotorStatus() {
   bool valid = true;
@@ -112,61 +97,58 @@ bool MotorStatus() {
 float steerFactor(float dir) {
   float scale;
 
-  if (dir >= 1) scale = -1;
+  if (dir >= 1)
+    scale = -1;
 
-  else if (dir <= -1) scale = -1;
+  else if (dir <= -1)
+    scale = -1;
 
-  else scale = -2.0 * (dir * dir) + 1;
+  else
+    scale = -2.0 * (dir * dir) + 1;
 
   return scale;
 }
 
 // Runs motor test, ramps each motor up and down
-void MotorTest1(){
-  if (GetStatus(MODULE_MOTORS)){
+void MotorTest1() {
+  if (GetStatus(MODULE_MOTORS)) {
     float speed = -0.01;
     DEBUG_PRINTLN("Ramping up");
-    for (size_t i = 0; i < 101; i++)
-    {
+    for (size_t i = 0; i < 101; i++) {
       speed += 0.01;
-      MotorMove(0,speed,true);
+      MotorMove(0, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
     DEBUG_PRINTLN("Ramping down");
-    for (size_t i = 0; i < 100; i++)
-    {
+    for (size_t i = 0; i < 100; i++) {
       speed -= 0.01;
-      MotorMove(0,speed,true);
+      MotorMove(0, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
-    
   }
 }
 
 // Runs motor test, ramps each right, left and back to center
-void MotorTest2(){
-  if (GetStatus(MODULE_MOTORS)){
+void MotorTest2() {
+  if (GetStatus(MODULE_MOTORS)) {
     float speed = MOTOR_MAX_SPEED_FWD * 0.25;
     float dir = -0.02;
     DEBUG_PRINTLN("Turning Right");
-    for (size_t i = 0; i < 51; i++)
-    {
+    for (size_t i = 0; i < 51; i++) {
       dir += 0.02;
-      MotorMove(dir,speed,true);
+      MotorMove(dir, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
     DEBUG_PRINTLN("Turning Left");
-    for (size_t i = 0; i < 101; i++)
-    {
+    for (size_t i = 0; i < 101; i++) {
       dir -= 0.02;
-      MotorMove(dir,speed,true);
+      MotorMove(dir, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
     DEBUG_PRINTLN("Centering");
-    for (size_t i = 0; i < 51; i++)
-    {
+    for (size_t i = 0; i < 51; i++) {
       dir += 0.02;
-      MotorMove(dir,speed,true);
+      MotorMove(dir, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
   }

@@ -4,8 +4,7 @@
 */
 
 // Start sequence of strategy
-void StartStrategyRemote()
-{
+void StartStrategyRemote() {
   DEBUG_PRINTLINE();
   DEBUG_PRINTLN("Strategy (Remote): Starting");
   StrategyStartLed(MODE_REMOTECONTROL);
@@ -25,14 +24,12 @@ void StartStrategyRemote()
 
 unsigned long lastSystemCheck = 9999999;
 // Main sequence of strategy
-void RunStrategyRemote()
-{
+void RunStrategyRemote() {
   static bool systemActive = true;
-  
-  if (systemActive)
-  {
+
+  if (systemActive) {
     // System Check
-    if(millis() - lastSystemCheck > SYSTEM_CHECK_DT){
+    if (millis() - lastSystemCheck > SYSTEM_CHECK_DT) {
       lastSystemCheck = millis();
       systemActive = SystemCheck(MODE_REMOTECONTROL);
     }
@@ -41,37 +38,31 @@ void RunStrategyRemote()
     sbus.process();
 
     ProcessIncomingCommands();
-  }
-  else
-  {
+  } else {
     // Attempt rebooting systems
-    if (millis() - lastSystemReboot > SYSTEM_REBOOT_DT)
-    {
+    if (millis() - lastSystemReboot > SYSTEM_REBOOT_DT) {
       DEBUG_PRINTLN("Rebooting Subsystems");
       lastSystemReboot = millis();
       SystemEnableMode(MODE_REMOTECONTROL);
 
       systemActive = SystemCheck(MODE_REMOTECONTROL);
-      if(systemActive){
+      if (systemActive) {
         lastSystemReboot = 0;
         DEBUG_PRINTLN("Systems Restored");
       }
       DEBUG_PRINTLINE();
-      
     }
   }
 }
 
 // End sequence of strategy
-void FinishStrategyRemote()
-{
+void FinishStrategyRemote() {
   DEBUG_PRINTLINE();
   DEBUG_PRINTLN("Strategy (Remote): Ending");
 
   DetachSelectButton();
 
-  if (GetStatus(MODULE_MOTOR_ACT))
-  {
+  if (GetStatus(MODULE_MOTOR_ACT)) {
     TerminateMotors();
   }
 
@@ -83,10 +74,8 @@ void FinishStrategyRemote()
 
 // Read RF signal and move motors accordingly
 unsigned long lastProcessCommand = 0;
-void ProcessIncomingCommands()
-{
-  if (millis() - lastProcessCommand > REMOTE_PROCESS_DT)
-  {
+void ProcessIncomingCommands() {
+  if (millis() - lastProcessCommand > REMOTE_PROCESS_DT) {
     lastProcessCommand = millis();
     float throttle = getChannelFloat(REMOTE_CHANNEL_THROTTLE);
     float steer = getChannelFloat(REMOTE_CHANNEL_STEER);
@@ -98,20 +87,15 @@ void ProcessIncomingCommands()
 }
 
 // Select button function
-void SelectFunctionRemote()
-{
-  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME)
-  {
+void SelectFunctionRemote() {
+  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
 
-    if (!GetStatus(MODULE_MOTORS))
-    {
+    if (!GetStatus(MODULE_MOTORS)) {
       SystemEnable(MODULE_MOTORS);
 
       LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
-    }
-    else
-    {
+    } else {
       SystemDisable(MODULE_MOTORS);
 
       LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, 0);

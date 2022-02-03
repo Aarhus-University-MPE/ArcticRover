@@ -1,3 +1,4 @@
+
 /*
   GeoRover Navigation Stack
 
@@ -25,8 +26,8 @@
 
 */
 
-#include "Math.h"
 #include "GeneralFunctions.h"
+#include "Math.h"
 
 // Target coordinate (read from EEPROM)
 long lat_target = 0;
@@ -47,12 +48,9 @@ bool gnssFixValid = false;
 bool navigationPreCheck = false;
 bool navigationFlag = false;
 
-bool Navigate()
-{
-  if (navigationPreCheck)
-  {
-    if (NavigationCheck())
-    {
+bool Navigate() {
+  if (navigationPreCheck) {
+    if (NavigationCheck()) {
       // Calculate distance from current pos to target pos
 
       // Check distance -> increment if < min accept
@@ -68,8 +66,7 @@ bool Navigate()
   Check system status while navigation is running.
   GNSS status, Accelerometer output (tilt?), Battery Status
 */
-bool NavigationCheck()
-{
+bool NavigationCheck() {
   DEBUG_PRINT("Running Navigation Checks... ");
   // GNSS valid?
 
@@ -84,58 +81,52 @@ bool NavigationCheck()
   Checks to run before starting autonomous navigation
   System checks, Route Checks, Sensor Checks
 */
-bool NavigationPreChecks()
-{
+bool NavigationPreChecks() {
   DEBUG_PRINT("Running Navigation Prechecks...");
   bool precheck = true;
   bool precheckCode[8];
 
   // System Checks
-  precheckCode[0] = VoltageCheck(); // Required
+  precheckCode[0] = VoltageCheck();  // Required
   precheckCode[1] = MotorStatus();   // Required
-  precheckCode[2] = GPSValid();     // Required
+  precheckCode[2] = GPSValid();      // Required
 
   // Route Checks
-  precheckCode[3] = RouteFileCheck();   // Required
-  precheckCode[4] = RouteFormatCheck(); // Required
-  precheckCode[5] = RouteRangeCheck();  // Required
+  precheckCode[3] = RouteFileCheck();    // Required
+  precheckCode[4] = RouteFormatCheck();  // Required
+  precheckCode[5] = RouteRangeCheck();   // Required
 
   // Sensor Checks
-  precheckCode[6] = TempSensorCheck();  // Optional
-  precheckCode[7] = AccelSensorCheck(); // Optional
+  precheckCode[6] = TempSensorCheck();   // Optional
+  precheckCode[7] = AccelSensorCheck();  // Optional
 
   byte precheckCodeByte = boolarr_to_byte(precheckCode);
 
   // Compare precheck with required
   precheck = SystemCheck(MODE_AUTONOMOUS);
-  
+
   return precheck;
 }
 
 // Checks if route is present (and loadable)
 // Load route from SD card and compare with EEPROM route
-bool RouteFileCheck()
-{
+bool RouteFileCheck() {
   bool validity = true;
-  
 
   int routeLen = EEPROM_READ_INT(MEMADDR_ROUTELEN_START);
 
-  if(routeLen <= 0){
+  if (routeLen <= 0) {
     // LoadRoute(); // Load route from SD card
   }
-  for (int i = 0; i < routeLen; i++)
-  {
-    // load value 
+  for (int i = 0; i < routeLen; i++) {
+    // load value
   }
-  
 
   return validity;
 }
 
 // Check if route is valid (format)
-bool RouteFormatCheck()
-{
+bool RouteFormatCheck() {
   bool validity = true;
   // Check route Validity
   // Check formats
@@ -144,8 +135,7 @@ bool RouteFormatCheck()
 }
 
 // Check if route is valid (distance to waypoints < max)
-bool RouteRangeCheck()
-{
+bool RouteRangeCheck() {
   bool validity = true;
   // Check route Validity
   // Calculate distances from current position to start point and between points.
@@ -154,46 +144,37 @@ bool RouteRangeCheck()
 }
 
 // Check validity of coordinate in the form of format and range of coordinate
-bool CoordinateValiditiy()
-{
+bool CoordinateValiditiy() {
   DEBUG_PRINTLN("Checking validity of coordinates ... ");
   bool validity = true;
-  if (!CoordinateValidityFormat(lat_target, lon_target))
-  {
+  if (!CoordinateValidityFormat(lat_target, lon_target)) {
     DEBUG_PRINT("Coordinate format NOT valid!");
   }
   return (CoordinateValidityFormat(lat_target, lon_target) && CoordinateValidityRange());
 }
 
 // Checks validity of coordinate format (-90 <= lat <= 90 && -180 <= lon <= 180)
-bool CoordinateValidityFormat(long lat, long lon)
-{
+bool CoordinateValidityFormat(long lat, long lon) {
   DEBUG_PRINT("Checking format of coordinates... lat: " + String(lat, DEC) + ", lon: " + String(lon, DEC) + " ... ");
   bool validity = true;
-  if (lat == 0 || lon == 0)
-  {
+  if (lat == 0 || lon == 0) {
     validity = false;
     DEBUG_PRINT("coordinates must be non zero ... ");
   }
 
-  if (lat < -MAX_LAT_VALUE || lat > MAX_LAT_VALUE)
-  {
+  if (lat < -MAX_LAT_VALUE || lat > MAX_LAT_VALUE) {
     validity = false;
     DEBUG_PRINT("latitude range must be (-90 < lat < 90) ... ");
   }
 
-  if (lon < -MAX_LONG_VALUE || lon > MAX_LONG_VALUE)
-  {
+  if (lon < -MAX_LONG_VALUE || lon > MAX_LONG_VALUE) {
     validity = false;
     DEBUG_PRINT("longitude range must be (-180 < lon < 180) ... ");
   }
 
-  if (validity)
-  {
+  if (validity) {
     DEBUG_PRINTLN("Coordinates format valid!");
-  }
-  else
-  {
+  } else {
     DEBUG_PRINTLN("Coordinates format NOT valid!");
   }
 
@@ -201,17 +182,13 @@ bool CoordinateValidityFormat(long lat, long lon)
 }
 
 // Checks if distance to coordinate is below maximum range (MAX_DISTANCE_VALID_WAYPOINT)
-bool CoordinateValidityRange()
-{
+bool CoordinateValidityRange() {
   DEBUG_PRINT("Checking range between current and target coordinates... lat_current: " + String(lat_current, DEC) + ", lon_current: " + String(lon_current, DEC) + " ... " + "lat_target: " + String(lat_target, DEC) + ", lon_target: " + String(lon_target, DEC) + " ... ");
   bool validity = (CoordinateDistance(lat_current, lon_current, lat_target, lon_target) <= MAX_DISTANCE_VALID_WAYPOINT);
 
-  if (validity)
-  {
+  if (validity) {
     DEBUG_PRINTLN("Coordinates within maximum range!");
-  }
-  else
-  {
+  } else {
     DEBUG_PRINTLN("Range NOT within maximum range!");
   }
   return validity;

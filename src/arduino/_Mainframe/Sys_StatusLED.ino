@@ -8,7 +8,6 @@ void InitStatusLed() {
   // LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, 0);
 }
 
-
 // Sets current LED Status from byte
 // [100] [RED - -]
 // [010] [- YEL -]
@@ -87,38 +86,8 @@ void LedBlinkTripleShort(byte color1, byte color2, byte color3) {
   LedBlinkHalt(color3, LED_BLINK_VERY_SHORT);
 }
 
-
-void StrategyStartLed(int strategy){
-  switch (strategy)
-  {
-  case MODE_EMERGENCY:
-    LedBlinkDoubleShort(BINARY_CODE_LED_RED);
-    break;
-  case MODE_IDLE:
-    LedBlinkDoubleShort(BINARY_CODE_LED_YEL);
-    break;
-  case MODE_SYSTEMTEST:
-    LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
-    break;
-  case MODE_REMOTECONTROL:
-    LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL);
-    break;
-  case MODE_AUTONOMOUS:
-    LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
-    break;
-  default:
-    break;
-  }
-}
-
-void StrategyRunLed(int strategy){
-  // Blink light of current mode
-  if (millis() - lastMillistModeBlink > LED_BLINK_VERY_LONG)
-  {
-    lastMillistModeBlink = millis();
-    
-    switch (strategy)
-    {
+void StrategyStartLed(int strategy) {
+  switch (strategy) {
     case MODE_EMERGENCY:
       LedBlinkDoubleShort(BINARY_CODE_LED_RED);
       break;
@@ -136,27 +105,50 @@ void StrategyRunLed(int strategy){
       break;
     default:
       break;
+  }
+}
+
+void StrategyRunLed(int strategy) {
+  // Blink light of current mode
+  if (millis() - lastMillistModeBlink > LED_BLINK_VERY_LONG) {
+    lastMillistModeBlink = millis();
+
+    switch (strategy) {
+      case MODE_EMERGENCY:
+        LedBlinkDoubleShort(BINARY_CODE_LED_RED);
+        break;
+      case MODE_IDLE:
+        LedBlinkDoubleShort(BINARY_CODE_LED_YEL);
+        break;
+      case MODE_SYSTEMTEST:
+        LedBlinkDoubleShort(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN);
+        break;
+      case MODE_REMOTECONTROL:
+        LedBlinkDoubleShort(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL);
+        break;
+      case MODE_AUTONOMOUS:
+        LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
+        break;
+      default:
+        break;
     }
   }
 }
 
-void StrategyFinishLed(int strategy){
-  
+void StrategyFinishLed(int strategy) {
 }
 
-void ModuleStartLed(int module){
-  
+void ModuleStartLed(int module) {
 }
 
-void ModuleStopLed(int module){
-
+void ModuleStopLed(int module) {
 }
 
-void LedTest(){
-  LedBlinkHalt(BINARY_CODE_LED_RED,LED_BLINK_VERY_LONG,LED_BLINK_LONG);
-  LedBlinkHalt(BINARY_CODE_LED_YEL,LED_BLINK_VERY_LONG,LED_BLINK_LONG);
-  LedBlinkHalt(BINARY_CODE_LED_GRN,LED_BLINK_VERY_LONG,LED_BLINK_LONG);
-  
+void LedTest() {
+  LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
+  LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
+  LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
+
   // LedBlinkDoubleShort(BINARY_CODE_LED_RED,BINARY_CODE_LED_RED);
   // delay(LED_BLINK_SHORT);
   // LedBlinkDoubleShort(BINARY_CODE_LED_RED,BINARY_CODE_LED_YEL);

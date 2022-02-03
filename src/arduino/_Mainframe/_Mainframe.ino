@@ -7,15 +7,13 @@
 */
 
 #include "_constants.h"
-#include "_pinout.h"
 #include "_shared.h"
-
+#include "_pinout.h"
 
 // ------------------------------------------------------------ //
 //                            SETUP                             //
 // ------------------------------------------------------------ //
-void setup()
-{
+void setup() {
   SetStatus(false);
 
   // Debug
@@ -25,23 +23,21 @@ void setup()
   InitAllPins();
   InitButtons();
   InitStatusLed();
-  
+
   SystemEnablePrimary();
 
   // Strategy initialization
   InitStrategyMethods();
   InitMode();
- 
+
   // Setup finished
   // LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
-  
 }
 
 // ------------------------------------------------------------ //
 //                          MAIN LOOP                           //
 // ------------------------------------------------------------ //
-void loop()
-{
+void loop() {
   ModeUpdater();
 
   strategyMethods[1][mode]();

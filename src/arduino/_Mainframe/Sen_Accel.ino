@@ -14,7 +14,6 @@
 
 MMA8452Q accel;
 
-
 bool InitializeAccel() {
   bool status = accel.begin();  // scale +/- 2g and frequency of 1.56 Hz
   accel.setScale(SCALE_2G);
@@ -23,10 +22,9 @@ bool InitializeAccel() {
   return status;
 }
 
-void TerminateAccel(){
+void TerminateAccel() {
   //
 }
-
 
 // accel.read() will update two sets of variables.
 // * int's x, y, and z will store the signed 12-bit values
@@ -35,20 +33,19 @@ void TerminateAccel(){
 //   acceleration from those 12-bit values. These variables
 //   are in units of g's.
 void ReadAccel() {
-  if (accel.available())
-  {
+  if (accel.available()) {
     accel.read();
   }
 }
 
-bool AccelStatus(){
+bool AccelStatus() {
   return GetStatus(MODULE_ACCEL);
 }
 
-bool AccelTest(bool printRes){
-  if(printRes){
-    DEBUG_PRINT("Accelerometer: "); 
-    if(AccelStatus()){
+bool AccelTest(bool printRes) {
+  if (printRes) {
+    DEBUG_PRINT("Accelerometer: ");
+    if (AccelStatus()) {
       ReadAccel();
       DEBUG_PRINT("x: ");
       DEBUG_PRINT((float)accel.cx);
@@ -56,11 +53,10 @@ bool AccelTest(bool printRes){
       DEBUG_PRINT((float)accel.cy);
       DEBUG_PRINT("\t z: ");
       DEBUG_PRINTLN((float)accel.cz);
-    }
-    else{
+    } else {
       DEBUG_PRINTLN("ERROR");
     }
   }
-  
+
   return AccelStatus();
 }

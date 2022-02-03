@@ -1,12 +1,11 @@
 
 // Set pointers for strategies methods
-void InitStrategyMethods()
-{
+void InitStrategyMethods() {
   strategyMethods[0][MODE_EMERGENCY] = StartStrategyEmergency;
   strategyMethods[1][MODE_EMERGENCY] = RunStrategyEmergency;
   strategyMethods[2][MODE_EMERGENCY] = FinishStrategyEmergency;
   strategyMethods[3][MODE_EMERGENCY] = SelectFunctionEmergency;
-  
+
   strategyMethods[0][MODE_MODELIBRARY] = StartStrategyModeLibrary;
   strategyMethods[1][MODE_MODELIBRARY] = RunStrategyModeLibrary;
   strategyMethods[2][MODE_MODELIBRARY] = FinishStrategyModeLibrary;
@@ -34,10 +33,9 @@ void InitStrategyMethods()
 }
 
 // Set last mode from EEPROM
-void InitMode()
-{
+void InitMode() {
   mode = EEPROM.read(MEMADDR_LASTMODE);
-  if(!digitalRead(PI_BUTTON_ESTOP)){
+  if (!digitalRead(PI_BUTTON_ESTOP)) {
     mode = MODE_EMERGENCY;
   }
   modeCycle = mode;
@@ -45,43 +43,38 @@ void InitMode()
 }
 
 // Checks if mode is updated and finish exit operations before changing
-void ModeUpdater()
-{
-  while (isModeUpdated)
-  {
+void ModeUpdater() {
+  while (isModeUpdated) {
     isModeUpdated = false;
     // Skip finish operation when going to emergency
-    if (mode != MODE_EMERGENCY)
-    {
-      strategyMethods[2][prevMode](); // finish any operations for prevMode here
+    if (mode != MODE_EMERGENCY) {
+      strategyMethods[2][prevMode]();  // finish any operations for prevMode here
     }
 
-    strategyMethods[0][mode](); // init new strategy according to the new mode value
+    strategyMethods[0][mode]();  // init new strategy according to the new mode value
   }
 }
 
-void AttachSelectButton(){
+void AttachSelectButton() {
   lastMillisSelect = millis();
   attachInterrupt(PI_INT_BUTTON_SELECT, strategyMethods[3][mode], FALLING);
 }
 
-void AttachModeButton(){
+void AttachModeButton() {
   attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
 }
 
-void DetachModeButton(){
+void DetachModeButton() {
   detachInterrupt(PI_INT_BUTTON_MODE);
 }
 
-void DetachSelectButton(){
+void DetachSelectButton() {
   detachInterrupt(PI_INT_BUTTON_SELECT);
 }
 
 // Tries set the mode and isModeUpdated flag
-boolean SetMode(byte newMode)
-{
-  if (newMode < MODES_MAX)
-  {
+boolean SetMode(byte newMode) {
+  if (newMode < MODES_MAX) {
     prevMode = mode;
     modeCycle = mode;
     mode = newMode;

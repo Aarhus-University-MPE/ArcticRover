@@ -10,8 +10,7 @@
 unsigned long lastMillisResetBackup = 0;
 
 // Runs heartbeat in and out
-void HeartBeat()
-{
+void HeartBeat() {
   HeartBeatOut();
   HeartBeatIn();
 
@@ -19,11 +18,9 @@ void HeartBeat()
 }
 
 unsigned long lastMillisHeartbeatOut = 0;
-// Sends heartbeat with with frequency of HRTBEAT_FRQ 
-void HeartBeatOut()
-{
-  if (millis() - lastMillisHeartbeatOut > HRTBEAT_DT_OUT)
-  {
+// Sends heartbeat with with frequency of HRTBEAT_FRQ
+void HeartBeatOut() {
+  if (millis() - lastMillisHeartbeatOut > HRTBEAT_DT_OUT) {
     lastMillisHeartbeatOut = millis();
     digitalWrite(PO_BACKUP_HRTBEAT, true);
     delay(20);
@@ -31,7 +28,7 @@ void HeartBeatOut()
   }
 }
 
-bool HeartBeatStatus(){
+bool HeartBeatStatus() {
   HeartBeatIn();
 
   return GetStatus(MODULE_BACKUPCPU);
@@ -40,24 +37,18 @@ bool HeartBeatStatus(){
 unsigned long lastMillisHeartbeatIn = 0;
 // Checks if time since last heartbeat received > maximum treshold
 // Will attempt to reset backup CPU with a frequency of  BACKUP_RST_FRQ
-void HeartBeatIn()
-{
-  if (millis() - lastMillisHeartbeatIn > HRTBEAT_TRESHOLD)
-  {
+void HeartBeatIn() {
+  if (millis() - lastMillisHeartbeatIn > HRTBEAT_TRESHOLD) {
     // Reset backup CPU
-    if (GetStatus(MODULE_BACKUPCPU))
-    {
+    if (GetStatus(MODULE_BACKUPCPU)) {
       lastMillisResetBackup = millis();
       SetStatus(MODULE_BACKUPCPU, false);
       DEBUG_PRINTLINE();
       DEBUG_PRINTLN("Error: Backup CPU offline, attempting to Reset.");
       ResetBackupCPU();
       DEBUG_PRINTLINE();
-    }
-    else
-    {
-      if (millis() - lastMillisResetBackup > BACKUP_RST_DT)
-      {
+    } else {
+      if (millis() - lastMillisResetBackup > BACKUP_RST_DT) {
         lastMillisResetBackup = millis();
         DEBUG_PRINTLINE();
         DEBUG_PRINTLN("Error: Backup CPU offline, attempting to Reset.");
@@ -70,12 +61,10 @@ void HeartBeatIn()
 
 unsigned long lastMillisHeartbeatInt = 0;
 // Resets timer since last heartbeat received
-void HeartBeatInInterrupt()
-{
-  if(millis() - lastMillisHeartbeatInt > BTN_DEBOUNCE_TIME){
+void HeartBeatInInterrupt() {
+  if (millis() - lastMillisHeartbeatInt > BTN_DEBOUNCE_TIME) {
     lastMillisHeartbeatIn = millis();
-    if (!GetStatus(MODULE_BACKUPCPU))
-    {
+    if (!GetStatus(MODULE_BACKUPCPU)) {
       SetStatus(MODULE_BACKUPCPU, true);
       DEBUG_PRINTLINE();
       DEBUG_PRINTLN("Backup CPU online");
@@ -85,17 +74,15 @@ void HeartBeatInInterrupt()
 }
 
 // Attempt to reset backup CPU
-void ResetBackupCPU()
-{
+void ResetBackupCPU() {
   digitalWrite(PO_BACKUP_RST, true);
   delay(20);
   digitalWrite(PO_BACKUP_RST, false);
 }
 
 unsigned long lastMillisHeartbeatBlackbox = 0;
-void HeartbeatBlackBox(){
-  if (millis() - lastMillisHeartbeatBlackbox > HRTBEAT_DT_LOG)
-  {
+void HeartbeatBlackBox() {
+  if (millis() - lastMillisHeartbeatBlackbox > HRTBEAT_DT_LOG) {
     lastMillisHeartbeatBlackbox = millis();
     DEBUG_PRINTLINE();
     DEBUG_PRINT("Heartbeat System Status: ");

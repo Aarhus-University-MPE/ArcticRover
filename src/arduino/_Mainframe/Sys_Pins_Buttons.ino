@@ -1,7 +1,5 @@
 // Sets pinmode of all pins and writes initial values for outputs
-void InitAllPins()
-{
-
+void InitAllPins() {
   // External Inputs
   pinMode(PI_BUTTON_ESTOP, INPUT_PULLUP);
   pinMode(PI_BUTTON_MODE, INPUT_PULLUP);
@@ -25,80 +23,58 @@ void InitAllPins()
   digitalWrite(PO_LED_STATUS_GRN, LOW);
 
   // Power control (Relays)
-  pinMode(PO_POWER_MOTOR_ON,  OUTPUT);
-  pinMode(PO_POWER_MOTOR_OFF, OUTPUT);
-  pinMode(PO_POWER_12V,       OUTPUT);
-  pinMode(PO_POWER_5V,        OUTPUT);
-  pinMode(PO_POWER_RF,        OUTPUT);
-  pinMode(PO_POWER_IRIDIUM,   OUTPUT);
+  pinMode(PO_POWER_MOTOR, OUTPUT);
+  pinMode(PO_POWER_24V, OUTPUT);
+  pinMode(PO_POWER_12V, OUTPUT);
+  pinMode(PO_POWER_5V, OUTPUT);
+  pinMode(PO_POWER_RF, OUTPUT);
+  pinMode(PO_POWER_IRIDIUM, OUTPUT);
+  pinMode(PO_POWER_HEATING, OUTPUT);
 
-  digitalWrite(PO_POWER_MOTOR_ON,   LOW);
-  digitalWrite(PO_POWER_12V,        LOW);
-  digitalWrite(PO_POWER_5V,         LOW);
-  digitalWrite(PO_POWER_RF,         LOW);
-  digitalWrite(PO_POWER_IRIDIUM,    LOW);
-
-  SetStatus(MODULE_PWR_MOTOR,true);
-  SystemDisable(MODULE_PWR_MOTOR);
+  digitalWrite(PO_POWER_MOTOR, LOW);
+  digitalWrite(PO_POWER_24V, LOW);
+  digitalWrite(PO_POWER_12V, LOW);
+  digitalWrite(PO_POWER_5V, LOW);
+  digitalWrite(PO_POWER_RF, LOW);
+  digitalWrite(PO_POWER_IRIDIUM, LOW);
+  digitalWrite(PO_POWER_HEATING, LOW);
 
   // Analog Sensors
   pinMode(PA_SENSOR_TEMP1, INPUT);
   pinMode(PA_SENSOR_TEMP2, INPUT);
   pinMode(PA_SENSOR_TEMP3, INPUT);
-
-  pinMode(PA_SENSOR_RELH1, INPUT);
-  pinMode(PA_SENSOR_RELH2, INPUT);
+  pinMode(PA_SENSOR_BATT, INPUT);
 
   // Motor Control
-  pinMode(PO_MOTOR_EN_LEFT,     OUTPUT);
-  pinMode(PO_MOTOR_EN_RIGHT,    OUTPUT);
-  digitalWrite(PO_MOTOR_EN_LEFT,  false);
-  digitalWrite(PO_MOTOR_EN_RIGHT, false);
-
-  pinMode(PP_MOTOR_THRTL_LEFT,  OUTPUT);
-  pinMode(PP_MOTOR_THRTL_RIGHT, OUTPUT);
-  analogWrite(PP_MOTOR_THRTL_LEFT,  0);
-  analogWrite(PP_MOTOR_THRTL_RIGHT, 0);
+  pinMode(PO_MOTOR_EN, OUTPUT);
+  digitalWrite(PO_MOTOR_EN, false);
 }
 
 // Initialization of the interrupts assigned to buttons
-void InitButtons()
-{
+void InitButtons() {
   lastMillisMode = millis();
   lastMillisEstop = millis();
-  // Assign mode button interrupt
-  attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
 
-  // Assign Emergency Stop button interrupt
-  attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
-
-  // Assign heartbeat interrupt
-  attachInterrupt(PI_INT_HRTBEAT, HeartBeatInInterrupt, FALLING);
+  // Input interrupts
+  attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);    // Mode Button
+  attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);  // E-STOP
+  attachInterrupt(PI_INT_HRTBEAT, HeartBeatInInterrupt, FALLING);              // Backup-CPU Heartbeat
 }
 
-// Activates Emergency Strategy. Triggered by Estop button interrupt.
-void EstopButtonInterruptHandler()
-{
+// Activates Emergency Strategy. Triggered by Estop button interrupt
+void EstopButtonInterruptHandler() {
   systemReset();
 }
 
-
-
-// Loops through button-selectable modes. Triggered by button interrupt
-void ModeButtonInterruptHandler()
-{
-  if (millis() - lastMillisMode > BTN_DEBOUNCE_TIME_LONG)
-  {
-    if(GetStatus(MODULE_ESTOP)){
+// Mode Library activated by mode button interrupt
+void ModeButtonInterruptHandler() {
+  if (millis() - lastMillisMode > BTN_DEBOUNCE_TIME_LONG) {
+    if (GetStatus(MODULE_ESTOP)) {
       DEBUG_PRINTLN("Mode button press, changing mode to Mode Library");
       lastMillisMode = millis();
-      SetMode(MODE_MODELIBRARY);    
-    }
-    else
-    {
+      SetMode(MODE_MODELIBRARY);
+    } else {
       DEBUG_PRINTLN("Emergency Mode, Input Blocked!");
     }
-    
-    
   }
 }

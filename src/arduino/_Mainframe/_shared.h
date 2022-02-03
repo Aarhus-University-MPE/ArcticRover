@@ -1,11 +1,13 @@
 // Function Prototypes
 #include <Arduino.h>
-#include <SPI.h>
-#include <SD.h>
-#include <Wire.h>
 #include <EEPROM.h>
+#include <SD.h>
+#include <SPI.h>
+#include <Wire.h>
 
-void(* systemReset) (void) = 0;
+#include "_motor.h"
+
+void (*systemReset)(void) = 0;
 
 void SystemEnablePrimary();
 bool MotorState();
@@ -45,7 +47,7 @@ bool InitializeSBUS();
 void TerminateSBUS();
 bool SBusStatus();
 
-bool VoltageCheck();  
+bool VoltageCheck();
 bool BatteryStatus();
 
 bool MotorState();
@@ -66,6 +68,7 @@ void LedBlinkDoubleShort(byte color);
 void LedBlinkDoubleShort(byte color1, byte color2);
 void LedBlinkTripleShort(byte color);
 void LedBlinkTripleShort(byte color1, byte color2, byte color3);
+
 
 typedef void (*functionPtr)();
 
@@ -92,11 +95,11 @@ void ModeButtonInterruptHandler();
 void InitBluetooth(unsigned long baudRate = 115200);
 
 //current and previous mode (strategy)
-unsigned long lastMillisSelect = 0;
-unsigned long lastMillisMode = 0;
-unsigned long lastMillisEstop = 0;
+unsigned long lastMillisSelect     = 0;
+unsigned long lastMillisMode       = 0;
+unsigned long lastMillisEstop      = 0;
 unsigned long lastMillistModeBlink = 0;
-unsigned long lastSystemReboot = 9999999;
+unsigned long lastSystemReboot     = 9999999;
 
 byte mode;
 byte modeCycle;
@@ -104,33 +107,24 @@ byte prevMode;
 
 boolean isModeUpdated = false;
 
-
-
-bool GetStatus(int module)
-{
+bool GetStatus(int module) {
   return SystemStatus[module];
 }
-void SetStatus(int module, bool status)
-{
+void SetStatus(int module, bool status) {
   SystemStatus[module] = status;
 }
-void SetStatus(bool status)
-{
-  for (int i = 0; i < MODULE_COUNT; i++)
-  {
+void SetStatus(bool status) {
+  for (int i = 0; i < MODULE_COUNT; i++) {
     SystemStatus[i] = status;
   }
-  SystemStatus[MODULE_ESTOP] = true;
+  SystemStatus[MODULE_ESTOP]    = true;
   SystemStatus[MODULE_RESERVED] = true;
 }
-
 
 // Run full system check
 void GetStatus(bool printRes);
 
 bool AccelTest(bool printRes);
-
-
 
 void BlackBoxAppendln();
 void BlackBoxAppendln(String blackBoxInput);
@@ -142,8 +136,6 @@ void BlackBoxAppendln(long int blackBoxInput);
 void BlackBoxAppendln(unsigned long blackBoxInput);
 void BlackBoxAppendln(long int blackBoxInput, int Type);
 
-
-
 void BlackBoxAppend(String blackBoxInput);
 void BlackBoxAppend(byte blackBoxInput);
 void BlackBoxAppend(bool blackBoxInput);
@@ -152,3 +144,8 @@ void BlackBoxAppend(int blackBoxInput);
 void BlackBoxAppend(long int blackBoxInput);
 void BlackBoxAppend(unsigned long blackBoxInput);
 void BlackBoxAppend(long int blackBoxInput, int Type);
+
+
+
+_motor motorLeft = _motor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);
+_motor motorRight = _motor(CANBUS_TX_MOTOR_RIGHT, CANBUS_RX_MOTOR_RIGHT);

@@ -7,8 +7,7 @@
 */
 
 // Checks voltage levels above critical values?
-bool VoltageCheck()
-{
+bool VoltageCheck() {
   bool valid = true;
 
   // Measure voltage, above critical?
@@ -17,12 +16,10 @@ bool VoltageCheck()
   return valid;
 }
 
-bool BatteryStatus()
-{
+bool BatteryStatus() {
   bool valid = true;
 
   valid = true;
 
   return valid;
 }
-

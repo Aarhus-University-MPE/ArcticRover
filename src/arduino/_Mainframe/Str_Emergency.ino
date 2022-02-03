@@ -52,19 +52,16 @@ void FinishStrategyEmergency() {
   attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
   SetStatus(MODULE_ESTOP, true);
 
-
   DEBUG_PRINTLN("Strategy (Emergency): Finished");
 
   // Disable light
 }
 
-
-void SelectFunctionEmergency(){
-
+void SelectFunctionEmergency() {
 }
 
 // Returns TRUE if Emergency Button is NOT pressed
-// Returns FALSE if Emergency Button IS pressed 
-bool EmergencyStopStatus(){
+// Returns FALSE if Emergency Button IS pressed
+bool EmergencyStopStatus() {
   return digitalRead(PI_BUTTON_ESTOP);
 }

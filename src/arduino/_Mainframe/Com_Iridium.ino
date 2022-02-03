@@ -13,16 +13,16 @@ IridiumSBD modem(COM_SERIAL_IRID);
 uint8_t buffer[200];
 int signalQuality = -1;
 
-bool InitializeIridium(){
+bool InitializeIridium() {
   COM_SERIAL_IRID.begin(IRID_BAUDRATE);
-  
+
   modem.adjustStartupTimeout(IRID_START_TIMEOUT);
   modem.adjustATTimeout(IRID_ATT_TIMEOUT);
 
   bool status = !(modem.begin() != ISBD_SUCCESS);
-  if(status){
-    int err = modem.getSignalQuality(signalQuality);  
-    if(err != 0){
+  if (status) {
+    int err = modem.getSignalQuality(signalQuality);
+    if (err != 0) {
       status = false;
     }
   }
@@ -30,28 +30,27 @@ bool InitializeIridium(){
   return status;
 }
 
-void TerminateIridium(){
+void TerminateIridium() {
   COM_SERIAL_IRID.end();
 }
 
-bool IridiumStatus(){
+bool IridiumStatus() {
   return modem.isConnected();
 }
 
-bool IridiumTest(){
+bool IridiumTest() {
   bool status = true;
 
-  int err = modem.getSignalQuality(signalQuality);  
-  if(err != 0){
-      status = false;
+  int err = modem.getSignalQuality(signalQuality);
+  if (err != 0) {
+    status = false;
   }
 
   DEBUG_PRINT("Iridium: ");
-  if(status){
+  if (status) {
     DEBUG_PRINT("Signal Quality: ");
     DEBUG_PRINTLN(signalQuality);
-  }
-  else{
+  } else {
     DEBUG_PRINTLN("ERROR");
   }
   return status;

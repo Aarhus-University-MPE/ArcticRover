@@ -12,34 +12,29 @@
 SBUS sbus(COM_SERIAL_RF);
 
 // Initialize RF Communication
-bool InitializeSBUS()
-{
+bool InitializeSBUS() {
   sbus.begin(false);
   bool status = COM_SERIAL_RF;
 
   return status;
 }
 
-void TerminateSBUS()
-{
+void TerminateSBUS() {
   COM_SERIAL_RF.end();
 }
 
-bool SBusStatus()
-{
+bool SBusStatus() {
   return (COM_SERIAL_RF);
 }
 
-bool SBusTest(){
+bool SBusTest() {
   bool status = sbus.getGoodFrames() > 0;
   long SBusTestStart = millis();
   long SBusRxLast = 0;
 
-  while (millis() - SBusTestStart < COM_TEST_PERIOD)
-  {
+  while (millis() - SBusTestStart < COM_TEST_PERIOD) {
     sbus.process();
-    if (millis() - SBusRxLast > SBUS_RX_PERIOD)
-    {
+    if (millis() - SBusRxLast > SBUS_RX_PERIOD) {
       printChannels();
       SBusRxLast = millis();
     }
@@ -48,9 +43,8 @@ bool SBusTest(){
   return status;
 }
 
-void printChannels(){
-  for (int i = 0; i < 8; i++)
-  {
+void printChannels() {
+  for (int i = 0; i < 8; i++) {
     DEBUG_PRINT("CH ");
     DEBUG_PRINT(i);
     DEBUG_PRINT(": ");
@@ -60,10 +54,8 @@ void printChannels(){
   DEBUG_PRINTLN();
 }
 
-
 // Scale SBUS channel value from range [0, 256] to [-1, 1]
-float getChannelFloat(int channel)
-{
+float getChannelFloat(int channel) {
   int value = getChannel(channel);
 
   float valueFloat = value / 128.0 - 1;
@@ -74,16 +66,13 @@ float getChannelFloat(int channel)
 int minChannel = 0;
 int maxChannel = 128;
 // Scale the S.BUS channel values into the range [0, 256]
-int getChannel(int channel)
-{
+int getChannel(int channel) {
   int value = sbus.getNormalizedChannel(channel);
 
-  if (value < minChannel)
-  {
+  if (value < minChannel) {
     minChannel = value;
   }
-  if (value > maxChannel)
-  {
+  if (value > maxChannel) {
     maxChannel = value;
   }
 

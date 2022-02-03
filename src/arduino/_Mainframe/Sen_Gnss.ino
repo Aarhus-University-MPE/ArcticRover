@@ -14,28 +14,23 @@
 
 SFE_UBLOX_GNSS myGNSS;
 
-long lastTimeGNSS = 0; // Local timer, limits I2C traffic to u-blox module.
+long lastTimeGNSS = 0;  // Local timer, limits I2C traffic to u-blox module.
 
-bool InitializeGnss()
-{
+bool InitializeGnss() {
   bool status = myGNSS.begin();
-  if (status)
-  {
-    myGNSS.setI2COutput(COM_TYPE_UBX);                               //Set the I2C port to output UBX only (turn off NMEA noise)
-    myGNSS.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY); //Set measurement rate to 1000ms (1Hz update rate)
+  if (status) {
+    myGNSS.setI2COutput(COM_TYPE_UBX);                                //Set the I2C port to output UBX only (turn off NMEA noise)
+    myGNSS.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY);  //Set measurement rate to 1000ms (1Hz update rate)
   }
   return status;
 }
 
-bool GnssStatus()
-{
+bool GnssStatus() {
   return myGNSS.isConnected();
 }
 
-bool GnssTest(bool printRes)
-{
-  if (printRes)
-  {
+bool GnssTest(bool printRes) {
+  if (printRes) {
     QueryGnss();
   }
 
@@ -44,14 +39,11 @@ bool GnssTest(bool printRes)
   return status;
 }
 
-bool GnssTime(){
+bool GnssTime() {
   DEBUG_PRINT("Time and Date is: ");
-  if (!myGNSS.getTimeValid() || !myGNSS.getDateValid())
-  {
+  if (!myGNSS.getTimeValid() || !myGNSS.getDateValid()) {
     DEBUG_PRINTLN("not valid");
-  }
-  else
-  {
+  } else {
     DEBUG_PRINTLN("valid");
     int year = myGNSS.getYear();
     int month = myGNSS.getMonth();
@@ -74,30 +66,25 @@ bool GnssTime(){
   return true;
 }
 
-void TerminateGnss()
-{
+void TerminateGnss() {
   myGNSS.end();
 }
 
 // Gets positional data in Latitude in degrees * 10^-7
-long GnssGetLat()
-{
+long GnssGetLat() {
   return myGNSS.getLatitude();
 }
 
 // Gets positional data in Longitude in degrees * 10^-7
-long GnssGetLong()
-{
+long GnssGetLong() {
   return myGNSS.getLongitude();
 }
 
 // Query module and prints Lat, Long, Alt, Acc
-void QueryGnss()
-{
+void QueryGnss() {
   DEBUG_PRINT("GNSS: ");
 
-  if (GnssStatus())
-  {
+  if (GnssStatus()) {
     long latitude = myGNSS.getLatitude();
     DEBUG_PRINT(F("Lat: "));
     DEBUG_PRINT(latitude);
@@ -117,15 +104,12 @@ void QueryGnss()
     DEBUG_PRINT(F("\t3D Positional Accuracy: "));
     DEBUG_PRINT(accuracy);
     DEBUG_PRINTLN(F(" (mm)"));
-  }
-  else
-  {
+  } else {
     DEBUG_PRINTLN("ERROR");
   }
 }
 
-double DistanceBetween(double lat1, double long1, double lat2, double long2)
-{
+double DistanceBetween(double lat1, double long1, double lat2, double long2) {
   // returns distance in meters between two positions, both specified
   // as signed decimal-degrees latitude and longitude. Uses great-circle
   // distance computation for hypothetical sphere of radius 6372795 meters.
@@ -149,8 +133,7 @@ double DistanceBetween(double lat1, double long1, double lat2, double long2)
   return delta * 6372795;
 }
 
-double CourseTo(double lat1, double long1, double lat2, double long2)
-{
+double CourseTo(double lat1, double long1, double lat2, double long2) {
   // returns course in degrees (North=0, West=270) from position 1 to position 2,
   // both specified as signed decimal-degrees latitude and longitude.
   // Because Earth is no exact sphere, calculated course may be off by a tiny fraction.
@@ -162,8 +145,7 @@ double CourseTo(double lat1, double long1, double lat2, double long2)
   double a2 = sin(lat1) * cos(lat2) * cos(dlon);
   a2 = cos(lat1) * sin(lat2) - a2;
   a2 = atan2(a1, a2);
-  if (a2 < 0.0)
-  {
+  if (a2 < 0.0) {
     a2 += TWO_PI;
   }
   return degrees(a2);
@@ -176,8 +158,7 @@ double CourseTo(double lat1, double long1, double lat2, double long2)
   - d = R ⋅ √x² + y²
   (φ/λ for lati­tude/longi­tude in radians)
 */
-long CoordinateDistance(long lat_A, long lon_A, long lat_B, long lon_B)
-{
+long CoordinateDistance(long lat_A, long lon_A, long lat_B, long lon_B) {
   long x = (lon_B - lon_A) * cos((lat_A + lat_B) / 2);
   long y = (lat_B - lat_A);
 
@@ -189,8 +170,7 @@ long CoordinateDistance(long lat_A, long lon_A, long lat_B, long lon_B)
   - θ = atan2( sin Δλ ⋅ cos φ2 , cos φ1 ⋅ sin φ2 − sin φ1 ⋅ cos φ2 ⋅ cos Δλ )
   (φ/λ for lati­tude/longi­tude in radians)
 */
-double CoordinateBearing(long lat_A, long lon_A, long lat_B, long lon_B)
-{
+double CoordinateBearing(long lat_A, long lon_A, long lat_B, long lon_B) {
   double x = sin(lon_B - lon_A) * cos(lat_B);
   double y = cos(lat_A) * sin(lat_B) - sin(lat_A) * cos(lat_B) * cos(lon_B - lon_A);
 

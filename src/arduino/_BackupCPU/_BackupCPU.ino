@@ -1,3 +1,4 @@
+
 /*
   GeoRover Backup CPU
   Detects and sends heartbeat to mainframe of GeoRover.
@@ -9,14 +10,13 @@
 */
 
 #include "_constants.h"
-#include "_shared.h"
 #include "_pinout.h"
+#include "_shared.h"
 
 // ------------------------------------------------------------ //
 //                            SETUP                             //
 // ------------------------------------------------------------ //
-void setup()
-{
+void setup() {
   // Debug
   DBG_ONLY(initializeDebugComm());
   DEBUG_PRINT("Debug mode. Entered Setup... ");
@@ -33,8 +33,7 @@ void setup()
 // ------------------------------------------------------------ //
 //                          MAIN LOOP                           //
 // ------------------------------------------------------------ //
-void loop()
-{
+void loop() {
   HeartBeat();
 
   recvWithStartEndMarkers();

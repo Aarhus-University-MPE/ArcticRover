@@ -18,7 +18,6 @@ void StartStrategyExample() {
 // Main sequence of strategy
 void RunStrategyExample() {
   // Blink light
-
 }
 
 // End sequence of strategy

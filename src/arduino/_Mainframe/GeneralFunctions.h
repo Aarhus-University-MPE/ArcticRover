@@ -18,7 +18,6 @@ byte boolarr_to_byte(bool bol[]) {
 
 void appendCharArray(char* s, char c) {
   int len = strlen(s);
-
   s[len] = c;
   s[len + 1] = '\0';
 }
@@ -26,17 +25,13 @@ void appendCharArray(char* s, char c) {
 void appendCsv(char* s) {
   int len = strlen(s);
   char end[5] = ".csv";
-  for (int i = 0; i < 5; i++)
-  {
+  for (int i = 0; i < 5; i++) {
     s[len + i] = end[i];
   }
-
   s[len + 5] = '\0';
 }
 
-
-unsigned long ToLong(bool b[])
-{
+unsigned long ToLong(bool b[]) {
   unsigned long c = 0;
   for (int i = 0; i < MODULE_COUNT; ++i) {
     if (b[i])

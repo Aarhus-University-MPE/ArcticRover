@@ -1,7 +1,8 @@
+
 // Function Prototypes
 #include <Arduino.h>
-#include <Wire.h>
 #include <EEPROM.h>
+#include <Wire.h>
 
 void InitAllPins();
 void InitButtons();
@@ -22,11 +23,9 @@ bool SystemStatus[MODULE_COUNT];
 bool GetStatus(int module);
 void SetStatus(int module, bool status);
 
-bool GetStatus(int module)
-{
+bool GetStatus(int module) {
   return SystemStatus[module];
 }
-void SetStatus(int module, bool status)
-{
+void SetStatus(int module, bool status) {
   SystemStatus[module] = status;
 }

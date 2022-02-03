@@ -34,6 +34,6 @@ void FinishStrategyIdle() {
 }
 
 // Selecet button function
-void SelectFunctionIdle(){
+void SelectFunctionIdle() {
   StrategyStartLed(MODE_IDLE);
 }

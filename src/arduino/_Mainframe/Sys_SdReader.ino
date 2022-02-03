@@ -7,11 +7,9 @@
 */
 
 // Initialize SD card reader module.
-bool InitializeSDReader()
-{
+bool InitializeSDReader() {
   bool status = false;
-  if (!SDReaderStatus())
-  {
+  if (!SDReaderStatus()) {
     status = SD.begin(PO_SPISS_SDCARD);
 
     SetStatus(MODULE_SD, status);
@@ -19,22 +17,18 @@ bool InitializeSDReader()
   return status;
 }
 
-void TerminateSDReader()
-{
+void TerminateSDReader() {
   SD.end();
   SetStatus(MODULE_SD, false);
 }
 // Checks status of SD reader
-bool SDReaderStatus()
-{
+bool SDReaderStatus() {
   return GetStatus(MODULE_SD);
 }
 
 // Query all files on SD card and print to serial prompt
-void SDQuery()
-{
-  if (SDReaderStatus())
-  {
+void SDQuery() {
+  if (SDReaderStatus()) {
     File file = SD.open("/");
     file.rewindDirectory();
     DBG_ONLY(printFiles(file));
@@ -45,21 +39,17 @@ void SDQuery()
 }
 
 // Print all files to serial port
-void printFiles(File dir)
-{
+void printFiles(File dir) {
   DEBUG_PRINTLN("Files in system:");
-  while (true)
-  {
+  while (true) {
     File entry = dir.openNextFile();
-    if (!entry)
-    {
+    if (!entry) {
       File entry = dir.openNextFile();
       if (!entry)
         break;
     }
 
-    if (!entry.isDirectory())
-    {
+    if (!entry.isDirectory()) {
       DEBUG_PRINT(entry.name());
       DEBUG_PRINT("\t\t");
       DEBUG_PRINTLN2(entry.size(), DEC);
@@ -70,77 +60,59 @@ void printFiles(File dir)
 }
 
 // Print size of file on SD card
-void SDSize(char fileName[])
-{
-  if (SDReaderStatus())
-  {
+void SDSize(char fileName[]) {
+  if (SDReaderStatus()) {
     appendCsv(fileName);
     DEBUG_PRINT("Opening file: ");
     DEBUG_PRINTLN(fileName);
     File file = SD.open(fileName);
-    if (file)
-    {
+    if (file) {
       DEBUG_PRINTLN("File size: " + (String)file.size() + " bytes");
       file.close();
-    }
-    else
+    } else
       DEBUG_PRINTLN("File not found!");
   }
 }
 
 // Print all data from datafile to serial port
-void SDDownload(char fileName[])
-{
-  if (SDReaderStatus())
-  {
+void SDDownload(char fileName[]) {
+  if (SDReaderStatus()) {
     appendCsv(fileName);
     DEBUG_PRINTLN("Downloading file: ");
     DEBUG_PRINTLN(fileName);
     File file = SD.open(fileName);
-    if (file)
-    {
-      while (file.available())
-      {
+    if (file) {
+      while (file.available()) {
         DEBUG_WRITE(file.read());
       }
       file.close();
       DEBUG_PRINTLN("End of File");
-    }
-    else
+    } else
       DEBUG_PRINTLN("File not found!");
   }
 }
 
 // Delete file on SD card
-void SDDelete(char fileName[])
-{
-  if (SDReaderStatus())
-  {
+void SDDelete(char fileName[]) {
+  if (SDReaderStatus()) {
     appendCsv(fileName);
-    if (SD.exists(fileName))
-    {
+    if (SD.exists(fileName)) {
       DEBUG_PRINTLN("Deleting file: ");
       DEBUG_PRINTLN(fileName);
       SD.remove(fileName);
       DEBUG_PRINTLN("File Removed");
-    }
-    else
+    } else
       DEBUG_PRINTLN("File not found");
   }
 }
 
 // Create empty file on SD card
-void SDCreate(char fileName[])
-{
-  if (SDReaderStatus())
-  {
+void SDCreate(char fileName[]) {
+  if (SDReaderStatus()) {
     appendCsv(fileName);
-    if (SD.exists(fileName))
-    {
+    if (SD.exists(fileName)) {
       DEBUG_PRINTLN("File already exist");
-    }
-    else
-    {
+    } else {
       DEBUG_PRINTLN("Creating file: ");
       DEBUG_PRINTLN(fileName);
       File file = SD.open(fileName, FILE_WRITE);

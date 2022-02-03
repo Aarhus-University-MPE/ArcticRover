@@ -9,10 +9,9 @@ void StartStrategyAutonomous() {
   delay(20);
 
   // Enable Primary System Power
-  digitalWrite(PO_POWER_5V,    HIGH);
+  digitalWrite(PO_POWER_5V, HIGH);
   delay(20);
 
-  
   // Initialize Long Range Communication
   SystemEnable(MODULE_IRIDIUM);
   delay(20);
@@ -27,7 +26,6 @@ void StartStrategyAutonomous() {
 // Main sequence of strategy
 void RunStrategyAutonomous() {
   // Blink light
-
 }
 
 // End sequence of strategy
@@ -48,8 +46,6 @@ void FinishStrategyAutonomous() {
     Functions
 ------------------------------------------------- */
 
-
 // Enable/Disable motor power
 void SelectFunctionAutonomous() {
-  
 }
