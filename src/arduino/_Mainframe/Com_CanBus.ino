@@ -4,8 +4,9 @@
 
   Mads Rosenhøj Jepepsen
   Aarhus University
-  2021
+  2022
 */
+
 #include <mcp2515.h>
 
 struct can_frame canMsg;

@@ -1,3 +1,11 @@
+/*
+  GeoRover Motor Class - Manages GEM Motor Functionalities.
+
+  Mads Rosenhøj Jepepsen
+  Aarhus University
+  2022
+*/
+
 #include "_motor.h"
 
 #include "Arduino.h"
