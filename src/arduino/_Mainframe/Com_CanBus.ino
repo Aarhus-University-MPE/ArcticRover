@@ -21,7 +21,8 @@ bool InitializeCanBus() {
   mcp2515.setBitrate(CANBBUS_SPEED, MCP_8MHZ);
   mcp2515.setNormalMode();
 
-  motorRight.setCANTXStatus();
+  motorRight.ResetCANStatus();
+  motorLeft.SetCANTXStatus();
 
   delay(20);
 
@@ -41,14 +42,14 @@ void TerminateCanBus() {
     Repeat
 */
 void CanBusProcess() {
-  if (millis() - CanBusTxLast > CANBUS_TX_PERIOD) {
-    if (motorLeft.GetCANTXStatus()) {
-      mcp2515.sendMessage(motorLeft.GetCanMsg());
-      motorLeft.setCANTXStatus();
-    } else if (motorRight.GetCANTXStatus()) {
-      mcp2515.sendMessage(motorRight.GetCanMsg());
-      motorRight.setCANTXStatus();
-    }
+  if (millis() - CanBusTxLast < CANBUS_TX_PERIOD) {
+    return;
+  }
+
+  if (motorLeft.GetCANTXStatus()) {
+    mcp2515.sendMessage(motorLeft.GetCanMsg());
+  } else if (motorRight.GetCANTXStatus()) {
+    mcp2515.sendMessage(motorRight.GetCanMsg());
   }
 
   if (motorLeft.GetCANRXStatus() || motorRight.GetCANRXStatus()) {
@@ -68,13 +69,13 @@ bool ParseData() {
   // Check ID against left motor
   if (canMsg.can_id == CANBUS_RX_MOTOR_LEFT || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 1 || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 3) {
     status = motorLeft.ParseCanMsg(canMsg, false);
-    motorRight.ResetCANStatus();
+    motorRight.SetCANTXStatus();  // Indicate motor Right to send next msg
   }
 
   // Check ID against right motor
   else if (canMsg.can_id == CANBUS_RX_MOTOR_RIGHT || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 1 || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 3) {
     status = motorRight.ParseCanMsg(canMsg, false);
-    motorLeft.ResetCANStatus();
+    motorLeft.SetCANTXStatus();  // Indicate motor Left to send next msg
     CanBusTxLast = millis();
   }
 

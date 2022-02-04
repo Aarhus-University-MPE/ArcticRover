@@ -105,7 +105,7 @@ bool _motor::GetCANRXStatus() { return _motor::CANRXStatus; }
 
 // Indicates CAN msg sent.
 // Unset TX flag, Set RX flag indicate awaiting response
-void _motor::setCANTXStatus() {
+void _motor::SetCANTXStatus() {
   _motor::CANTXStatus = false;
   _motor::CANRXStatus = true;
   _motor::CANRXTimeoutStart = millis();

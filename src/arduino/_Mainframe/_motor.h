@@ -76,7 +76,11 @@ class _motor {
 
   // Indicates CAN msg sent.
   // Unset TX flag, Set RX flag indicate awaiting response
-  void setCANTXStatus();
+  void SetCANRXStatus();
+
+  // Indicates CAN msg ready.
+  // Set TX flag, Unset RX flag indicate ready to send msg
+  void SetCANTXStatus();
 
   void CheckCANRXTimeout();
 
