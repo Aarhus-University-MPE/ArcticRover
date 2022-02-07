@@ -16,7 +16,7 @@ void StartStrategyIdle() {
 
   DEBUG_PRINTLN("Strategy (Idle): Initialized");
   DEBUG_PRINTLINE();
-  LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
+  StrategyStartLed(MODE_IDLE);
 }
 
 // Main sequence of strategy

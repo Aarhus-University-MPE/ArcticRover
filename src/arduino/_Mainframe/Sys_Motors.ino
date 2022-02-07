@@ -6,7 +6,6 @@
   2022
 */
 
-
 // Initialize motor power
 bool InitializeMotors() {
   if (GetStatus(MODULE_PWR_MOTOR)) {
@@ -23,12 +22,13 @@ bool InitializeMotors() {
 // Disable Motor HW Enable
 void TerminateMotors() {
   digitalWrite(PO_MOTOR_EN, false);
+  SystemDisable(MODULE_MOTORS);
 }
 
 // Moves motors based on direction and speed input within the range of [-1 and 1]
 // -1 full left, 1 full right (dir)
 // -1 full reverse, 1 full forward (speed)
-void MotorMove(float dir, float speed, float enable) {
+void MotorUpdate(float dir, float speed, float enable) {
   if (!enable) {
     // Stop motors
     SystemDisable(MODULE_MOTORS);
@@ -53,6 +53,7 @@ void MotorMove(float dir, float speed, float enable) {
   DEBUG_PRINT("\t Right: ");
   DEBUG_PRINTLN(velocityRight);
 }
+
 
 void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight) {
   // Move, handle direction
@@ -85,12 +86,22 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
   if (abs(velocityRight) < MIN_VELOCITY) velocityRight = 0;
 }
 
+bool MotorState(){
+  return GetStatus(MODULE_MOTORS);
+}
+
+
+// Motors operational?
 bool MotorStatus() {
-  bool valid = true;
+  return (MotorStatusLeft() && MotorStatusRight());
+}
 
-  // Motors operational?
+bool MotorStatusLeft() {
+  return motorLeft.Status();
+}
 
-  return valid;
+bool MotorStatusRight() {
+  return motorRight.Status();
 }
 
 // Calculates steering factor from 2nd order function (-2x^2 + 1), used in skid steering
@@ -116,13 +127,13 @@ void MotorTest1() {
     DEBUG_PRINTLN("Ramping up");
     for (size_t i = 0; i < 101; i++) {
       speed += 0.01;
-      MotorMove(0, speed, true);
+      MotorUpdate(0, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
     DEBUG_PRINTLN("Ramping down");
     for (size_t i = 0; i < 100; i++) {
       speed -= 0.01;
-      MotorMove(0, speed, true);
+      MotorUpdate(0, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
   }
@@ -136,19 +147,19 @@ void MotorTest2() {
     DEBUG_PRINTLN("Turning Right");
     for (size_t i = 0; i < 51; i++) {
       dir += 0.02;
-      MotorMove(dir, speed, true);
+      MotorUpdate(dir, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
     DEBUG_PRINTLN("Turning Left");
     for (size_t i = 0; i < 101; i++) {
       dir -= 0.02;
-      MotorMove(dir, speed, true);
+      MotorUpdate(dir, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
     DEBUG_PRINTLN("Centering");
     for (size_t i = 0; i < 51; i++) {
       dir += 0.02;
-      MotorMove(dir, speed, true);
+      MotorUpdate(dir, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
   }

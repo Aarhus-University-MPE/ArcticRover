@@ -23,7 +23,7 @@
 
 // Heartbeat
 #define PI_BACKUP_HRTBEAT    3
-#define PO_BACKUP_HRTBEAT    7
+#define PO_BACKUP_HRTBEAT    7 
 #define PI_INT_HRTBEAT       digitalPinToInterrupt(PI_BACKUP_HRTBEAT)
 
 // Reset pin
@@ -31,31 +31,31 @@
 #define PO_BACKUP_RST        6
 
 // Status LED/Sound
-#define PO_LED_STATUS_RED    32
-#define PO_LED_STATUS_YEL    34
-#define PO_LED_STATUS_GRN    36
+#define PO_LED_STATUS_RED    28
+#define PO_LED_STATUS_YEL    30
+#define PO_LED_STATUS_GRN    32
 
 // Power control (Relays)
-#define PO_POWER_MOTOR       38
-#define PO_POWER_24V         40
-#define PO_POWER_12V         42
-#define PO_POWER_5V          44
-#define PO_POWER_RF          46
-#define PO_POWER_IRIDIUM     48
-#define PO_POWER_HEATING     50
+#define PO_POWER_MOTOR       36
+#define PO_POWER_5V          38
+#define PO_POWER_12V         40
+#define PO_POWER_24V         42
+#define PO_POWER_RF          44
+#define PO_POWER_IRIDIUM     46
+#define PO_POWER_HEATING     48
 
 // Analog Sensors
-#define PA_SENSOR_TEMP1      PIN_A0
-#define PA_SENSOR_TEMP2      PIN_A1
-#define PA_SENSOR_TEMP3      PIN_A2
-#define PA_SENSOR_BATT       PIN_A3
+#define PA_SENSOR_BATT       PIN_A0
+#define PA_SENSOR_TEMP1      PIN_A1
+#define PA_SENSOR_TEMP2      PIN_A2
+#define PA_SENSOR_TEMP3      PIN_A3
 
 // Motor Control
-#define PO_MOTOR_EN          10
+#define PO_MOTOR_EN          34
 
 // Communication
-#define PO_SPISS_SDCARD      28  // 50 (MISO), 51 (MOSI), 52 (SCK)
-#define PO_SPISS_CANBUS      30  // 50 (MISO), 51 (MOSI), 52 (SCK)
+#define PO_SPISS_SDCARD      24  // 50 (MISO), 51 (MOSI), 52 (SCK)
+#define PO_SPISS_CANBUS      26  // 50 (MISO), 51 (MOSI), 52 (SCK)
 
 #define COM_SERIAL_DBG       Serial   // USB
 #define COM_SERIAL_IRID      Serial2  // 16 (TX), 17 (RX)

@@ -62,6 +62,12 @@ void CanBusProcess() {
   }
 }
 
+bool CanBusStatus(){
+  bool status = true;
+  // CAN ERROR?
+  return status;
+}
+
 bool ParseData() {
   char buffer[100];
   bool status = false;

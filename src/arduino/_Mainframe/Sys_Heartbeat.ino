@@ -86,6 +86,7 @@ void HeartbeatBlackBox() {
     lastMillisHeartbeatBlackbox = millis();
     DEBUG_PRINTLINE();
     DEBUG_PRINT("Heartbeat System Status: ");
+    SystemCheck();
     DEBUG_PRINTLN(String(ToLong(SystemStatus)));
     DEBUG_PRINTLINE();
   }

@@ -26,6 +26,7 @@ void StartStrategyAutonomous() {
 // Main sequence of strategy
 void RunStrategyAutonomous() {
   // Blink light
+  StrategyRunLed(MODE_AUTONOMOUS);
 }
 
 // End sequence of strategy
@@ -48,4 +49,5 @@ void FinishStrategyAutonomous() {
 
 // Enable/Disable motor power
 void SelectFunctionAutonomous() {
+  // Start Driving
 }

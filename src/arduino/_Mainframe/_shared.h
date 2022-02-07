@@ -19,9 +19,7 @@ void ModeButtonInterruptHandler();
 void InitStatusLed();
 void InitMode();
 void InitStrategyMethods();
-void LedBlink(byte color, unsigned int onDuration, unsigned int offDuration);
 void LedSet(byte color);
-void LedBlinkHalt(byte color, unsigned int duration, unsigned int afterHalt);
 void recvWithStartEndMarkers();
 bool SDReaderStatus();
 void SDQuery();
@@ -64,11 +62,13 @@ void appendCharArray(char *s, char c);
 void appendCsv(char *s);
 
 bool DebugCommStatus();
+void LedBlink(byte color, unsigned int onDuration, unsigned int offDuration);
+void LedBlinkHalt(byte color, unsigned int duration, unsigned int afterHalt);
+void LedBlinkSingleShort(byte color);
 void LedBlinkDoubleShort(byte color);
 void LedBlinkDoubleShort(byte color1, byte color2);
 void LedBlinkTripleShort(byte color);
 void LedBlinkTripleShort(byte color1, byte color2, byte color3);
-
 
 typedef void (*functionPtr)();
 
@@ -95,11 +95,13 @@ void ModeButtonInterruptHandler();
 void InitBluetooth(unsigned long baudRate = 115200);
 
 //current and previous mode (strategy)
-unsigned long lastMillisSelect     = 0;
-unsigned long lastMillisMode       = 0;
-unsigned long lastMillisEstop      = 0;
+unsigned long lastMillisSelect = 0;
+unsigned long lastMillisMode = 0;
+unsigned long lastMillisEstop = 0;
 unsigned long lastMillistModeBlink = 0;
-unsigned long lastSystemReboot     = 9999999;
+unsigned long lastSystemReboot = 9999999;
+unsigned long lastMillistHeatingOff = 0;
+unsigned long lastMillistHeatingOn = 0;
 
 byte mode;
 byte modeCycle;
@@ -117,7 +119,7 @@ void SetStatus(bool status) {
   for (int i = 0; i < MODULE_COUNT; i++) {
     SystemStatus[i] = status;
   }
-  SystemStatus[MODULE_ESTOP]    = true;
+  SystemStatus[MODULE_ESTOP] = true;
   SystemStatus[MODULE_RESERVED] = true;
 }
 
@@ -144,8 +146,6 @@ void BlackBoxAppend(int blackBoxInput);
 void BlackBoxAppend(long int blackBoxInput);
 void BlackBoxAppend(unsigned long blackBoxInput);
 void BlackBoxAppend(long int blackBoxInput, int Type);
-
-
 
 _motor motorLeft = _motor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);
 _motor motorRight = _motor(CANBUS_TX_MOTOR_RIGHT, CANBUS_RX_MOTOR_RIGHT);

@@ -8,6 +8,10 @@ void InitStatusLed() {
   // LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, 0);
 }
 
+bool LedStatus(){
+  return (digitalRead(PO_LED_STATUS_GRN) || digitalRead(PO_LED_STATUS_YEL) || digitalRead(PO_LED_STATUS_GRN));
+}
+
 // Sets current LED Status from byte
 // [100] [RED - -]
 // [010] [- YEL -]
@@ -55,7 +59,9 @@ void LedBlinkHalt(byte color, unsigned int duration, unsigned int afterHalt) {
   delay(afterHalt);
 }
 
-// Flashes LED once in specified color (very short duration)
+/// <summary>
+/// summary of variable, function, class or any thing else
+/// </summary>
 void LedBlinkSingleShort(byte color) {
   LedBlinkHalt(color, LED_BLINK_VERY_SHORT);
 }
@@ -102,6 +108,9 @@ void StrategyStartLed(int strategy) {
       break;
     case MODE_AUTONOMOUS:
       LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
+      break;
+    case MODE_MODELIBRARY:
+      LedBlinkSingleShort(BINARY_CODE_LED_YEL);
       break;
     default:
       break;

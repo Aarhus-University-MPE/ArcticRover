@@ -54,23 +54,11 @@ class _motor {
   struct can_frame canMsg;
   struct can_frame* canMsgPtr;
 
-  // Primary motor parameters
-  void ParseCanControl(struct can_frame _canMsg, bool print);
-
-  // Motor power states, inverter peak current and motor power
-  void PraseCanInverterState(struct can_frame _canMsg, bool print);
-
-  // Current motor warnings
-  void ParseCanWarning(struct can_frame _canMsg, bool print);
-
-  // Current motor errors
-  void ParseCanError(struct can_frame _canMsg, bool print);
 
  public:
   _motor(int _TX_id, int _RX_id);
 
   int GetRpm();
-
   bool GetCANTXStatus();
   bool GetCANRXStatus();
 
@@ -90,5 +78,19 @@ class _motor {
 
   struct can_frame* GetCanMsg();
 
+  bool Status();
+
   bool ParseCanMsg(struct can_frame _canMsg, bool print);
+
+  // Primary motor parameters
+  void ParseCanControl(struct can_frame _canMsg, bool print);
+
+  // Motor power states, inverter peak current and motor power
+  void PraseCanInverterState(struct can_frame _canMsg, bool print);
+
+  // Current motor warnings
+  void ParseCanWarning(struct can_frame _canMsg, bool print);
+
+  // Current motor errors
+  void ParseCanError(struct can_frame _canMsg, bool print);
 };

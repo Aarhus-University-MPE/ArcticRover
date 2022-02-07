@@ -70,29 +70,53 @@
 #define SYSTEM_CHECK_DT        1000
 #define SYSTEM_REBOOT_DT       5000
 
-#define MODULE_COUNT           17
+#define MODULE_COUNT           20
 
 #define MODULE_PWR             0
 #define MODULE_PWR_5V          1
 #define MODULE_PWR_12V         2
-#define MODULE_PWR_MOTOR       3
-#define MODULE_MOTORS          4
-#define MODULE_MOTOR_ACT       5
-#define MODULE_CANBUS          6
-#define MODULE_RF              7
-#define MODULE_IRIDIUM         8
-#define MODULE_GNSS            9
-#define MODULE_ACCEL           10
-#define MODULE_SD              11
-#define MODULE_BLACKBOX        12
-#define MODULE_DBGCOMM         13
-#define MODULE_BACKUPCPU       14
-#define MODULE_ESTOP           15
-#define MODULE_RESERVED        16
+#define MODULE_PWR_24V         3
+#define MODULE_PWR_MOTOR       4
+#define MODULE_MOTORS          5
+#define MODULE_MOTOR_L         6
+#define MODULE_MOTOR_R         7
+#define MODULE_MOTOR_ACT       8
+#define MODULE_CANBUS          9
+#define MODULE_RF              10
+#define MODULE_IRIDIUM         11
+#define MODULE_GNSS            12
+#define MODULE_ACCEL           13
+#define MODULE_SD              14
+#define MODULE_BLACKBOX        15
+#define MODULE_DBGCOMM         16
 #define MODULE_LED             17
+#define MODULE_HEATING         18
+#define MODULE_TEMP            19
+#define MODULE_BACKUPCPU       20
+#define MODULE_ESTOP           21
+#define MODULE_RESERVED        22
 
 #define ModuleToString(m) \
-  ((m) == 0 ? "Primary Power" : ((m) == 1 ? "Secondary Power (5V)" : ((m) == 2 ? "Secondary Power (12V)" : ((m) == 3 ? "Secondary Power (Motors)" : ((m) == 4 ? "Motors" : ((m) == 5 ? "Motor Active" : ((m) == 6 ? "CAN-bus" : ((m) == 7 ? "Short Range Communication (RF)" : ((m) == 8 ? "Long Range Communication (Iridium)" : ((m) == 9 ? "Global Navigation Satellite System" : ((m) == 10 ? "Accelerometer" : ((m) == 11 ? "Local Storage" : ((m) == 12 ? "Blackbox" : ((m) == 13 ? "Debug Comm." : ((m) == 14 ? "Backup CPU" : ((m) == 15 ? "Emergency Stop" : ((m) == 16 ? "Reserved" : ((m) == 17 ? "LED" : "Unknown"))))))))))))))))))
+  ((m) == 0 ? "Primary Power" : \
+  ((m) == 1 ? "Secondary Power (5V)" : \
+  ((m) == 2 ? "Secondary Power (12V)" : \
+  ((m) == 3 ? "Secondary Power (24V)" : \
+  ((m) == 4 ? "Secondary Power (Motors)" : \
+  ((m) == 5 ? "Motors" : \
+  ((m) == 6 ? "Motor Active" : \
+  ((m) == 7 ? "CAN-bus" : \
+  ((m) == 8 ? "Short Range Communication (RF)" : \
+  ((m) == 9 ? "Long Range Communication (Iridium)" : \
+  ((m) == 10 ? "Global Navigation Satellite System" : \
+  ((m) == 11 ? "Accelerometer" : \
+  ((m) == 12 ? "Local Storage" : \
+  ((m) == 13 ? "Blackbox" : \
+  ((m) == 14 ? "Debug Comm." : \
+  ((m) == 15 ? "Backup CPU" : \
+  ((m) == 16 ? "Emergency Stop" : \
+  ((m) == 17 ? "Reserved" : \
+  ((m) == 18 ? "LED" : \
+  "Unknown")))))))))))))))))))
 
 const unsigned long SYSREQ_REMOTE_CONTROL =
     (1L << MODULE_PWR) +
@@ -173,9 +197,14 @@ const unsigned long SYSREQ_AUTONOMOUS =
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
 
-#define MOTOR_LEFT                      true
-#define MOTOR_RIGHT                     false
 #define MOTOR_RAMP_TIME                 20
+
+// ------------------------------------------------------------ //
+//                           HEATING                            //
+// ------------------------------------------------------------ //
+#define TEMP_SYSTEM_MIN                 10
+#define HEATING_DURATION                20000
+#define HEATING_TIMEOUT                 40000
 
 // ------------------------------------------------------------ //
 //                        COMMUNICATION                         //
@@ -207,6 +236,11 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define CANBBUS_SPEED                   CAN_125KBPS
 #define COM_TEST_PERIOD                 5000
 #define CANBUS_TX_PERIOD                100
+
+// ------------------------------------------------------------ //
+//                        BATTERY LEVEL                         //
+// ------------------------------------------------------------ //
+#define BATTERY_MIN_LEVEL               20
 
 // ------------------------------------------------------------ //
 //                           EEPROM                             //
@@ -281,11 +315,9 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define CMD_ROUTE_SET                   'S'
 #define CMD_ROUTE_PRINT                 'P'
 
-
 // ------------------------------------------------------------ //
 //                          FUNCTIONS                           //
 // ------------------------------------------------------------ //
-
 
 void BlackBoxAppendln();
 void BlackBoxAppendln(String blackBoxInput);

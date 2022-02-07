@@ -21,6 +21,7 @@ void StartStrategyModeLibrary() {
   DEBUG_PRINTLINE();
   DEBUG_PRINT("Mode Cycle: ");
   DEBUG_PRINTLN(ModeToString(modeCycle));
+  StrategyStartLed(MODE_MODELIBRARY);
 }
 
 // Main sequence of strategy

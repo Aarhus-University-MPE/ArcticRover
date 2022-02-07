@@ -13,8 +13,8 @@
 */
 
 // Heartbeat
-#define PI_PRIMARY_HRTBEAT 2
-#define PO_PRIMARY_HRTBEAT 3
+#define PO_PRIMARY_HRTBEAT 2
+#define PI_PRIMARY_HRTBEAT 3
 #define PI_INT_HRTBEAT digitalPinToInterrupt(PI_PRIMARY_HRTBEAT)
 
 // Reset pin

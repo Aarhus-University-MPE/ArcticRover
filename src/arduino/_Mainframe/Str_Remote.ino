@@ -36,8 +36,11 @@ void RunStrategyRemote() {
 
     //Read RF signal
     sbus.process();
-
     ProcessIncomingCommands();
+
+    // Transmit via CAN
+    CanBusProcess();
+
   } else {
     // Attempt rebooting systems
     if (millis() - lastSystemReboot > SYSTEM_REBOOT_DT) {
@@ -82,7 +85,7 @@ void ProcessIncomingCommands() {
     float enable = getChannelFloat(REMOTE_CHANNEL_ENABLE);
 
     // move motors
-    MotorMove(steer, throttle, enable);
+    MotorUpdate(steer, throttle, enable);
   }
 }
 

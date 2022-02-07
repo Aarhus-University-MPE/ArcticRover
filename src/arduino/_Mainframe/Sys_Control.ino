@@ -27,6 +27,10 @@ void SystemEnable(int module) {
       digitalWrite(PO_POWER_12V, HIGH);
       DEBUG_PRINTLN("Power to Secondary Systems (12V): Enabled");
       break;
+    case MODULE_PWR_24V:
+      digitalWrite(PO_POWER_24V, HIGH);
+      DEBUG_PRINTLN("Power to Secondary Systems (24V): Enabled");
+      break;
     case MODULE_RF:
       SystemEnable(MODULE_PWR_5V);
       digitalWrite(PO_POWER_RF, HIGH);
@@ -107,6 +111,11 @@ void SystemEnable(int module) {
         DEBUG_PRINTLN("Error");
         status = false;
       }
+    
+    case MODULE_HEATING:
+      digitalWrite(PO_POWER_HEATING, HIGH);
+      lastMillistHeatingOn = millis();
+      break;
 
     default:
       break;
@@ -131,6 +140,7 @@ void SystemEnableMode(int mode) {
       // (along with motor initialization) SystemEnable(MODULE_MOTORS); //
       // <-- Enabled by user input
       SystemEnable(MODULE_RF);
+      SystemEnable(MODULE_CANBUS);
       break;
     case MODE_AUTONOMOUS:
       // SystemEnable();
@@ -158,6 +168,10 @@ void SystemDisable(int module) {
     case MODULE_PWR_12V:
       DEBUG_PRINTLN("Power to Secondary Systems (12V): Disabled");
       digitalWrite(PO_POWER_12V, LOW);
+      break;    
+    case MODULE_PWR_24V:
+      DEBUG_PRINTLN("Power to Secondary Systems (24V): Disabled");
+      digitalWrite(PO_POWER_24V, LOW);
       break;
     case MODULE_RF:
       digitalWrite(PO_POWER_RF, LOW);
@@ -184,6 +198,10 @@ void SystemDisable(int module) {
       SystemDisable(MODULE_PWR_MOTOR);
       TerminateMotors();
       DEBUG_PRINTLN("Motors: Disabled");
+      break;
+    case MODULE_HEATING:
+      digitalWrite(PO_POWER_HEATING, LOW);
+      lastMillistHeatingOff = millis();
       break;
     default:
       break;

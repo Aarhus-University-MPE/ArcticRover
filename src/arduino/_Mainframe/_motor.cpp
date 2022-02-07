@@ -25,86 +25,12 @@ _motor::_motor(int _TX_id, int _RX_id) {
   _motor::canMsgPtr = &(_motor::canMsg);
 }
 
-// Primary motor parameters
-void _motor::ParseCanControl(struct can_frame _canMsg, bool print) {
-  _motor::controlValueRx = (int)((_canMsg.data[1] << 8) | _canMsg.data[0]);
-  _motor::motorState = (int)(_canMsg.data[3] >> 6);
-  _motor::rpm = (int)((_canMsg.data[6] << 8) | _canMsg.data[5]) / 10.0f;
-  _motor::temperature = (int)_canMsg.data[7];
-
-  if (print) {
-    DEBUG_PRINT("Control value: ");
-    DEBUG_PRINT(_motor::controlValueRx);
-    DEBUG_PRINT("\t Motor State: ");
-    DEBUG_PRINT(_motor::motorState);
-    DEBUG_PRINT("\t rpm: ");
-    DEBUG_PRINT(_motor::rpm);
-    DEBUG_PRINT("\t Temperature: ");
-    DEBUG_PRINTLN(_motor::temperature);
-  }
-}
-
-// Motor power states, inverter peak current and motor power
-void _motor::PraseCanInverterState(struct can_frame _canMsg, bool print) {
-  _motor::inverterPeakCurr = (int)((_canMsg.data[1] << 8) | _canMsg.data[0]);
-  _motor::power = (int)((_canMsg.data[3] << 8) | _canMsg.data[2]);
-
-  if (print) {
-    DEBUG_PRINT("Max inverter peak current: ");
-    DEBUG_PRINT(_motor::inverterPeakCurr);
-    DEBUG_PRINT("\t Motor power: ");
-    DEBUG_PRINT(_motor::power);
-    DEBUG_PRINTLN(" W");
-  }
-}
-
-// Current motor warnings
-void _motor::ParseCanWarning(struct can_frame _canMsg, bool print) {
-  bool warning[64];
-  for (int i = 0; i < 8; i++) {
-    for (int j = 0; j < 8; j++) {
-      warning[i * 8 + j] = _canMsg.data[i] >> j & 1;
-    }
-  }
-  if (print) {
-    DEBUG_PRINT("Warning: ");
-    for (int i = 0; i < 64; i++) {
-      if (warning[i] == 1) {
-        DEBUG_PRINT(i);
-        DEBUG_PRINT("\t");
-      }
-    }
-    DEBUG_PRINTLN();
-  }
-}
-
-// Current motor errors
-void _motor::ParseCanError(struct can_frame _canMsg, bool print) {
-  bool error[64];
-  for (int i = 0; i < 8; i++) {
-    for (int j = 0; j < 8; j++) {
-      error[i * 8 + j] = _canMsg.data[i] >> j & 1;
-    }
-  }
-
-  if (print) {
-    DEBUG_PRINT("Error: ");
-    for (int i = 0; i < 64; i++) {
-      if (error[i] == 1) {
-        DEBUG_PRINT(i);
-        DEBUG_PRINT("\t");
-      }
-    }
-    DEBUG_PRINTLN();
-  }
-}
-
 int _motor::GetRpm() { return _motor::rpm; }
+
 bool _motor::GetCANTXStatus() { return _motor::CANTXStatus; }
+
 bool _motor::GetCANRXStatus() { return _motor::CANRXStatus; }
 
-// Indicates CAN msg sent.
-// Unset TX flag, Set RX flag indicate awaiting response
 void _motor::SetCANTXStatus() {
   _motor::CANTXStatus = false;
   _motor::CANRXStatus = true;
@@ -164,6 +90,10 @@ struct can_frame* _motor::GetCanMsg() {
   return _motor::canMsgPtr;
 }
 
+bool _motor::Status(){
+    return _motor::motorState != 3;
+}
+
 bool _motor::ParseCanMsg(struct can_frame _canMsg, bool print) {
   switch (_canMsg.can_id - RX_id) {
     case 0:
@@ -191,4 +121,74 @@ bool _motor::ParseCanMsg(struct can_frame _canMsg, bool print) {
   }
 
   return _motor::CANRXStatus;
+}
+
+void _motor::ParseCanControl(struct can_frame _canMsg, bool print) {
+  _motor::controlValueRx = (int)((_canMsg.data[1] << 8) | _canMsg.data[0]);
+  _motor::motorState = (int)(_canMsg.data[3] >> 6);
+  _motor::rpm = (int)((_canMsg.data[6] << 8) | _canMsg.data[5]) / 10.0f;
+  _motor::temperature = (int)_canMsg.data[7];
+
+  if (print) {
+    DEBUG_PRINT("Control value: ");
+    DEBUG_PRINT(_motor::controlValueRx);
+    DEBUG_PRINT("\t Motor State: ");
+    DEBUG_PRINT(_motor::motorState);
+    DEBUG_PRINT("\t rpm: ");
+    DEBUG_PRINT(_motor::rpm);
+    DEBUG_PRINT("\t Temperature: ");
+    DEBUG_PRINTLN(_motor::temperature);
+  }
+}
+
+void _motor::PraseCanInverterState(struct can_frame _canMsg, bool print) {
+  _motor::inverterPeakCurr = (int)((_canMsg.data[1] << 8) | _canMsg.data[0]);
+  _motor::power = (int)((_canMsg.data[3] << 8) | _canMsg.data[2]);
+
+  if (print) {
+    DEBUG_PRINT("Max inverter peak current: ");
+    DEBUG_PRINT(_motor::inverterPeakCurr);
+    DEBUG_PRINT("\t Motor power: ");
+    DEBUG_PRINT(_motor::power);
+    DEBUG_PRINTLN(" W");
+  }
+}
+
+void _motor::ParseCanWarning(struct can_frame _canMsg, bool print) {
+  bool warning[64];
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      warning[i * 8 + j] = _canMsg.data[i] >> j & 1;
+    }
+  }
+  if (print) {
+    DEBUG_PRINT("Warning: ");
+    for (int i = 0; i < 64; i++) {
+      if (warning[i] == 1) {
+        DEBUG_PRINT(i);
+        DEBUG_PRINT("\t");
+      }
+    }
+    DEBUG_PRINTLN();
+  }
+}
+
+void _motor::ParseCanError(struct can_frame _canMsg, bool print) {
+  bool error[64];
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      error[i * 8 + j] = _canMsg.data[i] >> j & 1;
+    }
+  }
+
+  if (print) {
+    DEBUG_PRINT("Error: ");
+    for (int i = 0; i < 64; i++) {
+      if (error[i] == 1) {
+        DEBUG_PRINT(i);
+        DEBUG_PRINT("\t");
+      }
+    }
+    DEBUG_PRINTLN();
+  }
 }
