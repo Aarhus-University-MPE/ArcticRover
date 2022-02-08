@@ -8,21 +8,15 @@
 
 // Initialize motor power
 bool InitializeMotors() {
-  if (GetStatus(MODULE_PWR_MOTOR)) {
-    delay(10);
-
-    digitalWrite(PO_MOTOR_EN, true);
-    return true;
-  } else {
-    DEBUG_PRINTLN("MOTOR POWER ERROR!");
+  if (!GetStatus(MODULE_PWR_MOTOR)) {
     return false;
   }
+  digitalWrite(PO_MOTOR_EN, true);
 }
 
 // Disable Motor HW Enable
 void TerminateMotors() {
   digitalWrite(PO_MOTOR_EN, false);
-  SystemDisable(MODULE_MOTORS);
 }
 
 // Moves motors based on direction and speed input within the range of [-1 and 1]
@@ -30,20 +24,18 @@ void TerminateMotors() {
 // -1 full reverse, 1 full forward (speed)
 void MotorUpdate(float dir, float speed, float enable) {
   if (!enable) {
-    // Stop motors
     SystemDisable(MODULE_MOTORS);
     return;
-  } else {
-    // Start motors
-    SystemEnable(MODULE_MOTORS);
   }
+
+  SystemEnable(MODULE_MOTORS);
 
   float velocityLeft;
   float velocityRight;
 
   SpeedCalculation(dir, speed, velocityLeft, velocityRight);
 
-  // Send command
+  // Update CAN messages
   motorLeft.Update(velocityLeft);
   motorRight.Update(velocityRight);
 
@@ -53,7 +45,6 @@ void MotorUpdate(float dir, float speed, float enable) {
   DEBUG_PRINT("\t Right: ");
   DEBUG_PRINTLN(velocityRight);
 }
-
 
 void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight) {
   // Move, handle direction
@@ -86,10 +77,9 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
   if (abs(velocityRight) < MIN_VELOCITY) velocityRight = 0;
 }
 
-bool MotorState(){
+bool MotorState() {
   return GetStatus(MODULE_MOTORS);
 }
-
 
 // Motors operational?
 bool MotorStatus() {
@@ -120,7 +110,7 @@ float steerFactor(float dir) {
   return scale;
 }
 
-// Runs motor test, ramps each motor up and down
+// Rework for CAN
 void MotorTest1() {
   if (GetStatus(MODULE_MOTORS)) {
     float speed = -0.01;

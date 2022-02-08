@@ -25,26 +25,7 @@ void RunStrategySystemTest() {
   StrategyRunLed(MODE_SYSTEMTEST);
 
   if (runTest) {
-    DEBUG_PRINTLN("Running Full System Test");
-
-    DEBUG_PRINTLINE();
-
     SystemTest();
-
-    DEBUG_PRINTLN("Disabeling all systems");
-    DEBUG_PRINTLINE();
-
-    unsigned long testResults = ToLong(SystemStatus);
-
-    SystemDisable();
-    AttachSelectButton();
-
-    DEBUG_PRINTLINE();
-    DEBUG_PRINTLN("System Test Complete");
-    DEBUG_PRINT("  Results: ");
-    DEBUG_PRINTLN(String(testResults));
-    DEBUG_PRINTLINE();
-    runTest = false;
   }
 }
 
@@ -59,58 +40,110 @@ void FinishStrategySystemTest() {
   DEBUG_PRINTLN("Strategy (System Test): Finished");
 }
 
+int systemTestState = 0;
 // Selecet button function
 void SelectFunctionSystemTest() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
+    systemTestState = 0;
     lastMillisSelect = millis();
     runTest = true;
     DetachSelectButton();
   }
 }
 
-// Enable all systems
-void SystemTestEnable() {
-}
-
 // Run full system test
 void SystemTest() {
-  // SetStatus(MODULE_PWR_MOTOR, digitalRead(PO_POWER_MOTOR_ON)); // Bi-stable relay, so not possible to measure
-  DEBUG_PRINTLN("Running test (1/4) - Power Systems");
-  SystemTestModule(MODULE_PWR_24V, false);
-  SystemTestModule(MODULE_PWR_12V, false);
-  SystemTestModule(MODULE_PWR_5V, false);
-  SystemTestModule(MODULE_PWR_MOTOR, false);
-  SystemTestModule(MODULE_PWR, false);
-  DEBUG_PRINTLN("Test (1/4) - Power Systems (Complete)");
-  DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Running test (2/4) - Communication");
-  SystemTestModule(MODULE_RF, false);
-  SystemTestModule(MODULE_IRIDIUM, false);
-  SystemTestModule(MODULE_BACKUPCPU, false);
-  DEBUG_PRINTLN("Test (2/4) - Communication (Complete)");
-  DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Running test (3/4) - Subsystems");
-  SystemTestModule(MODULE_ACCEL, false);
-  SystemTestModule(MODULE_SD, false);
-  SystemTestModule(MODULE_BLACKBOX, false);
-  SystemTestModule(MODULE_TEMP, false);
-  DEBUG_PRINTLN("Test (3/4) - Subsystems (Complete)");
-  DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Running test (4/4) - Motors");
-  SystemTestModule(MODULE_MOTORS, false);
-  DEBUG_PRINTLN("Test (4/4) - Motors (Complete)");
-  DEBUG_PRINTLINE();
-
-  SetStatus(MODULE_ESTOP, EmergencyStopStatus());
-  SetStatus(MODULE_RESERVED, true);
+  switch (systemTestState) {
+    case 0:
+      DEBUG_PRINTLN("Running Full System Test");
+      DEBUG_PRINTLINE();
+      systemTestState++;
+      break;
+    case 1:
+      DEBUG_PRINTLN("Running test (1/4) - Power Systems");
+      SystemTestModule(MODULE_PWR_24V, false);
+      SystemTestModule(MODULE_PWR_12V, false);
+      SystemTestModule(MODULE_PWR_5V, false);
+      SystemTestModule(MODULE_PWR_MOTOR, true);
+      SystemTestModule(MODULE_PWR, false);
+      DEBUG_PRINTLN("Test (1/4) - Power Systems (Complete)");
+      DEBUG_PRINTLINE();
+      systemTestState++;
+      break;
+    case 2:
+      DEBUG_PRINTLN("Running test (2/4) - Communication");
+      systemTestState++;
+      break;
+    case 3:
+      if (SystemTestModule(MODULE_RF, false)) systemTestState++;
+      break;
+    case 4:
+      if (SystemTestModule(MODULE_IRIDIUM, false)) systemTestState++;
+      break;
+    case 5:
+      if (SystemTestModule(MODULE_BACKUPCPU, false)) systemTestState++;
+      break;
+    case 6:
+      DEBUG_PRINTLN("Test (2/4) - Communication (Complete)");
+      DEBUG_PRINTLINE();
+      systemTestState++;
+      break;
+    case 7:
+      DEBUG_PRINTLN("Running test (3/4) - Subsystems");
+      systemTestState++;
+      break;
+    case 8:
+      if (SystemTestModule(MODULE_ACCEL, false)) systemTestState++;
+      break;
+    case 9:
+      if (SystemTestModule(MODULE_SD, false)) systemTestState++;
+      break;
+    case 10:
+      if (SystemTestModule(MODULE_BLACKBOX, false)) systemTestState++;
+      break;
+    case 11:
+      if (SystemTestModule(MODULE_TEMP, false)) systemTestState++;
+      break;
+    case 12:
+      DEBUG_PRINTLN("Test (3/4) - Subsystems (Complete)");
+      DEBUG_PRINTLINE();
+      systemTestState++;
+      break;
+    case 13:
+      DEBUG_PRINTLN("Running test (4/4) - Motors");
+      systemTestState++;
+      break;
+    case 14:
+      if (SystemTestModule(MODULE_MOTORS, false)) systemTestState++;
+      break;
+    case 15:
+      DEBUG_PRINTLN("Test (4/4) - Motors (Complete)");
+      DEBUG_PRINTLINE();
+      systemTestState++;
+      break;
+    case 16:
+      DEBUG_PRINTLN("Disabeling all systems");
+      DEBUG_PRINTLINE();
+      unsigned long testResults = ToLong(SystemStatus);
+      SystemDisable();
+      AttachSelectButton();
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("System Test Complete");
+      DEBUG_PRINT("  Results: ");
+      DEBUG_PRINTLN(String(testResults));
+      DEBUG_PRINTLINE();
+      runTest = false;
+      break;
+    default:
+      break;
+  }
 }
 
 // System check
 void SystemCheck() {
-  for (int i = 0; i < MODULE_COUNT - 2; i++)
-  {
+  for (int i = 0; i < MODULE_COUNT - 2; i++) {
     SystemCheckModule(i);
-  }  
+  }
 
   SetStatus(MODULE_ESTOP, EmergencyStopStatus());
   SetStatus(MODULE_RESERVED, true);
@@ -135,16 +168,16 @@ bool SystemCheckModule(byte module) {
         break;
       case MODULE_PWR_MOTOR:
         status = MotorStatus();
-        break;      
+        break;
       case MODULE_MOTORS:
         status = MotorStatus();  // <-- CAN ERROR MSG
-        break;      
+        break;
       case MODULE_MOTOR_L:
         status = MotorStatusLeft();  // <-- CAN ERROR MSG
-        break;      
+        break;
       case MODULE_MOTOR_R:
         status = MotorStatusRight();  // <-- CAN ERROR MSG
-        break;  
+        break;
       case MODULE_MOTOR_ACT:
         status = MotorState();  // <-- CAN ERROR MSG
         break;
@@ -168,7 +201,7 @@ bool SystemCheckModule(byte module) {
         break;
       case MODULE_BLACKBOX:
         status = BlackBoxStatus();
-        break;      
+        break;
       case MODULE_DBGCOMM:
         status = DebugCommStatus();
         break;
@@ -185,6 +218,8 @@ bool SystemCheckModule(byte module) {
         status = HeartBeatStatus();
         break;
       default:
+        DEBUG_PRINT("MODULE CHECK: Unknown System Module: ");
+        DEBUG_PRINTLN(ModuleToString(module));
         break;
     }
   }
@@ -202,35 +237,46 @@ bool SystemTestModule(byte module, bool disableAfterTest) {
       case MODULE_PWR:
         status = BatteryStatus(true);
         break;
-      case MODULE_PWR_24V:
-        status = digitalRead(PO_POWER_24V);
+      case MODULE_PWR_5V:
+        status = digitalRead(PO_POWER_5V);
         break;
       case MODULE_PWR_12V:
         status = digitalRead(PO_POWER_12V);
         break;
-      case MODULE_PWR_5V:
-        status = digitalRead(PO_POWER_5V);
+      case MODULE_PWR_24V:
+        status = digitalRead(PO_POWER_24V);
         break;
       case MODULE_PWR_MOTOR:
         status = MotorStatus();
         break;
-      case MODULE_GNSS:
-        status = GnssTest(true);
+      case MODULE_MOTORS:
+        DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
+        MotorTest1();
+        DEBUG_PRINTLINE();
+        DEBUG_PRINTLN("Motor Test 2 - Steering");
+        MotorTest2();
+        status = MotorStatus();  // <-- CAN ERROR MSG
         break;
-      case MODULE_RF:
-        status = SBusTest();
+      case MODULE_MOTOR_L:
+        status = MotorStatusLeft();
+        break;
+      case MODULE_MOTOR_R:
+        status = MotorStatusRight();
+        break;
+      case MODULE_MOTOR_ACT:
+        status = MotorState();
         break;
       case MODULE_CANBUS:
         status = CanBusTest();
         break;
+      case MODULE_RF:
+        status = SBusTest();
+        break;
       case MODULE_IRIDIUM:
         status = IridiumTest();
         break;
-      case MODULE_DBGCOMM:
-        status = DebugCommStatus();
-        break;
-      case MODULE_BACKUPCPU:
-        status = HeartBeatStatus();
+      case MODULE_GNSS:
+        status = GnssTest(true);
         break;
       case MODULE_ACCEL:
         status = AccelTest(true);
@@ -241,34 +287,32 @@ bool SystemTestModule(byte module, bool disableAfterTest) {
       case MODULE_BLACKBOX:
         status = BlackBoxStatus();
         break;
-      case MODULE_MOTOR_L:
-        DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
-        MotorTest1();
-        DEBUG_PRINTLINE();
-        DEBUG_PRINTLN("Motor Test 2 - Steering");
-        MotorTest2();
-        status = MotorStatus();  // <-- CAN ERROR MSG
-        break;      
-      case MODULE_MOTOR_R:
-        DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
-        MotorTest1();
-        DEBUG_PRINTLINE();
-        DEBUG_PRINTLN("Motor Test 2 - Steering");
-        MotorTest2();
-        status = MotorStatus();  // <-- CAN ERROR MSG
+      case MODULE_BACKUPCPU:
+        status = HeartBeatStatus();
+        break;
+      case MODULE_DBGCOMM:
+        status = DebugCommStatus();
         break;
       case MODULE_LED:
-        DEBUG_PRINTLN("LED Cycle Test");
         LedTest();
-        DEBUG_PRINTLINE();
+        status = true;
+        break;
+      case MODULE_HEATING:
+        LedTest();
         status = true;
         break;
       case MODULE_TEMP:
-        DEBUG_PRINTLN("Temperature Test");
         status = TemperatureStatus(true);
-        DEBUG_PRINTLINE();
+        break;
+      case MODULE_ESTOP:
+        status = EmergencyStopStatus();
+        break;
+      case MODULE_RESERVED:
+        status = true;
         break;
       default:
+        DEBUG_PRINT("MODULE TEST: Unknown System Module: ");
+        DEBUG_PRINTLN(ModuleToString(module));
         break;
     }
   }

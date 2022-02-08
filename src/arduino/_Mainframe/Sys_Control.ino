@@ -1,5 +1,5 @@
 /*
-  GeoRover System control
+  GeoRover System Control
 
   Mads Rosenhøj Jepepsen
   Aarhus University
@@ -8,6 +8,8 @@
 
 void SystemEnable(int module) {
   if (GetStatus(module)) return;
+  DEBUG_PRINT("SYS Enable: ")
+  DEBUG_PRINT(ModuleToString(module));
 
   bool status = true;
 
@@ -15,112 +17,68 @@ void SystemEnable(int module) {
     case MODULE_PWR:
       status = BatteryStatus();
       break;
-    case MODULE_PWR_MOTOR:
-      digitalWrite(PO_POWER_MOTOR, HIGH);
-      DEBUG_PRINTLN("Power to Motors: Enabled");
-      break;
     case MODULE_PWR_5V:
       digitalWrite(PO_POWER_5V, HIGH);
-      DEBUG_PRINTLN("Power to Secondary Systems (5V): Enabled");
       break;
     case MODULE_PWR_12V:
       digitalWrite(PO_POWER_12V, HIGH);
-      DEBUG_PRINTLN("Power to Secondary Systems (12V): Enabled");
       break;
     case MODULE_PWR_24V:
       digitalWrite(PO_POWER_24V, HIGH);
-      DEBUG_PRINTLN("Power to Secondary Systems (24V): Enabled");
       break;
-    case MODULE_RF:
-      SystemEnable(MODULE_PWR_5V);
-      digitalWrite(PO_POWER_RF, HIGH);
-      DEBUG_PRINT("Short Range Communication (RF): ");
-      if (InitializeSBUS()) {
-        DEBUG_PRINTLN("Enabled");
-      } else {
-        DEBUG_PRINTLN("Error");
-        status = false;
-      }
-      break;
-    case MODULE_IRIDIUM:
-      SystemEnable(MODULE_PWR_5V);
-      digitalWrite(PO_POWER_IRIDIUM, HIGH);
-      DEBUG_PRINT("Long Range Communication (Iridium): ");
-      if (InitializeIridium()) {
-        DEBUG_PRINTLN("Enabled");
-      } else {
-        DEBUG_PRINTLN("Error");
-        status = false;
-      }
-      break;
-    case MODULE_CANBUS:
-      SystemEnable(MODULE_PWR_5V);
-      DEBUG_PRINT("CanBus Communication: ");
-      if (InitializeCanBus()) {
-        DEBUG_PRINTLN("Enabled");
-      } else {
-        DEBUG_PRINTLN("Error");
-        status = false;
-      }
+    case MODULE_PWR_MOTOR:
+      digitalWrite(PO_POWER_MOTOR, HIGH);
       break;
     case MODULE_MOTORS:
-      SystemEnable(MODULE_PWR_MOTOR);
-      DEBUG_PRINT("Motors: ");
-      if (InitializeMotors()) {
-        DEBUG_PRINTLN("Enabled");
-      } else {
-        DEBUG_PRINTLN("Error");
-        status = false;
-      }
+      status = InitializeMotors();
+      break;
+    case MODULE_MOTOR_L:
+      status = MotorStatusLeft();
+      break;
+    case MODULE_MOTOR_R:
+      status = MotorStatusRight();
+      break;
+    case MODULE_MOTOR_ACT:
+      status = MotorState();
+      break;
+    case MODULE_CANBUS:
+      status = InitializeCanBus();
+      break;
+    case MODULE_RF:
+      digitalWrite(PO_POWER_RF, HIGH);
+      status = InitializeSBUS();
+      break;
+    case MODULE_IRIDIUM:
+      digitalWrite(PO_POWER_IRIDIUM, HIGH);
+      status = InitializeIridium();
       break;
     case MODULE_ACCEL:
-      SystemEnable(MODULE_PWR_5V);
-      DEBUG_PRINT("Accelerometer: ");
-      if (InitializeAccel()) {
-        DEBUG_PRINTLN("Enabled");
-      } else
-        DEBUG_PRINTLN("Error");
-      status = false;
+      status = InitializeAccel();
       break;
     case MODULE_GNSS:
-      SystemEnable(MODULE_PWR_5V);
-      DEBUG_PRINT("Global Navigation Satellite Systems: ");
-      if (InitializeGnss()) {
-        DEBUG_PRINTLN("Enabled");
-      } else {
-        DEBUG_PRINTLN("Error");
-        status = false;
-      }
+      status = InitializeGnss();
       break;
     case MODULE_SD:
-      SystemEnable(MODULE_PWR_5V);
-      DEBUG_PRINT("Local Storage: ");
-      if (InitializeSDReader()) {
-        DEBUG_PRINTLN("Enabled");
-      } else {
-        DEBUG_PRINTLN("Error");
-        status = false;
-      }
+      status = InitializeSDReader();
       break;
     case MODULE_BLACKBOX:
       InitBlackBox();
-      DEBUG_PRINT("Blackbox : ");
-      if (BlackBoxStatus()) {
-        DEBUG_PRINTLN("Enabled");
-      } else {
-        DEBUG_PRINTLN("Error");
-        status = false;
-      }
-    
+      status = BlackBoxStatus();
+      break;
     case MODULE_HEATING:
-      digitalWrite(PO_POWER_HEATING, HIGH);
-      lastMillistHeatingOn = millis();
+      status = HeatingStart();
       break;
 
     default:
+      DEBUG_PRINT("- UNKNOWN Case");
       break;
   }
 
+  if (status) {
+    DEBUG_PRINTLN(": Enabled");
+  } else {
+    DEBUG_PRINTLN(": ERROR");
+  }
   SetStatus(module, status);
   delay(10);
 }
@@ -155,59 +113,96 @@ void SystemEnableMode(int mode) {
 
 void SystemDisable(int module) {
   if (!GetStatus(module)) return;
+  bool status = false;
+  DEBUG_PRINT("SYS Disable: ")
+  DEBUG_PRINTLN(ModuleToString(module));
 
   switch (module) {
-    case MODULE_PWR_MOTOR:
-      DEBUG_PRINTLN("Power to Motors: Disabled.");
-      digitalWrite(PO_POWER_MOTOR, LOW);
+    case MODULE_PWR:
+      status = BatteryStatus();
       break;
     case MODULE_PWR_5V:
-      DEBUG_PRINTLN("Power to Secondary Systems (5V): Disabled");
       digitalWrite(PO_POWER_5V, LOW);
       break;
     case MODULE_PWR_12V:
-      DEBUG_PRINTLN("Power to Secondary Systems (12V): Disabled");
       digitalWrite(PO_POWER_12V, LOW);
-      break;    
+      break;
     case MODULE_PWR_24V:
-      DEBUG_PRINTLN("Power to Secondary Systems (24V): Disabled");
       digitalWrite(PO_POWER_24V, LOW);
       break;
-    case MODULE_RF:
-      digitalWrite(PO_POWER_RF, LOW);
-      TerminateSBUS();
-      DEBUG_PRINTLN("Short Range Communication (RF): Disabled");
+    case MODULE_PWR_MOTOR:
+      digitalWrite(PO_POWER_MOTOR, LOW);
       break;
-    case MODULE_IRIDIUM:
-      digitalWrite(PO_POWER_IRIDIUM, LOW);
-      DEBUG_PRINTLN("Long Range Communication (Iridium): Disabled");
+    case MODULE_MOTORS:
+      TerminateMotors();
+      SystemDisable(MODULE_PWR_MOTOR);
       break;
-    case MODULE_ACCEL:
-      TerminateAccel();
-      DEBUG_PRINTLN("Accelerometer: Disabled");
+    case MODULE_MOTOR_L:
+      status = MotorStatusLeft();
       break;
-    case MODULE_GNSS:
-      TerminateGnss();
-      DEBUG_PRINTLN("Global Navigation Satellite Systems: Disabled");
+    case MODULE_MOTOR_R:
+      status = MotorStatusRight();
+      break;
+    case MODULE_MOTOR_ACT:
+      status = MotorState();
       break;
     case MODULE_CANBUS:
       TerminateCanBus();
-      DEBUG_PRINTLN("CanBus Communication: Disabled");
       break;
-    case MODULE_MOTORS:
-      SystemDisable(MODULE_PWR_MOTOR);
-      TerminateMotors();
-      DEBUG_PRINTLN("Motors: Disabled");
+    case MODULE_RF:
+      TerminateSBUS();
+      digitalWrite(PO_POWER_RF, LOW);
+      break;
+    case MODULE_IRIDIUM:
+      TerminateIridium();
+      digitalWrite(PO_POWER_IRIDIUM, LOW);
+      break;
+    case MODULE_GNSS:
+      TerminateGnss();
+      break;
+    case MODULE_ACCEL:
+      TerminateAccel();
+      break;
+    case MODULE_SD:
+      status = SDReaderStatus();
+      break;
+    case MODULE_BLACKBOX:
+      status = BlackBoxStatus();
+      break;
+    case MODULE_DBGCOMM:
+      status = DebugCommStatus();
+      break;
+    case MODULE_LED:
+      status = LedStatus();
       break;
     case MODULE_HEATING:
-      digitalWrite(PO_POWER_HEATING, LOW);
-      lastMillistHeatingOff = millis();
+      HeatingStop();
+      break;
+    case MODULE_TEMP:
+      status = TemperatureStatus();
+      break;
+    case MODULE_BACKUPCPU:
+      status = HeartBeatStatus();
+      break;
+    case MODULE_ESTOP:
+      status = EmergencyStopStatus();
+      break;
+    case MODULE_RESERVED:
+      status = true;
       break;
     default:
+      DEBUG_PRINT(" - Unknown Case");
+      DEBUG_PRINTLN(ModuleToString(module));
       break;
   }
 
-  SetStatus(module, false);
+  if (status) {
+    DEBUG_PRINTLN("Unable to Disable");
+  } else {
+    DEBUG_PRINTLN("- Disabled");
+  }
+
+  SetStatus(module, status);
 }
 
 // Disable all secondary systems
@@ -221,6 +216,7 @@ void SystemDisable() {
   SystemDisable(MODULE_PWR_MOTOR);
   SystemDisable(MODULE_PWR_5V);
   SystemDisable(MODULE_PWR_12V);
+  SystemDisable(MODULE_PWR_24V);
 }
 
 bool SystemCheck(int mode) {

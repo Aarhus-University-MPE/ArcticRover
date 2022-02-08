@@ -80,13 +80,14 @@ void ResetBackupCPU() {
   digitalWrite(PO_BACKUP_RST, false);
 }
 
-unsigned long lastMillisHeartbeatBlackbox = 0;
+unsigned long lastMillisHeartbeatBlackbox = HRTBEAT_DT_LOG;
 void HeartbeatBlackBox() {
   if (millis() - lastMillisHeartbeatBlackbox > HRTBEAT_DT_LOG) {
     lastMillisHeartbeatBlackbox = millis();
     DEBUG_PRINTLINE();
-    DEBUG_PRINT("Heartbeat System Status: ");
+    DEBUG_PRINTLN("Heartbeat System Check: ")
     SystemCheck();
+    DEBUG_PRINT("System Status: ");
     DEBUG_PRINTLN(String(ToLong(SystemStatus)));
     DEBUG_PRINTLINE();
   }

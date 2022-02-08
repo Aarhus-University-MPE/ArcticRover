@@ -70,7 +70,7 @@
 #define SYSTEM_CHECK_DT        1000
 #define SYSTEM_REBOOT_DT       5000
 
-#define MODULE_COUNT           20
+#define MODULE_COUNT           23
 
 #define MODULE_PWR             0
 #define MODULE_PWR_5V          1
@@ -103,20 +103,24 @@
   ((m) == 3 ? "Secondary Power (24V)" : \
   ((m) == 4 ? "Secondary Power (Motors)" : \
   ((m) == 5 ? "Motors" : \
-  ((m) == 6 ? "Motor Active" : \
-  ((m) == 7 ? "CAN-bus" : \
-  ((m) == 8 ? "Short Range Communication (RF)" : \
-  ((m) == 9 ? "Long Range Communication (Iridium)" : \
-  ((m) == 10 ? "Global Navigation Satellite System" : \
-  ((m) == 11 ? "Accelerometer" : \
-  ((m) == 12 ? "Local Storage" : \
-  ((m) == 13 ? "Blackbox" : \
-  ((m) == 14 ? "Debug Comm." : \
-  ((m) == 15 ? "Backup CPU" : \
-  ((m) == 16 ? "Emergency Stop" : \
-  ((m) == 17 ? "Reserved" : \
-  ((m) == 18 ? "LED" : \
-  "Unknown")))))))))))))))))))
+  ((m) == 6 ? "Motor Left" : \
+  ((m) == 7 ? "Motor Right" : \
+  ((m) == 8 ? "Motor Active" : \
+  ((m) == 9 ? "CAN-bus" : \
+  ((m) == 10 ? "Short Range Communication (RF)" : \
+  ((m) == 11 ? "Long Range Communication (Iridium)" : \
+  ((m) == 12 ? "Global Navigation Satellite System" : \
+  ((m) == 13 ? "Accelerometer" : \
+  ((m) == 14 ? "Local Storage" : \
+  ((m) == 15 ? "Blackbox" : \
+  ((m) == 16 ? "Debug Comm." : \
+  ((m) == 17 ? "System LED" : \
+  ((m) == 18 ? "Heating" : \
+  ((m) == 19 ? "Temperature" : \
+  ((m) == 20 ? "Backup CPU" : \
+  ((m) == 21 ? "Emergency Stop" : \
+  ((m) == 22 ? "Reserved" : \
+  ("Unknown"))))))))))))))))))))))))
 
 const unsigned long SYSREQ_REMOTE_CONTROL =
     (1L << MODULE_PWR) +

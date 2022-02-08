@@ -39,6 +39,22 @@ int ThermTemp(int thermistor) {
   return temp;
 }
 
+bool HeatingStart() {
+  if (millis() - lastMillistHeatingOff < HEATING_TIMEOUT) {
+    return false;
+  }
+
+  digitalWrite(PO_POWER_HEATING, HIGH);
+  lastMillistHeatingOn = millis();
+
+  return true;
+}
+
+bool HeatingStop() {
+  digitalWrite(PO_POWER_HEATING, LOW);
+  lastMillistHeatingOff = millis();
+}
+
 bool TemperatureStatus() {
   bool status = MeanThermTemp() > TEMP_SYSTEM_MIN;
 
@@ -79,6 +95,8 @@ void HeatingProcess() {
   HeatingCheck();
 }
 
+// If currently heating checks for maximum heating duration
+// If not currently heating checks for timeout to reactivate heating
 void HeatingCheck() {
   if (GetStatus(MODULE_HEATING)) {
     if (millis() - lastMillistHeatingOn > HEATING_DURATION) {
