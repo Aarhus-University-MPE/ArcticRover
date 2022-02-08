@@ -53,6 +53,7 @@ void SelectFunctionSystemTest() {
 
 // Run full system test
 void SystemTest() {
+  unsigned long testResults;
   switch (systemTestState) {
     case 0:
       DEBUG_PRINTLN("Running Full System Test");
@@ -124,7 +125,7 @@ void SystemTest() {
     case 16:
       DEBUG_PRINTLN("Disabeling all systems");
       DEBUG_PRINTLINE();
-      unsigned long testResults = ToLong(SystemStatus);
+      testResults = ToLong(SystemStatus);
       SystemDisable();
       AttachSelectButton();
       DEBUG_PRINTLINE();
@@ -138,7 +139,6 @@ void SystemTest() {
       break;
   }
 }
-
 // System check
 void SystemCheck() {
   for (int i = 0; i < MODULE_COUNT - 2; i++) {
@@ -231,6 +231,7 @@ bool SystemCheckModule(byte module) {
 bool SystemTestModule(byte module, bool disableAfterTest) {
   SystemEnable(module);
   bool status = false;
+  bool testDone = true;
 
   if (GetStatus(module)) {
     switch (module) {
@@ -250,11 +251,7 @@ bool SystemTestModule(byte module, bool disableAfterTest) {
         status = MotorStatus();
         break;
       case MODULE_MOTORS:
-        DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
-        MotorTest1();
-        DEBUG_PRINTLINE();
-        DEBUG_PRINTLN("Motor Test 2 - Steering");
-        MotorTest2();
+        testDone = MotorTest();
         status = MotorStatus();  // <-- CAN ERROR MSG
         break;
       case MODULE_MOTOR_L:
@@ -323,5 +320,5 @@ bool SystemTestModule(byte module, bool disableAfterTest) {
     SystemDisable(module);
   }
 
-  return status;
+  return testDone;
 }

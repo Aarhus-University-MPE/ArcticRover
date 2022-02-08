@@ -111,7 +111,10 @@ float steerFactor(float dir) {
 }
 
 // Rework for CAN
-void MotorTest1() {
+int MotorTestState = 0;
+bool MotorTest() {
+  bool testComplete = false;
+  DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
   if (GetStatus(MODULE_MOTORS)) {
     float speed = -0.01;
     DEBUG_PRINTLN("Ramping up");
@@ -126,31 +129,35 @@ void MotorTest1() {
       MotorUpdate(0, speed, true);
       delay(MOTOR_RAMP_TIME);
     }
-  }
-}
 
-// Runs motor test, ramps each right, left and back to center
-void MotorTest2() {
-  if (GetStatus(MODULE_MOTORS)) {
-    float speed = MOTOR_MAX_SPEED_FWD * 0.25;
-    float dir = -0.02;
-    DEBUG_PRINTLN("Turning Right");
-    for (size_t i = 0; i < 51; i++) {
-      dir += 0.02;
-      MotorUpdate(dir, speed, true);
-      delay(MOTOR_RAMP_TIME);
-    }
-    DEBUG_PRINTLN("Turning Left");
-    for (size_t i = 0; i < 101; i++) {
-      dir -= 0.02;
-      MotorUpdate(dir, speed, true);
-      delay(MOTOR_RAMP_TIME);
-    }
-    DEBUG_PRINTLN("Centering");
-    for (size_t i = 0; i < 51; i++) {
-      dir += 0.02;
-      MotorUpdate(dir, speed, true);
-      delay(MOTOR_RAMP_TIME);
+    DEBUG_PRINTLINE();
+    DEBUG_PRINTLN("Motor Test 2 - Steering");
+
+    if (GetStatus(MODULE_MOTORS)) {
+      float speed = MOTOR_MAX_SPEED_FWD * 0.25;
+      float dir = -0.02;
+      DEBUG_PRINTLN("Turning Right");
+      for (size_t i = 0; i < 51; i++) {
+        dir += 0.02;
+        MotorUpdate(dir, speed, true);
+        delay(MOTOR_RAMP_TIME);
+      }
+      DEBUG_PRINTLN("Turning Left");
+      for (size_t i = 0; i < 101; i++) {
+        dir -= 0.02;
+        MotorUpdate(dir, speed, true);
+        delay(MOTOR_RAMP_TIME);
+      }
+      DEBUG_PRINTLN("Centering");
+      for (size_t i = 0; i < 51; i++) {
+        dir += 0.02;
+        MotorUpdate(dir, speed, true);
+        delay(MOTOR_RAMP_TIME);
+      }
     }
   }
+  
+  testComplete = true;
+
+  return testComplete;
 }
