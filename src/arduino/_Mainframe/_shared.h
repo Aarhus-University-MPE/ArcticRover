@@ -103,6 +103,7 @@ unsigned long lastSystemReboot = 9999999;
 unsigned long lastMillistHeatingOff = 0;
 unsigned long lastMillistHeatingOn = 0;
 
+int systemTestState = 0;
 byte mode;
 byte modeCycle;
 byte prevMode;

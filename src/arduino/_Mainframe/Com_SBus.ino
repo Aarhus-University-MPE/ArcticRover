@@ -24,23 +24,42 @@ void TerminateSBUS() {
 }
 
 bool SBusStatus() {
-  return (COM_SERIAL_RF);
+  return GetStatus(MODULE_RF);
 }
 
-bool SBusTest() {
-  bool status = sbus.getGoodFrames() > 0;
-  long SBusTestStart = millis();
-  long SBusRxLast = 0;
+int sbusTestState = 0;
+long millisSbusTestStart = 0;
+long millisLastSbusPrint = 0;
 
-  while (millis() - SBusTestStart < COM_TEST_PERIOD) {
-    sbus.process();
-    if (millis() - SBusRxLast > SBUS_RX_PERIOD) {
-      printChannels();
-      SBusRxLast = millis();
-    }
+bool SBusTest() {
+  bool testDone = false;
+
+  switch (sbusTestState) {
+    case 0:
+      DEBUG_PRINT("SBUS feed starting for: ");
+      DEBUG_PRINT(SYS_TEST_DURATION);
+      DEBUG_PRINTLN(" ms");
+      millisSbusTestStart = millis();
+      sbusTestState++;
+      break;
+    case 1:
+      sbus.process();
+      if (millis() - millisLastSbusPrint > SYS_PRINT_PERIOD_SHORT) {
+        millisLastSbusPrint = millis();
+        printChannels();
+      }
+
+      if (millis() - millisSbusTestStart > SYS_TEST_DURATION) sbusTestState++;
+      break;
+    case 2:
+      sbusTestState = 0;
+      testDone = true;
+      SetStatus(MODULE_RF,sbus.getGoodFrames() > 0);
+    default:
+      break;
   }
 
-  return status;
+  return testDone;
 }
 
 void printChannels() {

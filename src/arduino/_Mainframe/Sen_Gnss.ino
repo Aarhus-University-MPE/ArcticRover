@@ -26,44 +26,72 @@ bool InitializeGnss() {
 }
 
 bool GnssStatus() {
-  return myGNSS.isConnected();
+  return GetStatus(MODULE_GNSS);
 }
 
-bool GnssTest(bool printRes) {
-  if (printRes) {
-    QueryGnss();
+int gnssTestState = 0;
+long millisGnssTestStart = 0;
+long millisLastGnssPrint = 0;
+
+bool GnssTest() {
+  bool testDone = false;
+  switch (gnssTestState) {
+    case 0:
+      DEBUG_PRINT("GNSS feed starting for: ");
+      DEBUG_PRINT(SYS_TEST_DURATION);
+      DEBUG_PRINTLN(" ms");
+      millisGnssTestStart = millis();
+      gnssTestState++;
+      break;
+    case 1:
+      if (millis() - millisLastGnssPrint > SYS_PRINT_PERIOD_LONG) {
+        millisLastGnssPrint = millis();
+        QueryGnss();
+      }
+
+      if (millis() - millisGnssTestStart > SYS_TEST_DURATION) gnssTestState++;
+      break;
+    case 2:
+      SetStatus(MODULE_GNSS, GnssTime(true));
+      gnssTestState = 0;
+      testDone = true;
+    default:
+      break;
   }
 
-  bool status = (GnssStatus() && GnssTime());
+  return testDone;
+}
+
+bool GnssTime(bool print) {
+  bool status;
+  if (print) DEBUG_PRINT("Time and Date is: ");
+  if (!myGNSS.getTimeValid() || !myGNSS.getDateValid()) {
+    if (print) DEBUG_PRINTLN("not valid");
+    status = false;
+  } else {
+    if (print) {
+      DEBUG_PRINTLN("valid");
+      int year = myGNSS.getYear();
+      int month = myGNSS.getMonth();
+      int day = myGNSS.getDay();
+      int hour = myGNSS.getHour();
+      int minute = myGNSS.getMinute();
+
+      DEBUG_PRINT("Current time: ");
+      DEBUG_PRINT(year);
+      DEBUG_PRINT("-");
+      DEBUG_PRINT(month);
+      DEBUG_PRINT("-");
+      DEBUG_PRINT(day);
+      DEBUG_PRINT("-");
+      DEBUG_PRINT(hour);
+      DEBUG_PRINT(":");
+      DEBUG_PRINTLN(minute);
+    }
+    status = true;
+  }
 
   return status;
-}
-
-bool GnssTime() {
-  DEBUG_PRINT("Time and Date is: ");
-  if (!myGNSS.getTimeValid() || !myGNSS.getDateValid()) {
-    DEBUG_PRINTLN("not valid");
-  } else {
-    DEBUG_PRINTLN("valid");
-    int year = myGNSS.getYear();
-    int month = myGNSS.getMonth();
-    int day = myGNSS.getDay();
-    int hour = myGNSS.getHour();
-    int minute = myGNSS.getMinute();
-
-    DEBUG_PRINT("Current time: ");
-    DEBUG_PRINT(year);
-    DEBUG_PRINT("-");
-    DEBUG_PRINT(month);
-    DEBUG_PRINT("-");
-    DEBUG_PRINT(day);
-    DEBUG_PRINT("-");
-    DEBUG_PRINT(hour);
-    DEBUG_PRINT(":");
-    DEBUG_PRINTLN(minute);
-  }
-
-  return true;
 }
 
 void TerminateGnss() {

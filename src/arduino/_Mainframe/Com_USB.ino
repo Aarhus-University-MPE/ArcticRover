@@ -227,13 +227,17 @@ void parseCommandModule() {
       DEBUG_PRINT("Testing Module: ");
       DEBUG_PRINTLN(ModuleToString(moduleSlct));
       DEBUG_PRINTLINE();
-      if (SystemTestModule(moduleSlct, true)) {
+      if (SystemTestModule(moduleSlct)) {
         DEBUG_PRINTLN("Test Success");
       } else {
         DEBUG_PRINTLN("Test Failed!");
       }
+      SystemDisable(moduleSlct);
       DEBUG_PRINTLINE();
       break;
+    case CMD_MODULE_STOPTEST:
+      DEBUG_PRINTLN("Manual System Test Stop");
+      systemTestState = -1;
     case '\0':
       break;
     default:

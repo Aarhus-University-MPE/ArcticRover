@@ -42,21 +42,45 @@ bool AccelStatus() {
   return GetStatus(MODULE_ACCEL);
 }
 
-bool AccelTest(bool printRes) {
-  if (printRes) {
-    DEBUG_PRINT("Accelerometer: ");
-    if (AccelStatus()) {
-      ReadAccel();
-      DEBUG_PRINT("x: ");
-      DEBUG_PRINT((float)accel.cx);
-      DEBUG_PRINT("\t y: ");
-      DEBUG_PRINT((float)accel.cy);
-      DEBUG_PRINT("\t z: ");
-      DEBUG_PRINTLN((float)accel.cz);
-    } else {
-      DEBUG_PRINTLN("ERROR");
-    }
+int accTestState = 0;
+long millisAccTestStart = 0;
+long millisLastAccPrint = 0;
+
+bool AccelTest() {
+  bool testDone = false;
+  switch (accTestState) {
+    case 0:
+      DEBUG_PRINT("Accelerometer feed starting for: ");
+      DEBUG_PRINT(SYS_TEST_DURATION);
+      DEBUG_PRINTLN(" ms");
+      millisAccTestStart = millis();
+      accTestState++;
+      break;
+    case 1:
+      if (millis() - millisLastAccPrint > SYS_PRINT_PERIOD) {
+        millisLastAccPrint = millis();
+        DEBUG_PRINT("Accelerometer: ");
+        if (AccelStatus()) {
+          ReadAccel();
+          DEBUG_PRINT("x: ");
+          DEBUG_PRINT((float)accel.cx);
+          DEBUG_PRINT("\t y: ");
+          DEBUG_PRINT((float)accel.cy);
+          DEBUG_PRINT("\t z: ");
+          DEBUG_PRINTLN((float)accel.cz);
+        } else {
+          DEBUG_PRINTLN("ERROR");
+        }
+      }
+
+      if (millis() - millisAccTestStart > SYS_TEST_DURATION) accTestState++;
+      break;
+    case 2:
+      testDone = true;
+      accTestState = 0;
+    default:
+      break;
   }
 
-  return AccelStatus();
+  return testDone;
 }

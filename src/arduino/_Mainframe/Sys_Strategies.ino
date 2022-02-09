@@ -38,6 +38,7 @@ void InitMode() {
   if (!digitalRead(PI_BUTTON_ESTOP)) {
     mode = MODE_EMERGENCY;
   }
+  SetMode(mode);
   modeCycle = mode;
   strategyMethods[0][mode]();
 }

@@ -62,27 +62,51 @@ bool TemperatureStatus() {
   return status;
 }
 
-bool TemperatureStatus(bool print) {
-  if (!print) {
-    return TemperatureStatus();
+int tempTestState = 0;
+long millisTempTestStart = 0;
+long millisLastTempPrint = 0;
+
+// Runs temperature test for a duration, returns true once test is complete
+bool TemperatureTest() {
+  bool testDone = false;
+  int meanTemp;
+  switch (tempTestState) {
+    case 0:
+      DEBUG_PRINT("Thermistor feed starting for: ");
+      DEBUG_PRINT(SYS_TEST_DURATION);
+      DEBUG_PRINTLN(" ms");
+      millisTempTestStart = millis();
+      tempTestState++;
+      break;
+    case 1:
+      if (millis() - millisLastTempPrint > SYS_PRINT_PERIOD_LONG) {
+        millisLastTempPrint = millis();
+        meanTemp = MeanThermTemp();
+        DEBUG_PRINT("Temperatures: ");
+        DEBUG_PRINT("\tT1: ");
+        DEBUG_PRINT(ThermTemp(0));
+        DEBUG_PRINT("\tT2: ");
+        DEBUG_PRINT(ThermTemp(1));
+        DEBUG_PRINT("\tT3: ");
+        DEBUG_PRINT(ThermTemp(2));
+        DEBUG_PRINT("\tMean: ");
+        DEBUG_PRINTLN(meanTemp);
+
+        SetStatus(MODULE_TEMP, meanTemp > TEMP_SYSTEM_MIN);
+      }
+
+      if (millis() - millisTempTestStart > SYS_TEST_DURATION) tempTestState++;
+      break;
+    case 2:
+      testDone = true;
+      tempTestState = 0;
+      break;
+    default:
+      break;
   }
 
-  int meanTemp = MeanThermTemp();
-
-  DEBUG_PRINT("Temperatures: ");
-  DEBUG_PRINT("\tT1: ");
-  DEBUG_PRINT(ThermTemp(0));
-  DEBUG_PRINT("\tT2: ");
-  DEBUG_PRINT(ThermTemp(1));
-  DEBUG_PRINT("\tT3: ");
-  DEBUG_PRINT(ThermTemp(2));
-  DEBUG_PRINT("\tMean: ");
-  DEBUG_PRINTLN(meanTemp);
-
-  bool status = meanTemp > TEMP_SYSTEM_MIN;
-
-  SetStatus(MODULE_TEMP, status);
-  return status;
+  
+  return testDone;
 }
 
 // If temp < minimum temp runs heating period

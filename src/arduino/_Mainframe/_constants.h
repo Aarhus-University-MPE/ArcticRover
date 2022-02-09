@@ -46,7 +46,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion          "0.28.116"
+#define SystemVersion          "0.87.236"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN    B001  // 001
@@ -211,6 +211,15 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define HEATING_TIMEOUT                 40000
 
 // ------------------------------------------------------------ //
+//                         SYS TESTS                            //
+// ------------------------------------------------------------ //
+#define SYS_TEST_DURATION               5000
+#define SYS_TEST_DURATION_LONG          30000
+#define SYS_PRINT_PERIOD_LONG           500
+#define SYS_PRINT_PERIOD                250
+#define SYS_PRINT_PERIOD_SHORT          100
+
+// ------------------------------------------------------------ //
 //                        COMMUNICATION                         //
 // ------------------------------------------------------------ //
 
@@ -314,6 +323,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define CMD_MODULE_STATUS               'S'
 #define CMD_MODULE_RESET                'R'
 #define CMD_MODULE_TEST                 'T'
+#define CMD_MODULE_STOPTEST             'Q'
 
 #define CMD_ROUTE                       'R'
 #define CMD_ROUTE_SET                   'S'

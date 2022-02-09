@@ -81,6 +81,10 @@ bool MotorState() {
   return GetStatus(MODULE_MOTORS);
 }
 
+bool MotorPowerStatus() {
+  return MotorStatus();  // <-------- Update from CAN Power Error only
+}
+
 // Motors operational?
 bool MotorStatus() {
   return (MotorStatusLeft() && MotorStatusRight());
@@ -110,54 +114,191 @@ float steerFactor(float dir) {
   return scale;
 }
 
-// Rework for CAN
-int MotorTestState = 0;
+int motorTestState;
 bool MotorTest() {
-  bool testComplete = false;
-  DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
-  if (GetStatus(MODULE_MOTORS)) {
-    float speed = -0.01;
-    DEBUG_PRINTLN("Ramping up");
-    for (size_t i = 0; i < 101; i++) {
-      speed += 0.01;
-      MotorUpdate(0, speed, true);
-      delay(MOTOR_RAMP_TIME);
-    }
-    DEBUG_PRINTLN("Ramping down");
-    for (size_t i = 0; i < 100; i++) {
-      speed -= 0.01;
-      MotorUpdate(0, speed, true);
-      delay(MOTOR_RAMP_TIME);
-    }
-
-    DEBUG_PRINTLINE();
-    DEBUG_PRINTLN("Motor Test 2 - Steering");
-
-    if (GetStatus(MODULE_MOTORS)) {
-      float speed = MOTOR_MAX_SPEED_FWD * 0.25;
-      float dir = -0.02;
-      DEBUG_PRINTLN("Turning Right");
-      for (size_t i = 0; i < 51; i++) {
-        dir += 0.02;
-        MotorUpdate(dir, speed, true);
-        delay(MOTOR_RAMP_TIME);
-      }
-      DEBUG_PRINTLN("Turning Left");
-      for (size_t i = 0; i < 101; i++) {
-        dir -= 0.02;
-        MotorUpdate(dir, speed, true);
-        delay(MOTOR_RAMP_TIME);
-      }
-      DEBUG_PRINTLN("Centering");
-      for (size_t i = 0; i < 51; i++) {
-        dir += 0.02;
-        MotorUpdate(dir, speed, true);
-        delay(MOTOR_RAMP_TIME);
-      }
-    }
+  if (!GetStatus(MODULE_MOTORS)) {
+    return true;
   }
-  
-  testComplete = true;
+  bool testDone = false;
 
-  return testComplete;
+  switch (motorTestState) {
+    case 0:
+      DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
+      DEBUG_PRINTLINE();
+      motorTestState++;
+      break;
+    case 1:
+      if (MotorTestRamp()) motorTestState++;
+      break;
+    case 2:
+      DEBUG_PRINTLN("Motor Test 2 - Steering");
+      DEBUG_PRINTLINE();
+      motorTestState++;
+      break;
+    case 3:
+      if (MotorTestSteer()) motorTestState++;
+      break;
+    case 4:
+      motorTestState = 0;
+      testDone = true;
+      MotorUpdate(0, 0, false);
+    default:
+      break;
+  }
+
+  CanBusProcess();
+
+  return testDone;
+}
+
+int motorTestRampState = 0;
+long millisLastMotorStep = 0;
+float speed = 0.0f;
+
+// Runs Motor Ramp Test, ramps up to maximum speed FWD -> Ramps down to 0 -> Ramps up to maximum speed BWD -> Ramps down to 0
+bool MotorTestRamp() {
+  if (!GetStatus(MODULE_MOTORS)) {
+    return true;
+  }
+
+  bool testDone = false;
+  switch (motorTestRampState) {
+    case 0:
+      DEBUG_PRINTLN("Ramping up - FWD");
+      motorTestRampState++;
+      break;
+    case 1:
+      if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
+        MotorUpdate(0, speed, true);
+        speed += 0.01;
+        millisLastMotorStep = millis();
+      }
+      if (speed >= 1) motorTestRampState++;
+      break;
+    case 2:
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("Ramping down");
+      motorTestRampState++;
+      break;
+    case 3:
+      if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
+        MotorUpdate(0, speed, true);
+        speed -= 0.01;
+        millisLastMotorStep = millis();
+      }
+      if (speed <= 0) {
+        speed = 0;
+        MotorUpdate(0, speed, true);
+        motorTestRampState++;
+      }
+      break;
+    case 4:
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("Ramping up - BWD");
+      motorTestRampState++;
+      break;
+    case 5:
+      if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
+        MotorUpdate(0, speed, true);
+        speed -= 0.01;
+        millisLastMotorStep = millis();
+      }
+      if (speed <= 1) motorTestRampState++;
+      break;
+    case 6:
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("Ramping down");
+      motorTestRampState++;
+      break;
+    case 7:
+      if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
+        MotorUpdate(0, speed, true);
+        speed += 0.01;
+        millisLastMotorStep = millis();
+      }
+      if (speed >= 0) {
+        speed = 0;
+        motorTestRampState++;
+        MotorUpdate(0, speed, true);
+      }
+      break;
+    case 8:
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("Motor Test 2 - Steering");
+      motorTestRampState++;
+      break;
+    case 9:
+      motorTestRampState = 0;
+      testDone = true;
+      MotorUpdate(0, 0, true);
+    default:
+      testDone = true;
+      break;
+  }
+
+  return testDone;
+}
+
+
+int motorTestSteerState = 0;
+float dir = 0.0f;
+
+// Runs Motor Steering Test, Runs at lower speed, turns max steer right -> Max Steer Left -> Centered
+bool MotorTestSteer() {
+  if (!GetStatus(MODULE_MOTORS)) {
+    return true;
+  }
+  float speed = MOTOR_MAX_SPEED_FWD * 0.25;
+
+  bool testDone = false;
+
+  switch (motorTestSteerState) {
+    case 0:
+      DEBUG_PRINTLN("Turning Right -->");
+      motorTestSteerState++;
+      break;
+    case 1:
+      if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
+        MotorUpdate(dir, speed, true);
+        dir += 0.02;
+        millisLastMotorStep = millis();
+      }
+      if (dir >= 1) motorTestSteerState++;
+      break;
+    case 2:
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("Turning Left <--");
+      motorTestSteerState++;
+      break;
+    case 3:
+      if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
+        MotorUpdate(dir, speed, true);
+        dir -= 0.02;
+        millisLastMotorStep = millis();
+      }
+      if (dir <= -1) motorTestSteerState++;
+      break;
+    case 4:
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("Centering --> || <--");
+      motorTestSteerState++;
+      break;
+    case 5:
+      if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
+        MotorUpdate(dir, speed, true);
+        dir += 0.02;
+        millisLastMotorStep = millis();
+      }
+      if (dir >= 0) motorTestSteerState++;
+      break;
+    case 6:
+      motorTestSteerState = 0;
+      testDone = true;
+      MotorUpdate(0, 0, true);
+    default:
+      testDone = true;
+      break;
+  }
+
+  return testDone;
 }

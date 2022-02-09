@@ -11,6 +11,7 @@
 
 struct can_frame canMsg;
 struct can_frame canTestMsg;
+
 long CanBusTxLast;
 
 MCP2515 mcp2515(PO_SPISS_CANBUS);
@@ -62,10 +63,8 @@ void CanBusProcess() {
   }
 }
 
-bool CanBusStatus(){
-  bool status = true;
-  // CAN ERROR?
-  return status;
+bool CanBusStatus() {
+  return GetStatus(MODULE_CANBUS);
 }
 
 bool ParseData() {
@@ -88,35 +87,51 @@ bool ParseData() {
   return status;
 }
 
+int canTestState = 0;
+long millisCanTestStart = 0;
+long millisLastCanPrint = 0;
+
 bool CanBusTest() {
-  bool status = false;
-  DEBUG_PRINTLN("------- CAN Read ----------");
-  DEBUG_PRINTLN("ID  DLC   DATA");
+  bool testDone = false;
 
-  canTestMsg.can_id = 0x12;
-  canTestMsg.can_dlc = 3;
-  canTestMsg.data[0] = 0;
-  canTestMsg.data[1] = 0;
-  canTestMsg.data[2] = 0;
+  switch (canTestState) {
+    case 0:
+      DEBUG_PRINT("GNSS feed starting for: ");
+      DEBUG_PRINT(SYS_TEST_DURATION_LONG);
+      DEBUG_PRINTLN(" ms");
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN("------- CAN Read ----------");
+      DEBUG_PRINTLN("ID  DLC   DATA");
+      canTestMsg.can_id = 0x12;
+      canTestMsg.can_dlc = 3;
+      canTestMsg.data[0] = 0;
+      canTestMsg.data[1] = 0;
+      canTestMsg.data[2] = 0;
+      millisCanTestStart = millis();
+      canTestState++;
+      break;
+    case 1:
+      if (millis() - millisLastCanPrint > CANBUS_TX_PERIOD) {
+        millisLastCanPrint = millis();
+        if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
+          StreamData();
+          ParseData();
+          DEBUG_PRINTLN();
+        }
+        mcp2515.sendMessage(&canTestMsg);
+      }
 
-  mcp2515.sendMessage(&canTestMsg);
-
-  long CanBusTxLast = millis();
-  long CanBusTestStart = millis();
-
-  while (millis() - CanBusTestStart < COM_TEST_PERIOD) {
-    if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
-      StreamData();
-      status = ParseData();
-
-      Serial.println();
-    } else if (millis() - CanBusTxLast > CANBUS_TX_PERIOD) {
-      mcp2515.sendMessage(&canTestMsg);
-      CanBusTxLast = millis();
-    }
+      if (millis() - millisCanTestStart > SYS_TEST_DURATION_LONG) canTestState++;
+      break;
+    case 2:
+      canTestState = 0;
+      testDone = true;
+      SetStatus(MODULE_CANBUS, CanBusStatus());  //<---- Update to reflect Motor CAN Errors
+    default:
+      break;
   }
 
-  return status;
+  return testDone;
 }
 
 // Stream all data in raw HEX

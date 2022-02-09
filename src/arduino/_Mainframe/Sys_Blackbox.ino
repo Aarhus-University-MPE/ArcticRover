@@ -8,13 +8,12 @@
 
 bool newLine = true;
 // Initialize system Blackbox
-void InitBlackBox() {
+bool InitBlackBox() {
   InitializeSDReader();
 
   if (SDReaderStatus()) {
     File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
     if (blackBoxFile) {
-      DEBUG_PRINTLN("Initializing Blackbox");
       blackBoxFile.println("GeoRover Blackbox");
       blackBoxFile.print("System Version:;");
       blackBoxFile.println(SystemVersion);
@@ -25,9 +24,10 @@ void InitBlackBox() {
     } else
       SetStatus(MODULE_BLACKBOX, false);
   } else {
-    DEBUG_PRINTLN("SD connection error!");
     SetStatus(MODULE_BLACKBOX, false);
   }
+
+  return BlackBoxStatus;
 }
 
 bool BlackBoxStatus() {
