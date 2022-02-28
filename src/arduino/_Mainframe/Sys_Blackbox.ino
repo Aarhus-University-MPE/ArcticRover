@@ -9,20 +9,19 @@
 bool newLine = true;
 // Initialize system Blackbox
 bool InitBlackBox() {
-  InitializeSDReader();
+  if (!SDReaderStatus()) {
+    return false;
+  }
 
-  if (SDReaderStatus()) {
-    File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
-    if (blackBoxFile) {
-      blackBoxFile.println("GeoRover Blackbox");
-      blackBoxFile.print("System Version:;");
-      blackBoxFile.println(SystemVersion);
-      blackBoxFile.println();
-      blackBoxFile.close();
+  File blackBoxFile = SD.open("Blackbox.csv", FILE_WRITE);
+  if (blackBoxFile) {
+    blackBoxFile.println("GeoRover Blackbox");
+    blackBoxFile.print("System Version:;");
+    blackBoxFile.println(SystemVersion);
+    blackBoxFile.println();
+    blackBoxFile.close();
 
-      SetStatus(MODULE_BLACKBOX, true);
-    } else
-      SetStatus(MODULE_BLACKBOX, false);
+    SetStatus(MODULE_BLACKBOX, true);
   } else {
     SetStatus(MODULE_BLACKBOX, false);
   }

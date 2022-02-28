@@ -5,8 +5,8 @@ void InitAllPins() {
   pinMode(PO_PRIMARY_HRTBEAT, OUTPUT);
   pinMode(PO_PRIMARY_RST, OUTPUT);
 
-  digitalWrite(PO_PRIMARY_HRTBEAT, true);
-  digitalWrite(PO_PRIMARY_RST, true);
+  digitalWrite(PO_PRIMARY_HRTBEAT, false);
+  digitalWrite(PO_PRIMARY_RST, false);
 
   // Assign heartbeat interrupt
   attachInterrupt(PI_INT_HRTBEAT, HeartBeatInInterrupt, FALLING);

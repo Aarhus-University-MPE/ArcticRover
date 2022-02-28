@@ -31,13 +31,12 @@
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
 // ------------------------------------------------------------ //
-#define HRTBEAT_FRQ_OUT 6  // times per minute
+#define HRTBEAT_FRQ_OUT 1  // times per minute
 #define HRTBEAT_DT_OUT 60000 / HRTBEAT_FRQ_OUT
 
-#define HRTBEAT_TRESHOLD 60000
+#define HRTBEAT_TRESHOLD 240000
 
-#define BACKUP_RST_FRQ 2
-#define BACKUP_RST_DT 60000 / BACKUP_RST_FRQ
+#define BACKUP_RST_DT HRTBEAT_TRESHOLD
 
 // ------------------------------------------------------------ //
 //                        COMMUNICATION                         //
@@ -52,7 +51,7 @@
 // Sensor and Modules
 #define MODULE_COUNT 5
 
-#define MODULE_DEBUGCOMM 0
+#define MODULE_DBGCOMM 0
 #define MODULE_PRIMARYCPU 1
 
 // ------------------------------------------------------------ //

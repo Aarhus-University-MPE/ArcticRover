@@ -31,6 +31,9 @@ bool BatteryStatus(bool print) {
 
 int BatteryLevel() {
   int voltage = analogRead(PA_SENSOR_BATT);
+
+  DEBUG_PRINTLN(voltage);
+  
   int i;
 
   while (voltage < batteryLevelVoltage[i]) {

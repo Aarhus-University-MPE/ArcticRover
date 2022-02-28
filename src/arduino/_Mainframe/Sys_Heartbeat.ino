@@ -21,6 +21,7 @@ unsigned long lastMillisHeartbeatOut = 0;
 // Sends heartbeat with with frequency of HRTBEAT_FRQ
 void HeartBeatOut() {
   if (millis() - lastMillisHeartbeatOut > HRTBEAT_DT_OUT) {
+    DEBUG_PRINTLN("Sending Heartbeat!");
     lastMillisHeartbeatOut = millis();
     digitalWrite(PO_BACKUP_HRTBEAT, true);
     delay(20);

@@ -26,8 +26,6 @@ void setup() {
 
   // Setup finished
   DEBUG_PRINTLN("Setup complete.");
-
-  delay(1000);
 }
 
 // ------------------------------------------------------------ //
@@ -37,6 +35,4 @@ void loop() {
   HeartBeat();
 
   recvWithStartEndMarkers();
-
-  delay(100);
 }

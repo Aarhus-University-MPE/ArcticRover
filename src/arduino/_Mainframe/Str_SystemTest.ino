@@ -25,7 +25,7 @@ void RunStrategySystemTest() {
   StrategyRunLed(MODE_SYSTEMTEST);
 
   if (runTest) {
-    if(SystemTest()) runTest = false;
+    runTest = !SystemTest();
   }
 }
 

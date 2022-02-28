@@ -67,6 +67,9 @@ void SystemEnable(int module) {
     case MODULE_HEATING:
       status = HeatingStart();
       break;
+    case MODULE_BACKUPCPU:
+      status = GetStatus(MODULE_BACKUPCPU);
+      break;
 
     default:
       DEBUG_PRINT("- UNKNOWN Case");
@@ -264,11 +267,11 @@ bool SystemTest() {
       break;
     case 1:
       DEBUG_PRINTLN("Running test (1/4) - Power Systems");
-      SystemTestModule(MODULE_PWR_24V);
-      SystemTestModule(MODULE_PWR_12V);
-      SystemTestModule(MODULE_PWR_5V);
-      SystemTestModule(MODULE_PWR_MOTOR);
       SystemTestModule(MODULE_PWR);
+      SystemTestModule(MODULE_PWR_5V);
+      SystemTestModule(MODULE_PWR_12V);
+      SystemTestModule(MODULE_PWR_24V);
+      SystemTestModule(MODULE_PWR_MOTOR);
       DEBUG_PRINTLN("Test (1/4) - Power Systems (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
