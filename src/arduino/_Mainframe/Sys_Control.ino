@@ -8,7 +8,7 @@
 
 void SystemEnable(int module) {
   if (GetStatus(module)) return;
-  DEBUG_PRINT("SYS Enable: ")
+  DEBUG_PRINT("SYS Enable: ");
   DEBUG_PRINT(ModuleToString(module));
 
   bool status = true;
@@ -67,10 +67,15 @@ void SystemEnable(int module) {
     case MODULE_HEATING:
       status = HeatingStart();
       break;
+    case MODULE_TEMP:
+      status = TemperatureStatus();
+      break;
     case MODULE_BACKUPCPU:
       status = GetStatus(MODULE_BACKUPCPU);
       break;
-
+    case MODULE_LED:
+      status = true;
+      break;
     default:
       DEBUG_PRINT("- UNKNOWN Case");
       break;
@@ -87,7 +92,9 @@ void SystemEnable(int module) {
 
 // Enables Primary Systems
 void SystemEnablePrimary() {
+  SystemEnable(MODULE_PWR);
   SystemEnable(MODULE_SD);
+  SystemEnable(MODULE_BLACKBOX);
   SystemEnable(MODULE_GNSS);
   SystemEnable(MODULE_IRIDIUM);
 }
@@ -116,7 +123,7 @@ void SystemEnableMode(int mode) {
 void SystemDisable(int module) {
   if (!GetStatus(module)) return;
   bool status = false;
-  DEBUG_PRINT("SYS Disable: ")
+  DEBUG_PRINT("SYS Disable: ");
   DEBUG_PRINT(ModuleToString(module));
 
   switch (module) {
@@ -227,11 +234,11 @@ bool SystemCheck(int mode) {
 
   switch (mode) {
     case MODE_REMOTECONTROL:
-      status = (((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
+      status = ((((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
                  SYSREQ_REMOTE_CONTROL) |
-                (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED);
+                (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
-        DEBUG_PRINT("ERROR Code: ")
+        DEBUG_PRINT("ERROR Code: ");
         DEBUG_PRINTLN(String(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
                               SYSREQ_REMOTE_CONTROL) |
                              (1L << MODULE_RESERVED)));
@@ -239,13 +246,13 @@ bool SystemCheck(int mode) {
       break;
     case MODE_AUTONOMOUS:
       status =
-          (((ToLong(SystemStatus) ^ SYSREQ_AUTONOMOUS) & SYSREQ_AUTONOMOUS) |
-           (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED);
+          ((((ToLong(SystemStatus) ^ SYSREQ_AUTONOMOUS) & SYSREQ_AUTONOMOUS) |
+           (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
-        DEBUG_PRINT("ERROR Code: ")
-        DEBUG_PRINTLN(String(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
-                              SYSREQ_REMOTE_CONTROL) |
-                             (1L << MODULE_RESERVED)));
+        DEBUG_PRINT("ERROR Code: ");
+        DEBUG_PRINTLN(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
+                       SYSREQ_REMOTE_CONTROL) |
+                      (1L << MODULE_RESERVED));
       }
       break;
     default:
@@ -287,47 +294,53 @@ bool SystemTest() {
       if (SystemTestModule(MODULE_IRIDIUM)) systemTestState++;
       break;
     case 5:
-      if (SystemTestModule(MODULE_BACKUPCPU)) systemTestState++;
+      if (SystemTestModule(MODULE_GNSS)) systemTestState++;
       break;
     case 6:
+      if (SystemTestModule(MODULE_BACKUPCPU)) systemTestState++;
+      break;
+    case 7:
       DEBUG_PRINTLN("Test (2/4) - Communication (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
-    case 7:
+    case 8:
       DEBUG_PRINTLN("Running test (3/4) - Subsystems");
       systemTestState++;
       break;
-    case 8:
+    case 9:
       if (SystemTestModule(MODULE_ACCEL)) systemTestState++;
       break;
-    case 9:
+    case 10:
       if (SystemTestModule(MODULE_SD)) systemTestState++;
       break;
-    case 10:
+    case 11:
       if (SystemTestModule(MODULE_BLACKBOX)) systemTestState++;
       break;
-    case 11:
+    case 12:
       if (SystemTestModule(MODULE_TEMP)) systemTestState++;
       break;
-    case 12:
+    case 13:
+      if (SystemTestModule(MODULE_LED)) systemTestState++;
+      break;
+    case 14:
       DEBUG_PRINTLN("Test (3/4) - Subsystems (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
-    case 13:
+    case 15:
       DEBUG_PRINTLN("Running test (4/4) - Motors");
       systemTestState++;
       break;
-    case 14:
+    case 16:
       if (SystemTestModule(MODULE_MOTORS)) systemTestState++;
       break;
-    case 15:
+    case 17:
       DEBUG_PRINTLN("Test (4/4) - Motors (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
-    case 16:
+    case 18:
       DEBUG_PRINTLN("Disabeling all systems");
       DEBUG_PRINTLINE();
       testResults = ToLong(SystemStatus);
@@ -341,7 +354,7 @@ bool SystemTest() {
       testDone = true;
       systemTestState = 0;
       break;
-    default:      
+    default:
       DEBUG_PRINTLN("System Test Error: Stopping");
       systemTestState = 0;
       testDone = true;
@@ -375,7 +388,7 @@ bool SystemTestModule(byte module) {
         break;
       case MODULE_MOTORS:
         testDone = MotorTest();
-        status = MotorStatus(); 
+        status = MotorStatus();
         break;
       case MODULE_MOTOR_L:
         status = MotorStatusLeft();
@@ -422,12 +435,14 @@ bool SystemTestModule(byte module) {
         status = true;
         break;
       case MODULE_HEATING:
-        LedTest();
+        HeatingStart();
+        delay(2000);
+        HeatingStop();
         status = true;
         break;
-      case MODULE_TEMP:      
+      case MODULE_TEMP:
         status = TemperatureStatus();
-        testDone = TemperatureTest();  
+        testDone = TemperatureTest();
         break;
       case MODULE_ESTOP:
         status = EmergencyStopStatus();
@@ -452,7 +467,7 @@ void SystemCheck() {
   for (int i = 0; i < MODULE_COUNT - 2; i++) {
     SystemCheckModule(i);
   }
-
+  
   SetStatus(MODULE_ESTOP, EmergencyStopStatus());
   SetStatus(MODULE_RESERVED, true);
 }

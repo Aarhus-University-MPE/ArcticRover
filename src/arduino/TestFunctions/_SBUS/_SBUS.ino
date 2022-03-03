@@ -13,6 +13,7 @@ SBUS sbus(Serial3);
 
 void setup(){
   Serial.begin(115200);
+  pinMode(44, OUTPUT);
 
   InitializeSBUS();
 }
@@ -33,6 +34,7 @@ void loop(){
 // Initialize RF Communication
 bool InitializeSBUS()
 {
+  digitalWrite(44, HIGH);
   Serial.println("Initializing Short Range Communication... ");
   sbus.begin(false);
   bool status = Serial3;

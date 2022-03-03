@@ -15,6 +15,12 @@
         "string": "cpp",
         "unordered_map": "cpp",
         "cstddef": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "compare": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "xmemory": "cpp",
+        "xtr1common": "cpp"
     }
 }

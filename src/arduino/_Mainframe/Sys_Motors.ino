@@ -12,6 +12,7 @@ bool InitializeMotors() {
     return false;
   }
   digitalWrite(PO_MOTOR_EN, true);
+  return true;
 }
 
 // Disable Motor HW Enable
@@ -203,7 +204,7 @@ bool MotorTestRamp() {
         speed -= 0.01;
         millisLastMotorStep = millis();
       }
-      if (speed <= 1) motorTestRampState++;
+      if (speed <= -1) motorTestRampState++;
       break;
     case 6:
       DEBUG_PRINTLINE();

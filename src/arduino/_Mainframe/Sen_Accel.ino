@@ -78,6 +78,7 @@ bool AccelTest() {
     case 2:
       testDone = true;
       accTestState = 0;
+      DEBUG_PRINTLINE();
     default:
       break;
   }

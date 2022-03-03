@@ -17,6 +17,7 @@ SFE_UBLOX_GNSS myGNSS;
 long lastTimeGNSS = 0;  // Local timer, limits I2C traffic to u-blox module.
 
 bool InitializeGnss() {
+  Wire.begin();
   bool status = myGNSS.begin();
   if (status) {
     myGNSS.setI2COutput(COM_TYPE_UBX);                                //Set the I2C port to output UBX only (turn off NMEA noise)
@@ -55,6 +56,7 @@ bool GnssTest() {
       SetStatus(MODULE_GNSS, GnssTime(true));
       gnssTestState = 0;
       testDone = true;
+      DEBUG_PRINTLINE();
     default:
       break;
   }

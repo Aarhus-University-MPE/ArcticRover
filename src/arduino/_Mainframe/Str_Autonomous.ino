@@ -40,7 +40,7 @@ void FinishStrategyAutonomous() {
   SystemDisable();
   delay(20);
 
-  DEBUG_PRINTLN("Strategy (Autonomous): Finished.")
+  DEBUG_PRINTLN("Strategy (Autonomous): Finished.");
 }
 
 /* -------------------------------------------------

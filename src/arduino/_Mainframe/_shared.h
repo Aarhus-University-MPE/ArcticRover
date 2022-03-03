@@ -1,10 +1,9 @@
 // Function Prototypes
 #include <Arduino.h>
 #include <EEPROM.h>
-#include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
-
+#include <SD.h>
 #include "_motor.h"
 
 void (*systemReset)(void) = 0;
@@ -54,7 +53,7 @@ void ParseCanMsg(bool motor);
 
 void HeartBeat();
 void HeartBeatOut();
-void HeartBeatIn();
+void HeartBeatTimeout();
 void HeartBeatInInterrupt();
 void ResetBackupCPU();
 
@@ -62,7 +61,7 @@ void appendCharArray(char *s, char c);
 void appendCsv(char *s);
 
 bool DebugCommStatus();
-void LedBlink(byte color, unsigned int onDuration, unsigned int offDuration);
+bool LedBlink(byte color, unsigned int onDuration, unsigned int offDuration);
 void LedBlinkHalt(byte color, unsigned int duration, unsigned int afterHalt);
 void LedBlinkSingleShort(byte color);
 void LedBlinkDoubleShort(byte color);
@@ -129,24 +128,30 @@ void GetStatus(bool printRes);
 
 bool AccelTest(bool printRes);
 
-void BlackBoxAppendln();
-void BlackBoxAppendln(String blackBoxInput);
-void BlackBoxAppendln(byte blackBoxInput);
-void BlackBoxAppendln(bool blackBoxInput);
-void BlackBoxAppendln(char blackBoxInput);
-void BlackBoxAppendln(int blackBoxInput);
-void BlackBoxAppendln(long int blackBoxInput);
-void BlackBoxAppendln(unsigned long blackBoxInput);
-void BlackBoxAppendln(long int blackBoxInput, int Type);
 
-void BlackBoxAppend(String blackBoxInput);
-void BlackBoxAppend(byte blackBoxInput);
-void BlackBoxAppend(bool blackBoxInput);
-void BlackBoxAppend(char blackBoxInput);
-void BlackBoxAppend(int blackBoxInput);
-void BlackBoxAppend(long int blackBoxInput);
-void BlackBoxAppend(unsigned long blackBoxInput);
-void BlackBoxAppend(long int blackBoxInput, int Type);
+// // Blackbox functions
+// void BlackBoxAppendln();
 
-_motor motorLeft = _motor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);
-_motor motorRight = _motor(CANBUS_TX_MOTOR_RIGHT, CANBUS_RX_MOTOR_RIGHT);
+// void BlackBoxAppend(String blackBoxInput);
+// void BlackBoxAppendln(String blackBoxInput);
+
+// // void BlackBoxAppend(byte blackBoxInput);
+// // void BlackBoxAppendln(byte blackBoxInput);
+
+// // void BlackBoxAppend(int blackBoxInput);
+// // void BlackBoxAppendln(int blackBoxInput);
+
+// // void BlackBoxAppend(float blackBoxInput);
+// // void BlackBoxAppendln(float blackBoxInput);
+
+// // void BlackBoxAppend(long int blackBoxInput);
+// // void BlackBoxAppendln(long int blackBoxInput);
+
+// // void BlackBoxAppend(unsigned long blackBoxInput);
+// // void BlackBoxAppendln(unsigned long blackBoxInput);
+
+// // void BlackBoxAppend(long int blackBoxInput, int Type);
+// // void BlackBoxAppendln(long int blackBoxInput, int Type);
+
+GemMotor motorLeft = GemMotor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);
+GemMotor motorRight = GemMotor(CANBUS_TX_MOTOR_RIGHT, CANBUS_RX_MOTOR_RIGHT);

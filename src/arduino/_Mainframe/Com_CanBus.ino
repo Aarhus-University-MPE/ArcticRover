@@ -17,7 +17,7 @@ long CanBusTxLast;
 MCP2515 mcp2515(PO_SPISS_CANBUS);
 
 bool InitializeCanBus() {
-  SPI.begin();  //Begins SPI communication
+  SPI.begin();  // Begins SPI communication
   // mcp2515.reset();
   mcp2515.setBitrate(CANBBUS_SPEED, MCP_8MHZ);
   mcp2515.setNormalMode();
@@ -39,23 +39,36 @@ void TerminateCanBus() {
     MotorL TX -> RX
     ->
     MotorR TX -> RX
-    -> 
+    ->
     Repeat
 */
 void CanBusProcess() {
   if (millis() - CanBusTxLast < CANBUS_TX_PERIOD) {
     return;
   }
+  int err;
 
   if (motorLeft.GetCANTXStatus()) {
-    mcp2515.sendMessage(motorLeft.GetCanMsg());
+    err = mcp2515.sendMessage(motorLeft.GetCanMsg());
+    Serial.println("Sending Motor Left");
+    if (err == MCP2515::ERROR_OK) {
+    }else{
+      Serial.print("Motor Left Error - ");
+      Serial.println(err);
+    }
   } else if (motorRight.GetCANTXStatus()) {
-    mcp2515.sendMessage(motorRight.GetCanMsg());
+    err = mcp2515.sendMessage(motorRight.GetCanMsg());
+    Serial.println("Sending Motor Right");
+    if (err == MCP2515::ERROR_OK) {
+    }else{
+      Serial.print("Motor Right Error - ");
+      Serial.println(err);
+    }
   }
 
   if (motorLeft.GetCANRXStatus() || motorRight.GetCANRXStatus()) {
-    motorLeft.CheckCANRXTimeout();
-    motorRight.CheckCANRXTimeout();
+    if (motorLeft.CheckCANRXTimeout() == GemMotor::ERROR_TIMEOUT) Serial.println("Motor Left - Timeout");
+    if (motorRight.CheckCANRXTimeout() == GemMotor::ERROR_TIMEOUT) Serial.println("Motor Right - Timeout");
 
     if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
       ParseData();

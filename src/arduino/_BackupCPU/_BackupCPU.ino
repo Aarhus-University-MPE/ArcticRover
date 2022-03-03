@@ -17,12 +17,13 @@
 //                            SETUP                             //
 // ------------------------------------------------------------ //
 void setup() {
+  // System initialization
+  InitAllPins();
+  
   // Debug
   DBG_ONLY(initializeDebugComm());
   DEBUG_PRINT("Debug mode. Entered Setup... ");
 
-  // System initialization
-  InitAllPins();
 
   // Setup finished
   DEBUG_PRINTLN("Setup complete.");

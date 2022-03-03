@@ -79,6 +79,10 @@ void parseCommandBackup() {
       DEBUG_PRINTLN("Virtual Heartbeat");
       HeartBeatInInterrupt();
       break;
+    case CMD_BACKUP_FREEZE:
+      DEBUG_PRINTLN("Simulating System Halt");
+      delay(60000);
+      break;
     default:
       DEBUG_PRINTLN("NACK");
       break;

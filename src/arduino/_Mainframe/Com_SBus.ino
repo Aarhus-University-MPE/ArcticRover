@@ -44,6 +44,7 @@ bool SBusTest() {
       break;
     case 1:
       sbus.process();
+      
       if (millis() - millisLastSbusPrint > SYS_PRINT_PERIOD_SHORT) {
         millisLastSbusPrint = millis();
         printChannels();
@@ -55,6 +56,7 @@ bool SBusTest() {
       sbusTestState = 0;
       testDone = true;
       SetStatus(MODULE_RF,sbus.getGoodFrames() > 0);
+      DEBUG_PRINTLINE();
     default:
       break;
   }
@@ -62,15 +64,18 @@ bool SBusTest() {
   return testDone;
 }
 
+
 void printChannels() {
   for (int i = 0; i < 8; i++) {
-    DEBUG_PRINT("CH ");
-    DEBUG_PRINT(i);
-    DEBUG_PRINT(": ");
-    DEBUG_PRINT(getChannel(i));
-    DEBUG_PRINT("\t");
+    Serial.print("CH ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(getChannelFloat(i));
+    Serial.print("\t");
   }
-  DEBUG_PRINTLN();
+  Serial.print("Good frames: ");
+  Serial.print(sbus.getGoodFrames());
+  Serial.println();
 }
 
 // Scale SBUS channel value from range [0, 256] to [-1, 1]
@@ -82,18 +87,18 @@ float getChannelFloat(int channel) {
   return valueFloat;
 }
 
-int minChannel = 0;
-int maxChannel = 128;
+const int minChannel = -83;
+const int maxChannel = 83;
 // Scale the S.BUS channel values into the range [0, 256]
 int getChannel(int channel) {
   int value = sbus.getNormalizedChannel(channel);
 
-  if (value < minChannel) {
-    minChannel = value;
-  }
-  if (value > maxChannel) {
-    maxChannel = value;
-  }
+  // if (value < minChannel) {
+  //   minChannel = value;
+  // }
+  // if (value > maxChannel) {
+  //   maxChannel = value;
+  // }
 
   float result = value;
 

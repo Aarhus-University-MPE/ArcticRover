@@ -10,6 +10,7 @@
 
 const byte numChars = 32;
 char receivedCMD[numChars];
+int moduleSlct;
 
 void initializeDebugComm() {
   Serial.begin(DEBUG_BAUDRATE);
@@ -58,6 +59,15 @@ void recvWithStartEndMarkers() {
       recvInProgress = true;
     }
   }
+}
+
+bool activeCommand = false;
+void PerformCommand() {
+  if (!activeCommand) {
+    return;
+  }
+
+  SystemTestModule(moduleSlct);
 }
 
 bool DebugCommStatus() {
@@ -112,6 +122,12 @@ void parseCommandFiles() {
     case CMD_FILES_DELETE:
       SDDelete(fileName);
       break;
+    case CMD_FILES_BLCKBOX:
+      BlackBoxPrint();
+      break;
+    case CMD_FILES_BLCKBOXCLEAR:
+      BlackBoxClear();
+      break;
     case '\0':
       break;
     default:
@@ -156,6 +172,10 @@ void parseCommandBackup() {
       DEBUG_PRINTLN("Virtual Heartbeat");
       HeartBeatInInterrupt();
       break;
+    case CMD_BACKUP_FREEZE:
+      DEBUG_PRINTLN("Simulating System Halt");
+      delay(60000);
+      break;
     case '\0':
       break;
     default:
@@ -169,7 +189,7 @@ void parseCommandModule() {
   char moduleChar[numChars] = {0};
   strcpy(moduleChar, modulePtr);
 
-  int moduleSlct = atoi(moduleChar);
+  moduleSlct = atoi(moduleChar);
 
   switch (receivedCMD[1]) {
     case CMD_MODULE_ENABLE:
@@ -202,7 +222,7 @@ void parseCommandModule() {
       switch (receivedCMD[2]) {
         case '\0':
           DEBUG_PRINTLN("NACK");
-          //SystemDisable();
+          // SystemDisable();
           break;
         default:
           DEBUG_PRINT(moduleSlct);
@@ -214,7 +234,7 @@ void parseCommandModule() {
       break;
     case CMD_MODULE_STATUS:
       DEBUG_PRINTLN("Manual System Status Check");
-      //GetStatus(true);
+      // GetStatus(true);
       DEBUG_PRINT("System Status: ");
       DEBUG_PRINTLN(String(ToLong(SystemStatus)));
       break;
@@ -227,17 +247,16 @@ void parseCommandModule() {
       DEBUG_PRINT("Testing Module: ");
       DEBUG_PRINTLN(ModuleToString(moduleSlct));
       DEBUG_PRINTLINE();
-      if (SystemTestModule(moduleSlct)) {
-        DEBUG_PRINTLN("Test Success");
-      } else {
-        DEBUG_PRINTLN("Test Failed!");
-      }
-      SystemDisable(moduleSlct);
-      DEBUG_PRINTLINE();
+      activeCommand = true;
       break;
     case CMD_MODULE_STOPTEST:
+      DEBUG_PRINTLINE();
       DEBUG_PRINTLN("Manual System Test Stop");
+      SystemDisable(moduleSlct);
+      DEBUG_PRINTLINE();
+      activeCommand = false;
       systemTestState = -1;
+      break;
     case '\0':
       break;
     default:

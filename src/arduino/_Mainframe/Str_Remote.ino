@@ -2,6 +2,8 @@
 
     Allows manual control of motors
 */
+bool remoteActive;
+bool systemActive;
 
 // Start sequence of strategy
 void StartStrategyRemote() {
@@ -19,43 +21,31 @@ void StartStrategyRemote() {
 
   DEBUG_PRINTLN("Strategy (Remote): Initialized");
   DEBUG_PRINTLINE();
-  LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
 }
 
 unsigned long lastSystemCheck = 9999999;
 // Main sequence of strategy
 void RunStrategyRemote() {
-  static bool systemActive = true;
-
-  if (systemActive) {
-    // System Check
-    if (millis() - lastSystemCheck > SYSTEM_CHECK_DT) {
-      lastSystemCheck = millis();
-      systemActive = SystemCheck(MODE_REMOTECONTROL);
-    }
-
-    //Read RF signal
-    sbus.process();
-    ProcessIncomingCommands();
-
-    // Transmit via CAN
-    CanBusProcess();
-
-  } else {
-    // Attempt rebooting systems
-    if (millis() - lastSystemReboot > SYSTEM_REBOOT_DT) {
-      DEBUG_PRINTLN("Rebooting Subsystems");
-      lastSystemReboot = millis();
-      SystemEnableMode(MODE_REMOTECONTROL);
-
-      systemActive = SystemCheck(MODE_REMOTECONTROL);
-      if (systemActive) {
-        lastSystemReboot = 0;
-        DEBUG_PRINTLN("Systems Restored");
-      }
-      DEBUG_PRINTLINE();
-    }
+  if (!remoteActive) {
+    SystemDisable(MODULE_MOTORS);
+    return;
   }
+
+  SystemEnableMode(MODE_REMOTECONTROL);
+
+  SystemEnable(MODULE_MOTORS);
+
+  if (!RemoteSystemCheck()) {
+    remoteActive = false;
+    return;
+  }
+
+  // Read RF signal
+  sbus.process();
+  ProcessIncomingCommands();
+
+  // Transmit via CAN
+  CanBusProcess();
 }
 
 // End sequence of strategy
@@ -75,6 +65,14 @@ void FinishStrategyRemote() {
   DEBUG_PRINTLN("Strategy (Remote): Finished");
 }
 
+// Select button function
+void SelectFunctionRemote() {
+  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
+    lastMillisSelect = millis();
+    remoteActive = !remoteActive;
+  }
+}
+
 // Read RF signal and move motors accordingly
 unsigned long lastProcessCommand = 0;
 void ProcessIncomingCommands() {
@@ -89,19 +87,11 @@ void ProcessIncomingCommands() {
   }
 }
 
-// Select button function
-void SelectFunctionRemote() {
-  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
-    lastMillisSelect = millis();
-
-    if (!GetStatus(MODULE_MOTORS)) {
-      SystemEnable(MODULE_MOTORS);
-
-      LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
-    } else {
-      SystemDisable(MODULE_MOTORS);
-
-      LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, 0);
-    }
+// System Check
+bool RemoteSystemCheck() {
+  if (millis() - lastSystemCheck > SYSTEM_CHECK_DT) {
+    lastSystemCheck = millis();
+    systemActive = SystemCheck(MODE_REMOTECONTROL);
   }
+  return systemActive;
 }

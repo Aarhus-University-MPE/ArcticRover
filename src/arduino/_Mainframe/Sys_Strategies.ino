@@ -81,7 +81,7 @@ boolean SetMode(byte newMode) {
     mode = newMode;
     isModeUpdated = true;
     EEPROM.write(MEMADDR_LASTMODE, mode);
-    DEBUG_PRINT("Mode is set to: ");
+    DEBUG_PRINT("Mode Set: ");
     DEBUG_PRINTLN(ModeToString(mode));
     return true;
   }

@@ -14,7 +14,7 @@ void initializeDebugComm();
 
 void HeartBeat();
 void HeartBeatOut();
-void HeartBeatIn();
+void HeartBeatTimeout();
 void HeartBeatInInterrupt();
 void ResetBackupCPU();
 

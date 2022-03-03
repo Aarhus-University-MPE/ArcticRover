@@ -14,16 +14,16 @@
 //                            SETUP                             //
 // ------------------------------------------------------------ //
 void setup() {
-  SetStatus(false);
-
-  // Debug
-  DBG_ONLY(initializeDebugComm());
-
   // System initialization
   InitAllPins();
   InitButtons();
   InitStatusLed();
 
+  SetStatus(false);
+
+  // Debug
+  DBG_ONLY(initializeDebugComm());
+  
   SystemEnablePrimary();
 
   // Strategy initialization
@@ -42,4 +42,5 @@ void loop() {
   HeartBeat();
 
   DBG_ONLY(recvWithStartEndMarkers());
+  DBG_ONLY(PerformCommand());
 }

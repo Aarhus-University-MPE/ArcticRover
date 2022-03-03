@@ -13,40 +13,40 @@
 // Debug configuration flag - Comment out to unset
 #define DEBUG
 
-// Executes one line of code only if DEBUG flag is set.
+// Executes if DEBUG flag is set.
 #if defined(DEBUG)
 #define DBG_ONLY(x) x
 #define DEBUG_PRINT(x) \
-  Serial.print(x);     \
-  BlackBoxAppend(x);
+  BlackBoxAppend(x);   \
+  Serial.print(x)
 #define DEBUG_PRINTLN(x) \
-  Serial.println(x);     \
-  BlackBoxAppendln(x);
+  BlackBoxAppendln(x);   \
+  Serial.println(x)
 #define DEBUG_PRINTLN2(x, y) \
-  Serial.println(x, y);      \
-  BlackBoxAppendln(x, y);
+  BlackBoxAppendln(x, y);    \
+  Serial.println(x, y)
+#define DEBUG_PRINTLINE()                                   \
+  BlackBoxAppendln("------------------------------------"); \
+  Serial.println("------------------------------------")
 #define DEBUG_WRITE(x) Serial.write(x)
-#define DEBUG_PRINTLINE()                                \
-  DEBUG_PRINTLN("------------------------------------"); \
-  BlackBoxAppendln("------------------------------------")
 #define RECEIVE_CMDS() recvWithStartEndMarkers()
 #else
 #define DBG_ONLY(x)
 #define DEBUG_PRINT(x)       BlackBoxAppend(x)
 #define DEBUG_PRINTLN(x)     BlackBoxAppendln(x)
 #define DEBUG_PRINTLN2(x, y) BlackBoxAppendln(x, y)
-#define DEBUG_PRINTLINE()    BlackBoxAppendln("------------------------------------");
+#define DEBUG_PRINTLINE()    BlackBoxAppendln("------------------------------------")
 #define DEBUG_WRITE(x)
-#define RECEIVE_CMDS() recvWithStartEndMarkers()
+#define RECEIVE_CMDS()
 #endif
 
 #define ToBoolString(m)        ((m) == 1 ? "T" : ((m) == 0 ? "F" : "Unknown"))
-
 #define ToAnalogWrite(x)       ((x)*255.0f / 1.0f)
+
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion          "0.87.236"
+#define SystemVersion          "0.88.336"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN    B001  // 001
@@ -97,30 +97,7 @@
 #define MODULE_RESERVED        22
 
 #define ModuleToString(m) \
-  ((m) == 0 ? "Primary Power" : \
-  ((m) == 1 ? "Secondary Power (5V)" : \
-  ((m) == 2 ? "Secondary Power (12V)" : \
-  ((m) == 3 ? "Secondary Power (24V)" : \
-  ((m) == 4 ? "Secondary Power (Motors)" : \
-  ((m) == 5 ? "Motors" : \
-  ((m) == 6 ? "Motor Left" : \
-  ((m) == 7 ? "Motor Right" : \
-  ((m) == 8 ? "Motor Active" : \
-  ((m) == 9 ? "CAN-bus" : \
-  ((m) == 10 ? "Short Range Communication (RF)" : \
-  ((m) == 11 ? "Long Range Communication (Iridium)" : \
-  ((m) == 12 ? "Global Navigation Satellite System" : \
-  ((m) == 13 ? "Accelerometer" : \
-  ((m) == 14 ? "Local Storage" : \
-  ((m) == 15 ? "Blackbox" : \
-  ((m) == 16 ? "Debug Comm." : \
-  ((m) == 17 ? "System LED" : \
-  ((m) == 18 ? "Heating" : \
-  ((m) == 19 ? "Temperature" : \
-  ((m) == 20 ? "Backup CPU" : \
-  ((m) == 21 ? "Emergency Stop" : \
-  ((m) == 22 ? "Reserved" : \
-  ("Unknown"))))))))))))))))))))))))
+  ((m) == 0 ? "Primary Power" : ((m) == 1 ? "Secondary Power (5V)" : ((m) == 2 ? "Secondary Power (12V)" : ((m) == 3 ? "Secondary Power (24V)" : ((m) == 4 ? "Secondary Power (Motors)" : ((m) == 5 ? "Motors" : ((m) == 6 ? "Motor Left" : ((m) == 7 ? "Motor Right" : ((m) == 8 ? "Motor Active" : ((m) == 9 ? "CAN-bus" : ((m) == 10 ? "Short Range Communication (RF)" : ((m) == 11 ? "Long Range Communication (Iridium)" : ((m) == 12 ? "Global Navigation Satellite System" : ((m) == 13 ? "Accelerometer" : ((m) == 14 ? "Local Storage" : ((m) == 15 ? "Blackbox" : ((m) == 16 ? "Debug Comm." : ((m) == 17 ? "System LED" : ((m) == 18 ? "Heating" : ((m) == 19 ? "Temperature" : ((m) == 20 ? "Backup CPU" : ((m) == 21 ? "Emergency Stop" : ((m) == 22 ? "Reserved" : ("Unknown"))))))))))))))))))))))))
 
 const unsigned long SYSREQ_REMOTE_CONTROL =
     (1L << MODULE_PWR) +
@@ -140,6 +117,46 @@ const unsigned long SYSREQ_AUTONOMOUS =
     (1L << MODULE_BLACKBOX) +
     (1L << MODULE_BACKUPCPU) +
     (1L << MODULE_ESTOP);
+
+
+// ------------------------------------------------------------ //
+//                          COMMANDS                            //
+// ------------------------------------------------------------ //
+#define CMD_START_MARK                  '<'
+#define CMD_END_MARK                    '>'
+
+#define CMD_FILES                       'F'
+#define CMD_FILES_LIST                  'L'
+#define CMD_FILES_SIZE                  'S'
+#define CMD_FILES_DOWNLOAD              'D'
+#define CMD_FILES_DELETE                'R'
+#define CMD_FILES_BLCKBOX               'B'
+#define CMD_FILES_BLCKBOXCLEAR          'C'
+
+#define CMD_STRATEGY                    'S'
+#define CMD_STRATEGY_SET                'S'
+#define CMD_STRATEGY_FUNCTION           'F'
+#define CMD_STRATEGY_OVERRIDE           'O'
+
+#define CMD_BACKUP                      'B'
+#define CMD_BACKUP_RST                  'R'
+#define CMD_BACKUP_PRIMSTATUS           'S'
+#define CMD_BACKUP_HB                   'H'
+#define CMD_BACKUP_FREEZE               'F'
+
+#define CMD_MODULE                      'M'
+#define CMD_MODULE_ENABLE               'E'
+#define CMD_MODULE_DISABLE              'D'
+#define CMD_MODULE_OVERRIDE             'O'
+#define CMD_MODULE_STATUS               'S'
+#define CMD_MODULE_RESET                'R'
+#define CMD_MODULE_TEST                 'T'
+#define CMD_MODULE_STOPTEST             'Q'
+
+#define CMD_ROUTE                       'R'
+#define CMD_ROUTE_SET                   'S'
+#define CMD_ROUTE_PRINT                 'P'
+
 
 // ------------------------------------------------------------ //
 //                       STRATEGY MODES                         //
@@ -161,12 +178,12 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
 // ------------------------------------------------------------ //
-#define HRTBEAT_FRQ_OUT                 1  // times per minute
+#define HRTBEAT_FRQ_OUT                 12  // times per minute
 #define HRTBEAT_DT_OUT                  60000 / HRTBEAT_FRQ_OUT
 
-#define HRTBEAT_TRESHOLD                300000  // Treshold for late heartbeat
+#define HRTBEAT_TRESHOLD                60000  // Treshold for late heartbeat
 
-#define BACKUP_RST_DT                   300000  // Time between each reset attempt
+#define BACKUP_RST_DT                   HRTBEAT_TRESHOLD  // Time between each reset attempt
 
 #define HRTBEAT_DT_LOG                  300000  // Time between system status log
 
@@ -206,14 +223,14 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                           HEATING                            //
 // ------------------------------------------------------------ //
-#define TEMP_SYSTEM_MIN                 10
+#define TEMP_SYSTEM_MIN                 10      // ~28 V
 #define HEATING_DURATION                20000
 #define HEATING_TIMEOUT                 40000
 
 // ------------------------------------------------------------ //
 //                         SYS TESTS                            //
 // ------------------------------------------------------------ //
-#define SYS_TEST_DURATION               5000
+#define SYS_TEST_DURATION               10000
 #define SYS_TEST_DURATION_LONG          30000
 #define SYS_PRINT_PERIOD_LONG           500
 #define SYS_PRINT_PERIOD                250
@@ -291,63 +308,38 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define MEMADDR_IRCACHE_END             MEMADDR_IRCACHE_START + 32
 
 // compass and accelerometer cache
-#define MEMADDR_FREEIMU_START           MEMADDR_IRCACHE_END                 //!important - this constant is also in Freeimu.cpp
-#define MEMADDR_FREEIMU_END             MEMADDR_FREEIMU_START + 36 + 1 + 3  //36 bytes for values , 1 for signature, 3 empty space
+#define MEMADDR_FREEIMU_START           MEMADDR_IRCACHE_END                 //! important - this constant is also in Freeimu.cpp
+#define MEMADDR_FREEIMU_END             MEMADDR_FREEIMU_START + 36 + 1 + 3  // 36 bytes for values , 1 for signature, 3 empty space
 
-// ------------------------------------------------------------ //
-//                          COMMANDS                            //
-// ------------------------------------------------------------ //
-#define CMD_START_MARK                  '<'
-#define CMD_END_MARK                    '>'
-
-#define CMD_FILES                       'F'
-#define CMD_FILES_LIST                  'L'
-#define CMD_FILES_SIZE                  'S'
-#define CMD_FILES_DOWNLOAD              'D'
-#define CMD_FILES_DELETE                'R'
-
-#define CMD_STRATEGY                    'S'
-#define CMD_STRATEGY_SET                'S'
-#define CMD_STRATEGY_FUNCTION           'F'
-#define CMD_STRATEGY_OVERRIDE           'O'
-
-#define CMD_BACKUP                      'B'
-#define CMD_BACKUP_RST                  'R'
-#define CMD_BACKUP_PRIMSTATUS           'S'
-#define CMD_BACKUP_HB                   'H'
-
-#define CMD_MODULE                      'M'
-#define CMD_MODULE_ENABLE               'E'
-#define CMD_MODULE_DISABLE              'D'
-#define CMD_MODULE_OVERRIDE             'O'
-#define CMD_MODULE_STATUS               'S'
-#define CMD_MODULE_RESET                'R'
-#define CMD_MODULE_TEST                 'T'
-#define CMD_MODULE_STOPTEST             'Q'
-
-#define CMD_ROUTE                       'R'
-#define CMD_ROUTE_SET                   'S'
-#define CMD_ROUTE_PRINT                 'P'
 
 // ------------------------------------------------------------ //
 //                          FUNCTIONS                           //
 // ------------------------------------------------------------ //
 
 void BlackBoxAppendln();
+void BlackBoxAppend(String blackBoxInput);
 void BlackBoxAppendln(String blackBoxInput);
-void BlackBoxAppendln(byte blackBoxInput);
-void BlackBoxAppendln(bool blackBoxInput);
-void BlackBoxAppendln(char blackBoxInput);
+
+void BlackBoxAppend(int blackBoxInput);
 void BlackBoxAppendln(int blackBoxInput);
-void BlackBoxAppendln(long int blackBoxInput);
-void BlackBoxAppendln(unsigned long blackBoxInput);
+
+void BlackBoxAppend(long int blackBoxInput, int Type);
 void BlackBoxAppendln(long int blackBoxInput, int Type);
 
-void BlackBoxAppend(String blackBoxInput);
-void BlackBoxAppend(byte blackBoxInput);
-void BlackBoxAppend(bool blackBoxInput);
-void BlackBoxAppend(char blackBoxInput);
-void BlackBoxAppend(int blackBoxInput);
+void BlackBoxAppend(float blackBoxInput);
+void BlackBoxAppendln(float blackBoxInput);
+
 void BlackBoxAppend(long int blackBoxInput);
+void BlackBoxAppendln(long int blackBoxInput);
+
 void BlackBoxAppend(unsigned long blackBoxInput);
-void BlackBoxAppend(long int blackBoxInput, int Type);
+void BlackBoxAppendln(unsigned long blackBoxInput);
+
+// void BlackBoxAppend(byte blackBoxInput);
+// void BlackBoxAppendln(byte blackBoxInput);
+
+// void BlackBoxAppend(bool blackBoxInput);
+// void BlackBoxAppendln(bool blackBoxInput);
+
+// void BlackBoxAppend(char blackBoxInput);
+// void BlackBoxAppendln(char blackBoxInput);

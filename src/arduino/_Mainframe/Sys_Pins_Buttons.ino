@@ -8,6 +8,9 @@ void InitAllPins() {
   // Heartbeat
   pinMode(PI_BACKUP_HRTBEAT, INPUT_PULLUP);
   pinMode(PO_BACKUP_HRTBEAT, OUTPUT);
+
+  // Reset
+  digitalWrite(PO_BACKUP_RST, true);
   pinMode(PO_BACKUP_RST, OUTPUT);
 
   digitalWrite(PO_BACKUP_HRTBEAT, true);

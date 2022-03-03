@@ -18,16 +18,7 @@ int signalQuality = -1;
 bool InitializeIridium() {
   COM_SERIAL_IRID.begin(IRID_BAUDRATE);
 
-  modem.adjustStartupTimeout(IRID_START_TIMEOUT);
-  modem.adjustATTimeout(IRID_ATT_TIMEOUT);
-
   bool status = (modem.begin() == ISBD_SUCCESS);
-  if (status) {
-    int err = modem.getSignalQuality(signalQuality);
-    if (err != ISBD_SUCCESS) {
-      status = false;
-    }
-  }
 
   return status;
 }
@@ -97,6 +88,7 @@ bool IridiumTest() {
   DEBUG_PRINT(signalQuality);
   DEBUG_PRINTLN(".");
 
+  DEBUG_PRINTLINE();
 
   return status;
 }

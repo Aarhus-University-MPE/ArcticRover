@@ -5,6 +5,7 @@
   Aarhus University
   2021
 */
+#include <SD.h>
 
 // Initialize SD card reader module.
 bool InitializeSDReader() {
@@ -57,6 +58,7 @@ void printFiles(File dir) {
     entry.close();
   }
   DEBUG_PRINTLN("End of storage");
+  DEBUG_PRINTLINE();
 }
 
 // Print size of file on SD card
@@ -69,8 +71,9 @@ void SDSize(char fileName[]) {
     if (file) {
       DEBUG_PRINTLN("File size: " + (String)file.size() + " bytes");
       file.close();
-    } else
+    } else {
       DEBUG_PRINTLN("File not found!");
+    }
   }
 }
 
@@ -87,8 +90,9 @@ void SDDownload(char fileName[]) {
       }
       file.close();
       DEBUG_PRINTLN("End of File");
-    } else
+    } else {
       DEBUG_PRINTLN("File not found!");
+    }
   }
 }
 
@@ -101,8 +105,9 @@ void SDDelete(char fileName[]) {
       DEBUG_PRINTLN(fileName);
       SD.remove(fileName);
       DEBUG_PRINTLN("File Removed");
-    } else
+    } else {
       DEBUG_PRINTLN("File not found");
+    }
   }
 }
 

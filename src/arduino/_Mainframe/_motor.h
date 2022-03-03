@@ -31,9 +31,9 @@
 #define RPM_VEL_FACTOR          RPM_VEL / WHEEL_CIRCUMFERENCE
 #define RPM_CONTROL_SCALE       10
 #define MAX_CONTROL_VALUE       MAX_RPM* RPM_CONTROL_SCALE
-#define CAN_TIMEOUT             100
+#define CAN_TIMEOUT_DURATION    100
 
-class _motor {
+class GemMotor {
  private:
   int controlMode;
   int mode;
@@ -54,9 +54,14 @@ class _motor {
   struct can_frame canMsg;
   struct can_frame* canMsgPtr;
 
-
  public:
-  _motor(int _TX_id, int _RX_id);
+  GemMotor(int _TX_id, int _RX_id);
+
+  enum ERROR {
+    ERROR_IDLE = 0,
+    ERROR_WAITING = 1,
+    ERROR_TIMEOUT = 2
+  };
 
   int GetRpm();
   bool GetCANTXStatus();
@@ -70,7 +75,7 @@ class _motor {
   // Set TX flag, Unset RX flag indicate ready to send msg
   void SetCANTXStatus();
 
-  void CheckCANRXTimeout();
+  ERROR CheckCANRXTimeout();
 
   void ResetCANStatus();
 
