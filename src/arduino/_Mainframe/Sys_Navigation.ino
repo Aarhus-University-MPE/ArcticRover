@@ -7,7 +7,7 @@
   2021
 */
 
-/* Algorithm:  
+/* Algorithm:
   1. Check coordinates valid
     1.1 Format correct?
     1.2 Distance < min distance?
@@ -43,10 +43,10 @@ long lon_previous = 0;
 
 // Validity flags
 bool validCoordinate = false;
-bool gnssFixValid = false;
+bool gnssFixValid    = false;
 
 bool navigationPreCheck = false;
-bool navigationFlag = false;
+bool navigationFlag     = false;
 
 bool Navigate() {
   if (navigationPreCheck) {
@@ -67,7 +67,7 @@ bool Navigate() {
   GNSS status, Accelerometer output (tilt?), Battery Status
 */
 bool NavigationCheck() {
-  DEBUG_PRINT("Running Navigation Checks... ");
+  DEBUG_PRINT(F("Running Navigation Checks... "));
   // GNSS valid?
 
   // Battery status?
@@ -82,30 +82,31 @@ bool NavigationCheck() {
   System checks, Route Checks, Sensor Checks
 */
 bool NavigationPreChecks() {
-  DEBUG_PRINT("Running Navigation Prechecks...");
-  bool precheck = true;
-  bool precheckCode[8];
+  // DEBUG_PRINT("Running Navigation Prechecks...");
+  // bool precheck = true;
+  // bool precheckCode[8];
 
-  // System Checks
-  precheckCode[0] = VoltageCheck();  // Required
-  precheckCode[1] = MotorStatus();   // Required
-  precheckCode[2] = GPSValid();      // Required
+  // // System Checks
+  // precheckCode[0] = VoltageCheck();  // Required
+  // precheckCode[1] = MotorStatus();   // Required
+  // precheckCode[2] = GPSValid();      // Required
 
-  // Route Checks
-  precheckCode[3] = RouteFileCheck();    // Required
-  precheckCode[4] = RouteFormatCheck();  // Required
-  precheckCode[5] = RouteRangeCheck();   // Required
+  // // Route Checks
+  // precheckCode[3] = RouteFileCheck();    // Required
+  // precheckCode[4] = RouteFormatCheck();  // Required
+  // precheckCode[5] = RouteRangeCheck();   // Required
 
-  // Sensor Checks
-  precheckCode[6] = TempSensorCheck();   // Optional
-  precheckCode[7] = AccelSensorCheck();  // Optional
+  // // Sensor Checks
+  // precheckCode[6] = TempSensorCheck();   // Optional
+  // precheckCode[7] = AccelSensorCheck();  // Optional
 
-  byte precheckCodeByte = boolarr_to_byte(precheckCode);
+  // byte precheckCodeByte = boolarr_to_byte(precheckCode);
 
-  // Compare precheck with required
-  precheck = SystemCheck(MODE_AUTONOMOUS);
+  // // Compare precheck with required
+  // precheck = SystemCheck(MODE_AUTONOMOUS);
 
-  return precheck;
+  // return precheck;
+  return true;
 }
 
 // Checks if route is present (and loadable)
@@ -145,10 +146,10 @@ bool RouteRangeCheck() {
 
 // Check validity of coordinate in the form of format and range of coordinate
 bool CoordinateValiditiy() {
-  DEBUG_PRINTLN("Checking validity of coordinates ... ");
+  DEBUG_PRINTLN(F("Checking validity of coordinates ... "));
   bool validity = true;
   if (!CoordinateValidityFormat(lat_target, lon_target)) {
-    DEBUG_PRINT("Coordinate format NOT valid!");
+    DEBUG_PRINT(F("Coordinate format NOT valid!"));
   }
   return (CoordinateValidityFormat(lat_target, lon_target) && CoordinateValidityRange());
 }
@@ -159,23 +160,23 @@ bool CoordinateValidityFormat(long lat, long lon) {
   bool validity = true;
   if (lat == 0 || lon == 0) {
     validity = false;
-    DEBUG_PRINT("coordinates must be non zero ... ");
+    DEBUG_PRINT(F("coordinates must be non zero ... "));
   }
 
   if (lat < -MAX_LAT_VALUE || lat > MAX_LAT_VALUE) {
     validity = false;
-    DEBUG_PRINT("latitude range must be (-90 < lat < 90) ... ");
+    DEBUG_PRINT(F("latitude range must be (-90 < lat < 90) ... "));
   }
 
   if (lon < -MAX_LONG_VALUE || lon > MAX_LONG_VALUE) {
     validity = false;
-    DEBUG_PRINT("longitude range must be (-180 < lon < 180) ... ");
+    DEBUG_PRINT(F("longitude range must be (-180 < lon < 180) ... "));
   }
 
   if (validity) {
-    DEBUG_PRINTLN("Coordinates format valid!");
+    DEBUG_PRINTLN(F("Coordinates format valid!"));
   } else {
-    DEBUG_PRINTLN("Coordinates format NOT valid!");
+    DEBUG_PRINTLN(F("Coordinates format NOT valid!"));
   }
 
   return validity;
@@ -187,9 +188,9 @@ bool CoordinateValidityRange() {
   bool validity = (CoordinateDistance(lat_current, lon_current, lat_target, lon_target) <= MAX_DISTANCE_VALID_WAYPOINT);
 
   if (validity) {
-    DEBUG_PRINTLN("Coordinates within maximum range!");
+    DEBUG_PRINTLN(F("Coordinates within maximum range!"));
   } else {
-    DEBUG_PRINTLN("Range NOT within maximum range!");
+    DEBUG_PRINTLN(F("Range NOT within maximum range!"));
   }
   return validity;
 }

@@ -5,33 +5,24 @@
 
 // Start sequence of strategy
 void StartStrategyAutonomous() {
-  DEBUG_PRINTLN("Strategy (Autonomous): Starting.");
-  delay(20);
+  DEBUG_PRINTLN(F("Strategy (Autonomous): Starting."));
 
-  // Enable Primary System Power
-  digitalWrite(PO_POWER_5V, HIGH);
-  delay(20);
+  SystemEnableMode();
 
-  // Initialize Long Range Communication
-  SystemEnable(MODULE_IRIDIUM);
-  delay(20);
-
-  // Attach Select Button
   AttachSelectButton();
-  delay(20);
 
-  DEBUG_PRINTLN("Strategy (Autonomous): Initialized.");
+  DEBUG_PRINTLN(F("Strategy (Autonomous): Initialized."));
 }
 
 // Main sequence of strategy
 void RunStrategyAutonomous() {
   // Blink light
-  StrategyRunLed(MODE_AUTONOMOUS);
+  StrategyRunLed();
 }
 
 // End sequence of strategy
 void FinishStrategyAutonomous() {
-  DEBUG_PRINTLN("Strategy (Autonomous): Ending.");
+  DEBUG_PRINTLN(F("Strategy (Autonomous): Ending."));
   delay(20);
 
   DetachSelectButton();
@@ -40,7 +31,7 @@ void FinishStrategyAutonomous() {
   SystemDisable();
   delay(20);
 
-  DEBUG_PRINTLN("Strategy (Autonomous): Finished.");
+  DEBUG_PRINTLN(F("Strategy (Autonomous): Finished."));
 }
 
 /* -------------------------------------------------

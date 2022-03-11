@@ -14,6 +14,10 @@
 
 MMA8452Q accel;
 
+int accTestState = 0;
+long millisAccTestStart = 0;
+long millisLastAccPrint = 0;
+
 bool InitializeAccel() {
   bool status = accel.begin();  // scale +/- 2g and frequency of 1.56 Hz
   accel.setScale(SCALE_2G);
@@ -42,34 +46,30 @@ bool AccelStatus() {
   return GetStatus(MODULE_ACCEL);
 }
 
-int accTestState = 0;
-long millisAccTestStart = 0;
-long millisLastAccPrint = 0;
-
 bool AccelTest() {
   bool testDone = false;
   switch (accTestState) {
     case 0:
-      DEBUG_PRINT("Accelerometer feed starting for: ");
+      DEBUG_PRINT(F("Accelerometer feed starting for: "));
       DEBUG_PRINT(SYS_TEST_DURATION);
-      DEBUG_PRINTLN(" ms");
+      DEBUG_PRINTLN(F(" ms"));
       millisAccTestStart = millis();
       accTestState++;
       break;
     case 1:
       if (millis() - millisLastAccPrint > SYS_PRINT_PERIOD) {
         millisLastAccPrint = millis();
-        DEBUG_PRINT("Accelerometer: ");
+        DEBUG_PRINT(F("Accelerometer: "));
         if (AccelStatus()) {
           ReadAccel();
-          DEBUG_PRINT("x: ");
+          DEBUG_PRINT(F("x: "));
           DEBUG_PRINT((float)accel.cx);
-          DEBUG_PRINT("\t y: ");
+          DEBUG_PRINT(F("\t y: "));
           DEBUG_PRINT((float)accel.cy);
-          DEBUG_PRINT("\t z: ");
+          DEBUG_PRINT(F("\t z: "));
           DEBUG_PRINTLN((float)accel.cz);
         } else {
-          DEBUG_PRINTLN("ERROR");
+          DEBUG_PRINTLN(F("ERROR"));
         }
       }
 

@@ -1,28 +1,26 @@
 /*  Strategy - System Test mode
 
-    Runs system test...
+    Runs full system test ...
 */
+bool runTest = false;
 
 // Start sequence of strategy
 void StartStrategySystemTest() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (System Test): Starting");
-  StrategyStartLed(MODE_SYSTEMTEST);
-
+  DEBUG_PRINTLN(F("Strategy (System Test): Starting"));
   SystemDisable();
 
   AttachSelectButton();
 
-  DEBUG_PRINTLN("Strategy (System Test): Initialized");
+  DEBUG_PRINTLN(F("Strategy (System Test): Initialized"));
   DEBUG_PRINTLINE();
-  StrategyStartLed(MODE_SYSTEMTEST);
+  StrategyStartLed();
 }
 
 // Main sequence of strategy
-bool runTest = false;
 void RunStrategySystemTest() {
   // Blink light
-  StrategyRunLed(MODE_SYSTEMTEST);
+  StrategyRunLed();
 
   if (runTest) {
     runTest = !SystemTest();
@@ -32,12 +30,12 @@ void RunStrategySystemTest() {
 // End sequence of strategy
 void FinishStrategySystemTest() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (System Test): Ending");
+  DEBUG_PRINTLN(F("Strategy (System Test): Ending"));
 
   DetachSelectButton();
   SystemDisable();
 
-  DEBUG_PRINTLN("Strategy (System Test): Finished");
+  DEBUG_PRINTLN(F("Strategy (System Test): Finished"));
 }
 
 

@@ -16,6 +16,10 @@ SFE_UBLOX_GNSS myGNSS;
 
 long lastTimeGNSS = 0;  // Local timer, limits I2C traffic to u-blox module.
 
+int gnssTestState = 0;
+long millisGnssTestStart = 0;
+long millisLastGnssPrint = 0;
+
 bool InitializeGnss() {
   Wire.begin();
   bool status = myGNSS.begin();
@@ -30,17 +34,13 @@ bool GnssStatus() {
   return GetStatus(MODULE_GNSS);
 }
 
-int gnssTestState = 0;
-long millisGnssTestStart = 0;
-long millisLastGnssPrint = 0;
-
 bool GnssTest() {
   bool testDone = false;
   switch (gnssTestState) {
     case 0:
-      DEBUG_PRINT("GNSS feed starting for: ");
+      DEBUG_PRINT(F("GNSS feed starting for: "));
       DEBUG_PRINT(SYS_TEST_DURATION);
-      DEBUG_PRINTLN(" ms");
+      DEBUG_PRINTLN(F(" ms"));
       millisGnssTestStart = millis();
       gnssTestState++;
       break;
@@ -66,28 +66,28 @@ bool GnssTest() {
 
 bool GnssTime(bool print) {
   bool status;
-  if (print) DEBUG_PRINT("Time and Date is: ");
+  if (print) DEBUG_PRINT(F("Time and Date is: "));
   if (!myGNSS.getTimeValid() || !myGNSS.getDateValid()) {
-    if (print) DEBUG_PRINTLN("not valid");
+    if (print) DEBUG_PRINTLN(F("not valid"));
     status = false;
   } else {
     if (print) {
-      DEBUG_PRINTLN("valid");
+      DEBUG_PRINTLN(F("valid"));
       int year = myGNSS.getYear();
       int month = myGNSS.getMonth();
       int day = myGNSS.getDay();
       int hour = myGNSS.getHour();
       int minute = myGNSS.getMinute();
 
-      DEBUG_PRINT("Current time: ");
+      DEBUG_PRINT(F("Current time: "));
       DEBUG_PRINT(year);
-      DEBUG_PRINT("-");
+      DEBUG_PRINT(F("-"));
       DEBUG_PRINT(month);
-      DEBUG_PRINT("-");
+      DEBUG_PRINT(F("-"));
       DEBUG_PRINT(day);
-      DEBUG_PRINT("-");
+      DEBUG_PRINT(F("-"));
       DEBUG_PRINT(hour);
-      DEBUG_PRINT(":");
+      DEBUG_PRINT(F(":"));
       DEBUG_PRINTLN(minute);
     }
     status = true;
@@ -112,7 +112,7 @@ long GnssGetLong() {
 
 // Query module and prints Lat, Long, Alt, Acc
 void QueryGnss() {
-  DEBUG_PRINT("GNSS: ");
+  DEBUG_PRINT(F("GNSS: "));
 
   if (GnssStatus()) {
     long latitude = myGNSS.getLatitude();

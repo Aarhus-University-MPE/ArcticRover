@@ -39,12 +39,12 @@ bool IridiumTest() {
     status = false;
   }
 
-  DEBUG_PRINT("Iridium: ");
+  DEBUG_PRINT(F("Iridium: "));
   if (status) {
-    DEBUG_PRINT("Signal Quality: ");
+    DEBUG_PRINT(F("Signal Quality: "));
     DEBUG_PRINTLN(signalQuality);
   } else {
-    DEBUG_PRINTLN("ERROR");
+    DEBUG_PRINTLN(F("ERROR"));
   }
 
    // Example: Print the firmware revision
@@ -52,26 +52,26 @@ bool IridiumTest() {
   err = modem.getFirmwareVersion(version, sizeof(version));
   if (err != ISBD_SUCCESS)
   {
-     DEBUG_PRINT("Firmware Version failed: error ");
+     DEBUG_PRINT(F("Firmware Version failed: error "));
      DEBUG_PRINTLN(err);
      status = false;
   }
-  DEBUG_PRINT("Firmware Version is ");
+  DEBUG_PRINT(F("Firmware Version is "));
   DEBUG_PRINT(version);
-  DEBUG_PRINTLN(".");
+  DEBUG_PRINTLN(F("."));
 
   // Example: Print the IMEI
   char IMEI[16];
   err = modem.getIMEI(IMEI, sizeof(IMEI));
   if (err != ISBD_SUCCESS)
   {
-     DEBUG_PRINT("getIMEI failed: error ");
+     DEBUG_PRINT(F("getIMEI failed: error "));
      DEBUG_PRINTLN(err);
      status = false;
   }
-  DEBUG_PRINT("IMEI is ");
+  DEBUG_PRINT(F("IMEI is "));
   DEBUG_PRINT(IMEI);
-  DEBUG_PRINTLN(".");
+  DEBUG_PRINTLN(F("."));
 
   // Example: Test the signal quality.
   // This returns a number between 0 and 5.
@@ -79,14 +79,14 @@ bool IridiumTest() {
   err = modem.getSignalQuality(signalQuality);
   if (err != ISBD_SUCCESS)
   {
-    DEBUG_PRINT("SignalQuality failed: error ");
+    DEBUG_PRINT(F("SignalQuality failed: error "));
     DEBUG_PRINTLN(err);
      status = false;
   }
 
-  DEBUG_PRINT("On a scale of 0 to 5, signal quality is currently ");
+  DEBUG_PRINT(F("On a scale of 0 to 5, signal quality is currently "));
   DEBUG_PRINT(signalQuality);
-  DEBUG_PRINTLN(".");
+  DEBUG_PRINTLN(F("."));
 
   DEBUG_PRINTLINE();
 

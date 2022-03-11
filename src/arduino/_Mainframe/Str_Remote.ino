@@ -4,45 +4,49 @@
 */
 bool remoteActive;
 bool systemActive;
+unsigned long lastSystemCheck = 9999999;
 
 // Start sequence of strategy
 void StartStrategyRemote() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Remote): Starting");
-  StrategyStartLed(MODE_REMOTECONTROL);
-
+  DEBUG_PRINTLN(F("Strategy (Remote): Starting"));
   SystemDisable();
-  delay(20);
 
-  SystemEnableMode(MODE_REMOTECONTROL);
+  SystemEnableMode();
 
-  // Enable motor control
   AttachSelectButton();
 
-  DEBUG_PRINTLN("Strategy (Remote): Initialized");
+  DEBUG_PRINTLN(F("Strategy (Remote): Initialized"));
   DEBUG_PRINTLINE();
+
+  StrategyStartLed();
 }
 
-unsigned long lastSystemCheck = 9999999;
 // Main sequence of strategy
 void RunStrategyRemote() {
   if (!remoteActive) {
     SystemDisable(MODULE_MOTORS);
+    StrategyRunLed(MODE_IDLE);
     return;
   }
 
-  SystemEnableMode(MODE_REMOTECONTROL);
-
+  SystemEnable(MODULE_PWR_MOTOR);
   SystemEnable(MODULE_MOTORS);
+  SystemEnable(MODULE_RF);
+  SystemEnable(MODULE_CANBUS);
 
   if (!RemoteSystemCheck()) {
     remoteActive = false;
+    SystemDisable(MODULE_MOTORS);
+    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
     return;
   }
 
+  StrategyRunLed(MODE_AUTONOMOUS);
+
   // Read RF signal
   sbus.process();
-  ProcessIncomingCommands();
+  ProcessRf();
 
   // Transmit via CAN
   CanBusProcess();
@@ -51,47 +55,69 @@ void RunStrategyRemote() {
 // End sequence of strategy
 void FinishStrategyRemote() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Remote): Ending");
+  DEBUG_PRINTLN(F("Strategy (Remote): Ending"));
 
   DetachSelectButton();
 
-  if (GetStatus(MODULE_MOTOR_ACT)) {
-    TerminateMotors();
-  }
-
   SystemDisable();
 
-  LedBlinkDoubleShort(BINARY_CODE_LED_RED);
-  DEBUG_PRINTLN("Strategy (Remote): Finished");
+  DEBUG_PRINTLN(F("Strategy (Remote): Finished"));
 }
 
 // Select button function
 void SelectFunctionRemote() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
-    remoteActive = !remoteActive;
+    remoteActive     = !remoteActive;
   }
 }
 
 // Read RF signal and move motors accordingly
-unsigned long lastProcessCommand = 0;
-void ProcessIncomingCommands() {
-  if (millis() - lastProcessCommand > REMOTE_PROCESS_DT) {
-    lastProcessCommand = millis();
-    float throttle = getChannelFloat(REMOTE_CHANNEL_THROTTLE);
-    float steer = getChannelFloat(REMOTE_CHANNEL_STEER);
-    float enable = getChannelFloat(REMOTE_CHANNEL_ENABLE);
-
-    // move motors
-    MotorUpdate(steer, throttle, enable);
+void ProcessRf() {
+  if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
+    MotorUpdate(0, 0, 0);
+    return;
   }
+
+  float throttle1 = getChannelFloatFull(1);  // Left stick Vertical
+  float dir1      = getChannelFloat(2);      // Left stick Horisontal
+  float throttle2 = getChannelFloat(3);      // Right stick Vertical
+  float dir2      = getChannelFloat(4);      // Right stick Horisontal
+  int gear        = getChannel(5);           // Gear select (SA)
+
+  int forwardDir;
+  float speed, dir;
+  bool enabled;
+
+  // Primary input (Left Stick)
+  if (throttle1 > CONTROLLER_DEADZONE_FLOAT) {
+    if (gear < REMOTE_CHANNEL_LOW) {
+      speed = throttle1 * MOTOR_MAX_SPEED_BWD;
+    } else if (gear > REMOTE_CHANNEL_HIGH) {
+      speed = throttle1 * MOTOR_MAX_SPEED_FWD;
+    }
+    dir = dir1;
+    enabled = true;
+  }
+  // Secondary input (Right Stick)
+  else if (abs(throttle2) > CONTROLLER_DEADZONE_FLOAT) {
+    if (throttle2 > 0) {
+      speed = throttle2 * MOTOR_MAX_SPEED_FWD / 4;
+    } else {
+      speed = throttle2 * MOTOR_MAX_SPEED_BWD / 4;
+    }
+    dir = dir2;
+    enabled = true;
+  }
+
+  MotorUpdate(dir, speed, enabled);
 }
 
 // System Check
 bool RemoteSystemCheck() {
   if (millis() - lastSystemCheck > SYSTEM_CHECK_DT) {
     lastSystemCheck = millis();
-    systemActive = SystemCheck(MODE_REMOTECONTROL);
+    systemActive    = SystemCheck(MODE_REMOTECONTROL);
   }
   return systemActive;
 }

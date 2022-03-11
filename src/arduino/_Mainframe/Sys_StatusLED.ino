@@ -1,6 +1,8 @@
-byte currentLedStatus = B000;
-unsigned long lastMillisLed = 0;
+byte currentLedStatus       = B000;
+unsigned long lastMillisLed;
 unsigned long millisSinceLast;
+unsigned long lastMillisModeBlinkState;
+
 
 // Set LED
 void InitStatusLed() {
@@ -34,11 +36,11 @@ void LedSet(byte color) {
 // [001] [- - GRN]
 bool LedBlink(byte color, unsigned int onDuration, unsigned int offDuration) {
   millisSinceLast = millis() - lastMillisLed;
-  bool cycleDone = false;
+  bool cycleDone  = false;
   if (currentLedStatus > 0 && millisSinceLast > onDuration) {
     LedSet(0);
     lastMillisLed = millis();
-    cycleDone = true;
+    cycleDone     = true;
   }
   if (currentLedStatus == 0 && millisSinceLast > offDuration) {
     LedSet(color);
@@ -108,8 +110,8 @@ void LedBlinkTripleShort(byte color1, byte color2, byte color3) {
   LedBlinkHalt(color3, LED_BLINK_VERY_SHORT);
 }
 
-void StrategyStartLed(int strategy) {
-  // switch (strategy) {
+void StrategyStartLed() {
+  // switch (mode) {
   //   case MODE_EMERGENCY:
   //     LedBlinkDoubleShort(BINARY_CODE_LED_RED);
   //     break;
@@ -133,10 +135,32 @@ void StrategyStartLed(int strategy) {
   // }
 }
 
-unsigned long lastMillisModeBlinkState;
-// Blink light of current mode
-void StrategyRunLed(int strategy) {
-  switch (strategy) {
+// Blink light of current mode (Non-blocking)
+void StrategyRunLed() {
+  switch (mode) {
+    case MODE_EMERGENCY:
+      LedBlink(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      break;
+    case MODE_IDLE:
+      LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      break;
+    case MODE_SYSTEMTEST:
+      LedBlink(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      break;
+    case MODE_REMOTECONTROL:
+      LedBlink(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      break;
+    case MODE_AUTONOMOUS:
+      LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      break;
+    default:
+      break;
+  }
+}
+
+// Blink light of given mode (Non-blocking)
+void StrategyRunLed(byte mode) {
+  switch (mode) {
     case MODE_EMERGENCY:
       LedBlink(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;

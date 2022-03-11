@@ -8,7 +8,7 @@
 // Start sequence of strategy
 void StartStrategyEmergency() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Emergency): Starting");
+  DEBUG_PRINTLN(F("Strategy (Emergency): Starting"));
 
   // Disable all outputs
   SystemDisable();
@@ -17,9 +17,9 @@ void StartStrategyEmergency() {
   // Disable input buttons
   detachInterrupt(PI_BUTTON_MODE);
   detachInterrupt(PI_BUTTON_SELECT);
-  DEBUG_PRINTLN("Strategy (Emergency): Systems Disabled");
+  DEBUG_PRINTLN(F("Strategy (Emergency): Systems Disabled"));
 
-  DEBUG_PRINTLN("Strategy (Emergency): Initialized");
+  DEBUG_PRINTLN(F("Strategy (Emergency): Initialized"));
   DEBUG_PRINTLINE();
 }
 
@@ -40,7 +40,7 @@ void RunStrategyEmergency() {
 // End sequence of strategy
 void FinishStrategyEmergency() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Emergency): Ending");
+  DEBUG_PRINTLN(F("Strategy (Emergency): Ending"));
 
   lastMillisMode = millis();
   lastMillisEstop = millis();
@@ -52,7 +52,7 @@ void FinishStrategyEmergency() {
   attachInterrupt(PI_INT_BUTTON_ESTOP, EstopButtonInterruptHandler, FALLING);
   SetStatus(MODULE_ESTOP, true);
 
-  DEBUG_PRINTLN("Strategy (Emergency): Finished");
+  DEBUG_PRINTLN(F("Strategy (Emergency): Finished"));
 
   // Disable light
 }

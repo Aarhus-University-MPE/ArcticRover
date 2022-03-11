@@ -19,13 +19,13 @@ void initializeDebugComm() {
   else
     SetStatus(MODULE_DBGCOMM, false);
 
-  DEBUG_PRINTLN("#---------------------------#");
-  DEBUG_PRINTLN("#     GeoRover Firmware     #");
-  DBG_ONLY(DEBUG_PRINTLN("#       #DEBUG MODE#        #"));
-  DEBUG_PRINT("#  System Version: ");
+  DEBUG_PRINTLN(F("#---------------------------#"));
+  DEBUG_PRINTLN(F("#     GeoRover Firmware     #"));
+  DBG_ONLY(DEBUG_PRINTLN(F("#       #DEBUG MODE#        #")));
+  DEBUG_PRINT(F("#  System Version: "));
   DEBUG_PRINT(SystemVersion);
-  DEBUG_PRINTLN(" #");
-  DEBUG_PRINTLN("#---------------------------#");
+  DEBUG_PRINTLN(F(" #"));
+  DEBUG_PRINTLN(F("#---------------------------#"));
   DEBUG_PRINTLN();
 }
 
@@ -76,9 +76,9 @@ bool DebugCommStatus() {
 
 // Parse read Command
 void parseCommand() {
-  DEBUG_PRINT("Received command (DBG_PRT): \"");
+  DEBUG_PRINT(F("Received command (DBG_PRT): \""));
   DEBUG_PRINT(receivedCMD);
-  DEBUG_PRINTLN("\"");
+  DEBUG_PRINTLN(F("\""));
 
   switch (receivedCMD[0]) {
     case CMD_FILES:
@@ -99,7 +99,7 @@ void parseCommand() {
     case '\0':
       break;
     default:
-      DEBUG_PRINTLN("NACK");
+      DEBUG_PRINTLN(F("NACK"));
       break;
   }
 }
@@ -131,7 +131,7 @@ void parseCommandFiles() {
     case '\0':
       break;
     default:
-      DEBUG_PRINTLN("NACK");
+      DEBUG_PRINTLN(F("NACK"));
       break;
   }
 }
@@ -139,10 +139,10 @@ void parseCommandFiles() {
 void parseCommandStrategy() {
   switch (receivedCMD[1]) {
     case CMD_STRATEGY_SET:
-      DEBUG_PRINT("Manual Strategy Set to: ");
+      DEBUG_PRINT(F("Manual Strategy Set to: "));
       DEBUG_PRINTLN((int)(receivedCMD[2] - '0'));
       if (!SetMode((int)(receivedCMD[2] - '0')))
-        DEBUG_PRINTLN("Mode not found!");
+        DEBUG_PRINTLN(F("Mode not found!"));
       break;
     case CMD_STRATEGY_FUNCTION:
       strategyMethods[3][mode]();
@@ -153,7 +153,7 @@ void parseCommandStrategy() {
     case '\0':
       break;
     default:
-      DEBUG_PRINTLN("NACK");
+      DEBUG_PRINTLN(F("NACK"));
       break;
   }
 }
@@ -161,25 +161,25 @@ void parseCommandStrategy() {
 void parseCommandBackup() {
   switch (receivedCMD[1]) {
     case CMD_BACKUP_RST:
-      DEBUG_PRINTLN("Manual Reset of Backup System.");
+      DEBUG_PRINTLN(F("Manual Reset of Backup System."));
       ResetBackupCPU();
       break;
     case CMD_BACKUP_PRIMSTATUS:
-      DEBUG_PRINT("Backup System Status: ");
+      DEBUG_PRINT(F("Backup System Status: "));
       DEBUG_PRINTLN(GetStatus(MODULE_BACKUPCPU));
       break;
     case CMD_BACKUP_HB:
-      DEBUG_PRINTLN("Virtual Heartbeat");
+      DEBUG_PRINTLN(F("Virtual Heartbeat"));
       HeartBeatInInterrupt();
       break;
     case CMD_BACKUP_FREEZE:
-      DEBUG_PRINTLN("Simulating System Halt");
+      DEBUG_PRINTLN(F("Simulating System Halt for 60 sec"));
       delay(60000);
       break;
     case '\0':
       break;
     default:
-      DEBUG_PRINTLN("NACK");
+      DEBUG_PRINTLN(F("NACK"));
       break;
   }
 }
@@ -193,10 +193,10 @@ void parseCommandModule() {
 
   switch (receivedCMD[1]) {
     case CMD_MODULE_ENABLE:
-      DEBUG_PRINT("Manual Enable of Module: ");
+      DEBUG_PRINT(F("Manual Enable of Module: "));
       switch (receivedCMD[2]) {
         case '\0':
-          DEBUG_PRINTLN("ALL SYSTEMS");
+          DEBUG_PRINTLN(F("ALL SYSTEMS"));
           break;
         default:
           DEBUG_PRINTLN(moduleSlct);
@@ -205,10 +205,10 @@ void parseCommandModule() {
       }
       break;
     case CMD_MODULE_DISABLE:
-      DEBUG_PRINT("Manual Disable of Module: ");
+      DEBUG_PRINT(F("Manual Disable of Module: "));
       switch (receivedCMD[2]) {
         case '\0':
-          DEBUG_PRINTLN("ALL SYSTEMS");
+          DEBUG_PRINTLN(F("ALL SYSTEMS"));
           SystemDisable();
           break;
         default:
@@ -218,40 +218,40 @@ void parseCommandModule() {
       }
       break;
     case CMD_MODULE_OVERRIDE:
-      DEBUG_PRINT("Manual Override of Module: ");
+      DEBUG_PRINT(F("Manual Override of Module: "));
       switch (receivedCMD[2]) {
         case '\0':
-          DEBUG_PRINTLN("NACK");
+          DEBUG_PRINTLN(F("NACK"));
           // SystemDisable();
           break;
         default:
           DEBUG_PRINT(moduleSlct);
-          DEBUG_PRINT("\t");
+          DEBUG_PRINT(F("\t"));
           DEBUG_PRINTLN(ToBoolString(!GetStatus(moduleSlct)));
           SetStatus(moduleSlct, !GetStatus(moduleSlct));
           break;
       }
       break;
     case CMD_MODULE_STATUS:
-      DEBUG_PRINTLN("Manual System Status Check");
+      DEBUG_PRINTLN(F("Manual System Status Check"));
       // GetStatus(true);
-      DEBUG_PRINT("System Status: ");
+      DEBUG_PRINT(F("System Status: "));
       DEBUG_PRINTLN(String(ToLong(SystemStatus)));
       break;
     case CMD_MODULE_RESET:
-      DEBUG_PRINT("Manual System Reset in: ");
+      DEBUG_PRINT(F("Manual System Reset in: "));
       CountDownPrint();
       systemReset();
       break;
     case CMD_MODULE_TEST:
-      DEBUG_PRINT("Testing Module: ");
+      DEBUG_PRINT(F("Testing Module: "));
       DEBUG_PRINTLN(ModuleToString(moduleSlct));
       DEBUG_PRINTLINE();
       activeCommand = true;
       break;
     case CMD_MODULE_STOPTEST:
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN("Manual System Test Stop");
+      DEBUG_PRINTLN(F("Manual System Test Stop"));
       SystemDisable(moduleSlct);
       DEBUG_PRINTLINE();
       activeCommand = false;
@@ -260,7 +260,7 @@ void parseCommandModule() {
     case '\0':
       break;
     default:
-      DEBUG_PRINTLN("NACK");
+      DEBUG_PRINTLN(F("NACK"));
       break;
   }
 }
@@ -282,9 +282,9 @@ void parseCommandRoute() {
   switch (receivedCMD[1]) {
     case CMD_ROUTE_SET:
       // write coordinate
-      DEBUG_PRINT("Lat: ");
+      DEBUG_PRINT(F("Lat: "));
       DEBUG_PRINT(latInt);
-      DEBUG_PRINT(" Lon: ");
+      DEBUG_PRINT(F(" Lon: "));
       DEBUG_PRINTLN(lonInt);
 
       EEPROM_WRITE_LAT((long)(receivedCMD[2] - '0'), latInt);
@@ -294,9 +294,9 @@ void parseCommandRoute() {
       EEPROM_READ_LAT((long)(receivedCMD[2] - '0'), latInt);
       EEPROM_READ_LON((long)(receivedCMD[2] - '0'), lonInt);
 
-      DEBUG_PRINT("Lat: ");
+      DEBUG_PRINT(F("Lat: "));
       DEBUG_PRINT(latInt);
-      DEBUG_PRINT(" Lon: ");
+      DEBUG_PRINT(F(" Lon: "));
       DEBUG_PRINTLN(lonInt);
       break;
     default:
@@ -310,22 +310,22 @@ void parseData() {  // split the data into its parts
 }
 
 void CountDownPrint() {
-  DEBUG_PRINT("3");
+  DEBUG_PRINT(F("3"));
   delay(333);
-  DEBUG_PRINT(".");
+  DEBUG_PRINT(F("."));
   delay(333);
-  DEBUG_PRINT(". ");
+  DEBUG_PRINT(F(". "));
   delay(333);
-  DEBUG_PRINT("2");
+  DEBUG_PRINT(F("2"));
   delay(333);
-  DEBUG_PRINT(".");
+  DEBUG_PRINT(F("."));
   delay(333);
-  DEBUG_PRINT(". ");
+  DEBUG_PRINT(F(". "));
   delay(333);
-  DEBUG_PRINT("1");
+  DEBUG_PRINT(F("1"));
   delay(333);
-  DEBUG_PRINT(".");
+  DEBUG_PRINT(F("."));
   delay(333);
-  DEBUG_PRINTLN(". ");
+  DEBUG_PRINTLN(F(". "));
   delay(333);
 }

@@ -6,34 +6,32 @@
 // Start sequence of strategy
 void StartStrategyIdle() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Idle): Starting");
-  StrategyStartLed(MODE_IDLE);
+  DEBUG_PRINTLN(F("Strategy (Idle): Starting"));
 
-  // Disable all outputs
   SystemDisable();
 
   AttachSelectButton();
 
-  DEBUG_PRINTLN("Strategy (Idle): Initialized");
+  DEBUG_PRINTLN(F("Strategy (Idle): Initialized"));
   DEBUG_PRINTLINE();
-  StrategyStartLed(MODE_IDLE);
+
+  StrategyStartLed();
 }
 
 // Main sequence of strategy
 void RunStrategyIdle() {
-  StrategyRunLed(MODE_IDLE);
+  StrategyRunLed();
 }
 
 // End sequence of strategy
 void FinishStrategyIdle() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Idle): Ending");
+  DEBUG_PRINTLN(F("Strategy (Idle): Ending"));
   SystemDisable();
 
-  DEBUG_PRINTLN("Strategy (Idle): Finished");
+  DEBUG_PRINTLN(F("Strategy (Idle): Finished"));
 }
 
 // Selecet button function
 void SelectFunctionIdle() {
-  StrategyStartLed(MODE_IDLE);
 }

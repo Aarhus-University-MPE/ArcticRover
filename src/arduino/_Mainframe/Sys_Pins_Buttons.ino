@@ -55,7 +55,7 @@ void InitAllPins() {
 
 // Initialization of the interrupts assigned to buttons
 void InitButtons() {
-  lastMillisMode = millis();
+  lastMillisMode  = millis();
   lastMillisEstop = millis();
 
   // Input interrupts
@@ -73,11 +73,11 @@ void EstopButtonInterruptHandler() {
 void ModeButtonInterruptHandler() {
   if (millis() - lastMillisMode > BTN_DEBOUNCE_TIME_LONG) {
     if (GetStatus(MODULE_ESTOP)) {
-      DEBUG_PRINTLN("Mode button press, changing mode to Mode Library");
+      DEBUG_PRINTLN(F("Mode button press, changing mode to Mode Library"));
       lastMillisMode = millis();
       SetMode(MODE_MODELIBRARY);
     } else {
-      DEBUG_PRINTLN("Emergency Mode, Input Blocked!");
+      DEBUG_PRINTLN(F("Emergency Mode, Input Blocked!"));
     }
   }
 }

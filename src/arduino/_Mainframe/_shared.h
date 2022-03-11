@@ -4,7 +4,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <SD.h>
-#include "_motor.h"
+#include "GemMotor.h"
 
 void (*systemReset)(void) = 0;
 
@@ -129,29 +129,26 @@ void GetStatus(bool printRes);
 bool AccelTest(bool printRes);
 
 
-// // Blackbox functions
-// void BlackBoxAppendln();
-
-// void BlackBoxAppend(String blackBoxInput);
-// void BlackBoxAppendln(String blackBoxInput);
-
-// // void BlackBoxAppend(byte blackBoxInput);
-// // void BlackBoxAppendln(byte blackBoxInput);
-
-// // void BlackBoxAppend(int blackBoxInput);
-// // void BlackBoxAppendln(int blackBoxInput);
-
-// // void BlackBoxAppend(float blackBoxInput);
-// // void BlackBoxAppendln(float blackBoxInput);
-
-// // void BlackBoxAppend(long int blackBoxInput);
-// // void BlackBoxAppendln(long int blackBoxInput);
-
-// // void BlackBoxAppend(unsigned long blackBoxInput);
-// // void BlackBoxAppendln(unsigned long blackBoxInput);
-
-// // void BlackBoxAppend(long int blackBoxInput, int Type);
-// // void BlackBoxAppendln(long int blackBoxInput, int Type);
-
 GemMotor motorLeft = GemMotor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);
 GemMotor motorRight = GemMotor(CANBUS_TX_MOTOR_RIGHT, CANBUS_RX_MOTOR_RIGHT);
+
+
+
+void BlackBoxAppendln();
+void BlackBoxAppend(String blackBoxInput);
+void BlackBoxAppendln(String blackBoxInput);
+
+void BlackBoxAppend(int blackBoxInput);
+void BlackBoxAppendln(int blackBoxInput);
+
+void BlackBoxAppend(long int blackBoxInput, int Type);
+void BlackBoxAppendln(long int blackBoxInput, int Type);
+
+void BlackBoxAppend(float blackBoxInput);
+void BlackBoxAppendln(float blackBoxInput);
+
+void BlackBoxAppend(long int blackBoxInput);
+void BlackBoxAppendln(long int blackBoxInput);
+
+void BlackBoxAppend(unsigned long blackBoxInput);
+void BlackBoxAppendln(unsigned long blackBoxInput);

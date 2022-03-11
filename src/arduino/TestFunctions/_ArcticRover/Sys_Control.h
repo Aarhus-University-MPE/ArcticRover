@@ -6,10 +6,25 @@
   2021
 */
 
+bool SystemStatus[MODULE_COUNT];
+
+bool GetStatus(int module) {
+  return SystemStatus[module];
+}
+void SetStatus(int module, bool status) {
+  SystemStatus[module] = status;
+}
+void SetStatus(bool status) {
+  for (int i = 0; i < MODULE_COUNT; i++) {
+    SystemStatus[i] = status;
+  }
+  SystemStatus[MODULE_ESTOP] = true;
+  SystemStatus[MODULE_RESERVED] = true;
+}
 
 void SystemEnable(int module) {
   if (GetStatus(module)) return;
-  DEBUG_PRINT(F("SYS Enable: "));
+  DEBUG_PRINT("SYS Enable: ");
   DEBUG_PRINT(ModuleToString(module));
 
   bool status = true;
@@ -78,14 +93,14 @@ void SystemEnable(int module) {
       status = true;
       break;
     default:
-      DEBUG_PRINT(F("- UNKNOWN Case"));
+      DEBUG_PRINT("- UNKNOWN Case");
       break;
   }
 
   if (status) {
-    DEBUG_PRINTLN(F(": Enabled"));
+    DEBUG_PRINTLN(": Enabled");
   } else {
-    DEBUG_PRINTLN(F(": ERROR"));
+    DEBUG_PRINTLN(": ERROR");
   }
   SetStatus(module, status);
   delay(10);
@@ -100,15 +115,15 @@ void SystemEnablePrimary() {
   SystemEnable(MODULE_IRIDIUM);
 }
 
-// Enable systems for current mode
-void SystemEnableMode() {
+void SystemEnableMode(int mode) {
   switch (mode) {
     case MODE_REMOTECONTROL:
-      // SystemEnable(MODULE_PWR);
-      // SystemEnable(MODULE_PWR_MOTOR); // <-- Enabled by user input (along with motor initialization)
-      // SystemEnable(MODULE_MOTORS); // <-- Enabled by user input
-      // SystemEnable(MODULE_RF);
-      // SystemEnable(MODULE_CANBUS);
+      SystemEnable(MODULE_PWR);
+      // SystemEnable(MODULE_PWR_MOTOR); // <-- Enabled by user input
+      // (along with motor initialization) SystemEnable(MODULE_MOTORS); //
+      // <-- Enabled by user input
+      SystemEnable(MODULE_RF);
+      SystemEnable(MODULE_CANBUS);
       break;
     case MODE_AUTONOMOUS:
       // SystemEnable();
@@ -124,7 +139,7 @@ void SystemEnableMode() {
 void SystemDisable(int module) {
   if (!GetStatus(module)) return;
   bool status = false;
-  DEBUG_PRINT(F("SYS Disable: "));
+  DEBUG_PRINT("SYS Disable: ");
   DEBUG_PRINT(ModuleToString(module));
 
   switch (module) {
@@ -201,15 +216,15 @@ void SystemDisable(int module) {
       status = true;
       break;
     default:
-      DEBUG_PRINT(F(" - Unknown Case"));
+      DEBUG_PRINT(" - Unknown Case");
       DEBUG_PRINTLN(ModuleToString(module));
       break;
   }
 
   if (status) {
-    DEBUG_PRINTLN(F("Unable to Disable"));
+    DEBUG_PRINTLN("Unable to Disable");
   } else {
-    DEBUG_PRINTLN(F("- Disabled"));
+    DEBUG_PRINTLN("- Disabled");
   }
 
   SetStatus(module, status);
@@ -239,7 +254,7 @@ bool SystemCheck(int mode) {
                  SYSREQ_REMOTE_CONTROL) |
                 (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
-        DEBUG_PRINT(F("ERROR Code: "));
+        DEBUG_PRINT("ERROR Code: ");
         DEBUG_PRINTLN(String(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
                               SYSREQ_REMOTE_CONTROL) |
                              (1L << MODULE_RESERVED)));
@@ -250,7 +265,7 @@ bool SystemCheck(int mode) {
           ((((ToLong(SystemStatus) ^ SYSREQ_AUTONOMOUS) & SYSREQ_AUTONOMOUS) |
            (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
-        DEBUG_PRINT(F("ERROR Code: "));
+        DEBUG_PRINT("ERROR Code: ");
         DEBUG_PRINTLN(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
                        SYSREQ_REMOTE_CONTROL) |
                       (1L << MODULE_RESERVED));
@@ -269,23 +284,23 @@ bool SystemTest() {
   bool testDone = false;
   switch (systemTestState) {
     case 0:
-      DEBUG_PRINTLN(F("Running Full System Test"));
+      DEBUG_PRINTLN("Running Full System Test");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
     case 1:
-      DEBUG_PRINTLN(F("Running test (1/4) - Power Systems"));
+      DEBUG_PRINTLN("Running test (1/4) - Power Systems");
       SystemTestModule(MODULE_PWR);
       SystemTestModule(MODULE_PWR_5V);
       SystemTestModule(MODULE_PWR_12V);
       SystemTestModule(MODULE_PWR_24V);
       SystemTestModule(MODULE_PWR_MOTOR);
-      DEBUG_PRINTLN(F("Test (1/4) - Power Systems (Complete)"));
+      DEBUG_PRINTLN("Test (1/4) - Power Systems (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
     case 2:
-      DEBUG_PRINTLN(F("Running test (2/4) - Communication"));
+      DEBUG_PRINTLN("Running test (2/4) - Communication");
       systemTestState++;
       break;
     case 3:
@@ -301,12 +316,12 @@ bool SystemTest() {
       if (SystemTestModule(MODULE_BACKUPCPU)) systemTestState++;
       break;
     case 7:
-      DEBUG_PRINTLN(F("Test (2/4) - Communication (Complete)"));
+      DEBUG_PRINTLN("Test (2/4) - Communication (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
     case 8:
-      DEBUG_PRINTLN(F("Running test (3/4) - Subsystems"));
+      DEBUG_PRINTLN("Running test (3/4) - Subsystems");
       systemTestState++;
       break;
     case 9:
@@ -325,38 +340,38 @@ bool SystemTest() {
       if (SystemTestModule(MODULE_LED)) systemTestState++;
       break;
     case 14:
-      DEBUG_PRINTLN(F("Test (3/4) - Subsystems (Complete)"));
+      DEBUG_PRINTLN("Test (3/4) - Subsystems (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
     case 15:
-      DEBUG_PRINTLN(F("Running test (4/4) - Motors"));
+      DEBUG_PRINTLN("Running test (4/4) - Motors");
       systemTestState++;
       break;
     case 16:
       if (SystemTestModule(MODULE_MOTORS)) systemTestState++;
       break;
     case 17:
-      DEBUG_PRINTLN(F("Test (4/4) - Motors (Complete)"));
+      DEBUG_PRINTLN("Test (4/4) - Motors (Complete)");
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
     case 18:
-      DEBUG_PRINTLN(F("Disabeling all systems"));
+      DEBUG_PRINTLN("Disabeling all systems");
       DEBUG_PRINTLINE();
       testResults = ToLong(SystemStatus);
       SystemDisable();
       AttachSelectButton();
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN(F("System Test Complete"));
-      DEBUG_PRINT(F("  Results: "));
+      DEBUG_PRINTLN("System Test Complete");
+      DEBUG_PRINT("  Results: ");
       DEBUG_PRINTLN(String(testResults));
       DEBUG_PRINTLINE();
       testDone = true;
       systemTestState = 0;
       break;
     default:
-      DEBUG_PRINTLN(F("System Test Error: Stopping"));
+      DEBUG_PRINTLN("System Test Error: Stopping");
       systemTestState = 0;
       testDone = true;
       break;
@@ -452,7 +467,7 @@ bool SystemTestModule(byte module) {
         status = true;
         break;
       default:
-        DEBUG_PRINT(F("MODULE TEST: Unknown System Module: "));
+        DEBUG_PRINT("MODULE TEST: Unknown System Module: ");
         DEBUG_PRINTLN(ModuleToString(module));
         break;
     }
@@ -542,7 +557,7 @@ bool SystemCheckModule(byte module) {
         status = HeartBeatStatus();
         break;
       default:
-        DEBUG_PRINT(F("MODULE CHECK: Unknown System Module: "));
+        DEBUG_PRINT("MODULE CHECK: Unknown System Module: ");
         DEBUG_PRINTLN(ModuleToString(module));
         break;
     }

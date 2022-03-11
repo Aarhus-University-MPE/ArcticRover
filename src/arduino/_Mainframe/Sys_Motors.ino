@@ -5,6 +5,7 @@
   Aarhus University
   2022
 */
+unsigned long millisLastMotorStep;
 
 // Initialize motor power
 bool InitializeMotors() {
@@ -12,6 +13,7 @@ bool InitializeMotors() {
     return false;
   }
   digitalWrite(PO_MOTOR_EN, true);
+
   return true;
 }
 
@@ -39,17 +41,11 @@ void MotorUpdate(float dir, float speed, float enable) {
   // Update CAN messages
   motorLeft.Update(velocityLeft);
   motorRight.Update(velocityRight);
-
-  DEBUG_PRINT("Motor Move: ");
-  DEBUG_PRINT("Left: ");
-  DEBUG_PRINT(velocityLeft);
-  DEBUG_PRINT("\t Right: ");
-  DEBUG_PRINTLN(velocityRight);
 }
 
 void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight) {
   // Move, handle direction
-  float steerFactorLeft = 1;
+  float steerFactorLeft  = 1;
   float steerFactorRight = 1;
 
   // turn right, right wheel moves slower
@@ -61,7 +57,7 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
     steerFactorLeft = steerFactor(dir);
   }
 
-  float speedLeft = speed * steerFactorLeft;
+  float speedLeft  = speed * steerFactorLeft;
   float speedRight = speed * steerFactorRight;
 
   if (speedLeft < 0)
@@ -115,16 +111,16 @@ float steerFactor(float dir) {
   return scale;
 }
 
-int motorTestState;
 bool MotorTest() {
   if (!GetStatus(MODULE_MOTORS)) {
     return true;
   }
   bool testDone = false;
+  static int motorTestState;
 
   switch (motorTestState) {
     case 0:
-      DEBUG_PRINTLN("Motor Test 1 - Linear Ramp");
+      DEBUG_PRINTLN(F("Motor Test 1 - Linear Ramp"));
       DEBUG_PRINTLINE();
       motorTestState++;
       break;
@@ -132,7 +128,7 @@ bool MotorTest() {
       if (MotorTestRamp()) motorTestState++;
       break;
     case 2:
-      DEBUG_PRINTLN("Motor Test 2 - Steering");
+      DEBUG_PRINTLN(F("Motor Test 2 - Steering"));
       DEBUG_PRINTLINE();
       motorTestState++;
       break;
@@ -141,7 +137,7 @@ bool MotorTest() {
       break;
     case 4:
       motorTestState = 0;
-      testDone = true;
+      testDone       = true;
       MotorUpdate(0, 0, false);
     default:
       break;
@@ -152,20 +148,19 @@ bool MotorTest() {
   return testDone;
 }
 
-int motorTestRampState = 0;
-long millisLastMotorStep = 0;
-float speed = 0.0f;
-
 // Runs Motor Ramp Test, ramps up to maximum speed FWD -> Ramps down to 0 -> Ramps up to maximum speed BWD -> Ramps down to 0
 bool MotorTestRamp() {
   if (!GetStatus(MODULE_MOTORS)) {
     return true;
   }
 
+  static int motorTestRampState;
+  static float speed;
+
   bool testDone = false;
   switch (motorTestRampState) {
     case 0:
-      DEBUG_PRINTLN("Ramping up - FWD");
+      DEBUG_PRINTLN(F("Ramping up - FWD"));
       motorTestRampState++;
       break;
     case 1:
@@ -178,7 +173,7 @@ bool MotorTestRamp() {
       break;
     case 2:
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN("Ramping down");
+      DEBUG_PRINTLN(F("Ramping down"));
       motorTestRampState++;
       break;
     case 3:
@@ -195,7 +190,7 @@ bool MotorTestRamp() {
       break;
     case 4:
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN("Ramping up - BWD");
+      DEBUG_PRINTLN(F("Ramping up - BWD"));
       motorTestRampState++;
       break;
     case 5:
@@ -208,7 +203,7 @@ bool MotorTestRamp() {
       break;
     case 6:
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN("Ramping down");
+      DEBUG_PRINTLN(F("Ramping down"));
       motorTestRampState++;
       break;
     case 7:
@@ -225,12 +220,12 @@ bool MotorTestRamp() {
       break;
     case 8:
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN("Motor Test 2 - Steering");
+      DEBUG_PRINTLN(F("Motor Test 2 - Steering"));
       motorTestRampState++;
       break;
     case 9:
       motorTestRampState = 0;
-      testDone = true;
+      testDone           = true;
       MotorUpdate(0, 0, true);
     default:
       testDone = true;
@@ -240,17 +235,14 @@ bool MotorTestRamp() {
   return testDone;
 }
 
-
-int motorTestSteerState = 0;
-float dir = 0.0f;
-
 // Runs Motor Steering Test, Runs at lower speed, turns max steer right -> Max Steer Left -> Centered
 bool MotorTestSteer() {
   if (!GetStatus(MODULE_MOTORS)) {
     return true;
   }
-  float speed = MOTOR_MAX_SPEED_FWD * 0.25;
-
+  static int motorTestSteerState;
+  static float dir;
+  float speed   = MOTOR_MAX_SPEED_FWD * 0.25;
   bool testDone = false;
 
   switch (motorTestSteerState) {
@@ -294,7 +286,7 @@ bool MotorTestSteer() {
       break;
     case 6:
       motorTestSteerState = 0;
-      testDone = true;
+      testDone            = true;
       MotorUpdate(0, 0, true);
     default:
       testDone = true;

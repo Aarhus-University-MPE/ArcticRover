@@ -76,12 +76,12 @@ void DetachSelectButton() {
 // Tries set the mode and isModeUpdated flag
 boolean SetMode(byte newMode) {
   if (newMode < MODES_MAX) {
-    prevMode = mode;
-    modeCycle = mode;
-    mode = newMode;
+    prevMode      = mode;
+    modeCycle     = mode;
+    mode          = newMode;
     isModeUpdated = true;
     EEPROM.write(MEMADDR_LASTMODE, mode);
-    DEBUG_PRINT("Mode Set: ");
+    DEBUG_PRINT(F("Mode Set: "));
     DEBUG_PRINTLN(ModeToString(mode));
     return true;
   }

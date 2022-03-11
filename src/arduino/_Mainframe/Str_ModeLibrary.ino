@@ -6,37 +6,32 @@
 // Start sequence of strategy
 void StartStrategyModeLibrary() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Mode Library): Starting");
-  StrategyStartLed(MODE_MODELIBRARY);
+  DEBUG_PRINTLN(F("Strategy (Mode Library): Starting"));
 
   lastMillisMode = millis();
   lastMillisEstop = millis();
 
   // Assign mode button interrupt
   attachInterrupt(PI_INT_BUTTON_MODE, ModeFunctionModeLibrary, FALLING);
-  AttachSelectButton();
-  delay(20);
 
-  DEBUG_PRINTLN("Strategy (Mode Library): Initialized");
+  AttachSelectButton();
+
+  DEBUG_PRINTLN(F("Strategy (Mode Library): Initialized"));
   DEBUG_PRINTLINE();
-  DEBUG_PRINT("Mode Cycle: ");
+  DEBUG_PRINT(F("Mode Cycle: "));
   DEBUG_PRINTLN(ModeToString(modeCycle));
-  StrategyStartLed(MODE_MODELIBRARY);
 }
 
 // Main sequence of strategy
 void RunStrategyModeLibrary() {
-  if (millis() - lastMillistModeBlink > LED_BLINK_VERY_LONG) {
-    lastMillistModeBlink = millis();
-    StrategyStartLed(modeCycle);
-  }
+  StrategyRunLed(modeCycle);
 }
 
 // End sequence of strategy
 void FinishStrategyModeLibrary() {
   DEBUG_PRINTLINE();
-  DEBUG_PRINTLN("Strategy (Mode Library): Ending");
-  DEBUG_PRINTLN("Strategy (Mode Library): Finished");
+  DEBUG_PRINTLN(F("Strategy (Mode Library): Ending"));
+  DEBUG_PRINTLN(F("Strategy (Mode Library): Finished"));
 
   // Assign mode button interrupt
   attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
@@ -53,7 +48,7 @@ void SelectFunctionModeLibrary() {
     }
 
     // Select Mode
-    DEBUG_PRINTLN("Mode Selected.");
+    DEBUG_PRINTLN(F("Mode Selected."));
     SetMode(modeCycle);
   }
 }
@@ -77,7 +72,7 @@ void ModeFunctionModeLibrary() {
       modeCycle = modeCycle + 1;
     }
 
-    DEBUG_PRINT("Mode Cycle: ");
+    DEBUG_PRINT(F("Mode Cycle: "));
     DEBUG_PRINTLN(ModeToString(modeCycle));
   }
 }

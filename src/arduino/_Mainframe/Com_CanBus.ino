@@ -14,18 +14,25 @@ struct can_frame canTestMsg;
 
 long CanBusTxLast;
 
+int canTestState        = 0;
+long millisCanTestStart = 0;
+long millisLastCanPrint = 0;
+
 MCP2515 mcp2515(PO_SPISS_CANBUS);
 
 bool InitializeCanBus() {
+  int err;
   SPI.begin();  // Begins SPI communication
-  // mcp2515.reset();
-  mcp2515.setBitrate(CANBBUS_SPEED, MCP_8MHZ);
-  mcp2515.setNormalMode();
+  mcp2515.reset();
 
-  motorRight.ResetCANStatus();
-  motorLeft.SetCANTXStatus();
+  err = mcp2515.setBitrate(CANBBUS_SPEED, MCP_8MHZ);
+  if (err != MCP2515::ERROR_OK) return false;
 
-  delay(20);
+  err = mcp2515.setNormalMode();
+  if (err != MCP2515::ERROR_OK) return false;
+
+  motorRight.ResetCanStatus();
+  motorLeft.SetCanTxStatus();
 
   return mcp2515.checkReceive();
 }
@@ -48,27 +55,25 @@ void CanBusProcess() {
   }
   int err;
 
-  if (motorLeft.GetCANTXStatus()) {
+  if (motorLeft.GetCanTxStatus()) {
     err = mcp2515.sendMessage(motorLeft.GetCanMsg());
-    Serial.println("Sending Motor Left");
     if (err == MCP2515::ERROR_OK) {
-    }else{
+    } else {
       Serial.print("Motor Left Error - ");
       Serial.println(err);
     }
-  } else if (motorRight.GetCANTXStatus()) {
+  } else if (motorRight.GetCanTxStatus()) {
     err = mcp2515.sendMessage(motorRight.GetCanMsg());
-    Serial.println("Sending Motor Right");
     if (err == MCP2515::ERROR_OK) {
-    }else{
+    } else {
       Serial.print("Motor Right Error - ");
       Serial.println(err);
     }
   }
 
-  if (motorLeft.GetCANRXStatus() || motorRight.GetCANRXStatus()) {
-    if (motorLeft.CheckCANRXTimeout() == GemMotor::ERROR_TIMEOUT) Serial.println("Motor Left - Timeout");
-    if (motorRight.CheckCANRXTimeout() == GemMotor::ERROR_TIMEOUT) Serial.println("Motor Right - Timeout");
+  if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
+    if (motorLeft.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) motorRight.SetCanTxStatus();
+    if (motorRight.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) motorLeft.SetCanTxStatus();
 
     if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
       ParseData();
@@ -86,36 +91,32 @@ bool ParseData() {
 
   // Check ID against left motor
   if (canMsg.can_id == CANBUS_RX_MOTOR_LEFT || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 1 || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 3) {
-    status = motorLeft.ParseCanMsg(canMsg, false);
-    motorRight.SetCANTXStatus();  // Indicate motor Right to send next msg
+    status = motorLeft.ParseCanMsg(canMsg);
+    motorRight.SetCanTxStatus();  // Indicate motor Right to send next msg
   }
 
   // Check ID against right motor
   else if (canMsg.can_id == CANBUS_RX_MOTOR_RIGHT || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 1 || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 3) {
-    status = motorRight.ParseCanMsg(canMsg, false);
-    motorLeft.SetCANTXStatus();  // Indicate motor Left to send next msg
-    CanBusTxLast = millis();
+    status = motorRight.ParseCanMsg(canMsg);
+    motorLeft.SetCanTxStatus();  // Indicate motor Left to send next msg
   }
 
+  CanBusTxLast = millis();
   return status;
 }
-
-int canTestState = 0;
-long millisCanTestStart = 0;
-long millisLastCanPrint = 0;
 
 bool CanBusTest() {
   bool testDone = false;
 
   switch (canTestState) {
     case 0:
-      DEBUG_PRINT("GNSS feed starting for: ");
+      DEBUG_PRINT(F("GNSS feed starting for: "));
       DEBUG_PRINT(SYS_TEST_DURATION_LONG);
-      DEBUG_PRINTLN(" ms");
+      DEBUG_PRINTLN(F(" ms"));
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN("------- CAN Read ----------");
-      DEBUG_PRINTLN("ID  DLC   DATA");
-      canTestMsg.can_id = 0x12;
+      DEBUG_PRINTLN(F("------- CAN Read ----------"));
+      DEBUG_PRINTLN(F("ID  DLC   DATA"));
+      canTestMsg.can_id  = 0x12;
       canTestMsg.can_dlc = 3;
       canTestMsg.data[0] = 0;
       canTestMsg.data[1] = 0;
@@ -138,7 +139,7 @@ bool CanBusTest() {
       break;
     case 2:
       canTestState = 0;
-      testDone = true;
+      testDone     = true;
       SetStatus(MODULE_CANBUS, CanBusStatus());  //<---- Update to reflect Motor CAN Errors
     default:
       break;
@@ -150,13 +151,13 @@ bool CanBusTest() {
 // Stream all data in raw HEX
 void StreamData() {
   Serial.print(canMsg.can_id, HEX);  // print ID
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.print(canMsg.can_dlc, HEX);  // print DLC
-  Serial.print(" ");
+  Serial.print(F(" "));
 
   for (int i = 0; i < canMsg.can_dlc; i++) {  // print the data
     Serial.print(canMsg.data[i], HEX);
-    Serial.print(" ");
+    Serial.print(F(" "));
   }
 
   Serial.println();
@@ -165,17 +166,17 @@ void StreamData() {
 void ParseCanMsg(bool motor) {
   if (canMsg.can_id == 0x64) {
     int control_value = (int)((canMsg.data[1] << 8) | canMsg.data[0]);
-    int motor_state = (int)(canMsg.data[3] >> 6);
-    int rpm = (int)((canMsg.data[6] << 8) | canMsg.data[5]) / 10.0f;
-    int temperature = (int)canMsg.data[7];
+    int motor_state   = (int)(canMsg.data[3] >> 6);
+    int rpm           = (int)((canMsg.data[6] << 8) | canMsg.data[5]) / 10.0f;
+    int temperature   = (int)canMsg.data[7];
 
-    Serial.print("Control value: ");
+    Serial.print(F("Control value: "));
     Serial.print(control_value);
-    Serial.print("\t Motor State: ");
+    Serial.print(F("\t Motor State: "));
     Serial.print(motor_state);
-    Serial.print("\t rpm: ");
+    Serial.print(F("\t rpm: "));
     Serial.print(rpm);
-    Serial.print("\t Temperature: ");
+    Serial.print(F("\t Temperature: "));
     Serial.println(temperature);
   }
 
@@ -193,11 +194,11 @@ void ParseCanMsg(bool motor) {
         warning[i * 8 + j] = canMsg.data[i] >> j & 1;
       }
     }
-    Serial.print("Warning: ");
+    Serial.print(F("Warning: "));
     for (size_t i = 0; i < 64; i++) {
       if (warning[i] == 1) {
         Serial.print(i);
-        Serial.print("\t");
+        Serial.print(F("\t"));
       }
     }
 
@@ -217,11 +218,11 @@ void ParseCanMsg(bool motor) {
         error[i * 8 + j] = canMsg.data[i] >> j & 1;
       }
     }
-    Serial.print("Error: ");
+    Serial.print(F("Error: "));
     for (size_t i = 0; i < 64; i++) {
       if (error[i] == 1) {
         Serial.print(i);
-        Serial.print("\t");
+        Serial.print(F("\t"));
       }
     }
 

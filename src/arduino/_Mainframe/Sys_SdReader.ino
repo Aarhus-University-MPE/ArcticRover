@@ -41,7 +41,7 @@ void SDQuery() {
 
 // Print all files to serial port
 void printFiles(File dir) {
-  DEBUG_PRINTLN("Files in system:");
+  DEBUG_PRINTLN(F(("Files in system:")));
   while (true) {
     File entry = dir.openNextFile();
     if (!entry) {
@@ -52,12 +52,12 @@ void printFiles(File dir) {
 
     if (!entry.isDirectory()) {
       DEBUG_PRINT(entry.name());
-      DEBUG_PRINT("\t\t");
+      DEBUG_PRINT(F(("\t\t")));
       DEBUG_PRINTLN2(entry.size(), DEC);
     }
     entry.close();
   }
-  DEBUG_PRINTLN("End of storage");
+  DEBUG_PRINTLN(F(("End of storage")));
   DEBUG_PRINTLINE();
 }
 
@@ -65,14 +65,14 @@ void printFiles(File dir) {
 void SDSize(char fileName[]) {
   if (SDReaderStatus()) {
     appendCsv(fileName);
-    DEBUG_PRINT("Opening file: ");
+    DEBUG_PRINT(F("Opening file: "));
     DEBUG_PRINTLN(fileName);
     File file = SD.open(fileName);
     if (file) {
       DEBUG_PRINTLN("File size: " + (String)file.size() + " bytes");
       file.close();
     } else {
-      DEBUG_PRINTLN("File not found!");
+      DEBUG_PRINTLN(F("File not found!"));
     }
   }
 }
@@ -81,7 +81,7 @@ void SDSize(char fileName[]) {
 void SDDownload(char fileName[]) {
   if (SDReaderStatus()) {
     appendCsv(fileName);
-    DEBUG_PRINTLN("Downloading file: ");
+    DEBUG_PRINTLN(F("Downloading file: "));
     DEBUG_PRINTLN(fileName);
     File file = SD.open(fileName);
     if (file) {
@@ -89,9 +89,9 @@ void SDDownload(char fileName[]) {
         DEBUG_WRITE(file.read());
       }
       file.close();
-      DEBUG_PRINTLN("End of File");
+      DEBUG_PRINTLN(F("End of File"));
     } else {
-      DEBUG_PRINTLN("File not found!");
+      DEBUG_PRINTLN(F("File not found!"));
     }
   }
 }
@@ -101,12 +101,12 @@ void SDDelete(char fileName[]) {
   if (SDReaderStatus()) {
     appendCsv(fileName);
     if (SD.exists(fileName)) {
-      DEBUG_PRINTLN("Deleting file: ");
+      DEBUG_PRINTLN(F("Deleting file: "));
       DEBUG_PRINTLN(fileName);
       SD.remove(fileName);
-      DEBUG_PRINTLN("File Removed");
+      DEBUG_PRINTLN(F("File Removed"));
     } else {
-      DEBUG_PRINTLN("File not found");
+      DEBUG_PRINTLN(F("File not found"));
     }
   }
 }
@@ -116,9 +116,9 @@ void SDCreate(char fileName[]) {
   if (SDReaderStatus()) {
     appendCsv(fileName);
     if (SD.exists(fileName)) {
-      DEBUG_PRINTLN("File already exist");
+      DEBUG_PRINTLN(F("File already exist"));
     } else {
-      DEBUG_PRINTLN("Creating file: ");
+      DEBUG_PRINTLN(F("Creating file: "));
       DEBUG_PRINTLN(fileName);
       File file = SD.open(fileName, FILE_WRITE);
       file.close();

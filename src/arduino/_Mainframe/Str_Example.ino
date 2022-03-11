@@ -1,28 +1,47 @@
-/*  XX mode
+/*  Strategy - Example
 
     Description...
 */
 
 // Start sequence of strategy
 void StartStrategyExample() {
-  DEBUG_PRINT("Strategy: Emergency Starting...");
-  DBG_ONLY(delay(500));
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN(F("Strategy (Example): Starting"));
+  SystemDisable();
 
-  delay(20);
+  StrategyStartLed();
 
-  // Disable all outputs
+  SystemEnableMode();
 
-  DEBUG_PRINTLN("all outputs disabled.");
+  DEBUG_PRINTLN(F("Strategy (Example): Initialized"));
+  DEBUG_PRINTLINE();
 }
 
 // Main sequence of strategy
 void RunStrategyExample() {
-  // Blink light
+  StrategyRunLed(); // Non-blocking LED blink
+  
+  // Add code which runs every loop for current strategy
+
 }
 
 // End sequence of strategy
 void FinishStrategyExample() {
-  DEBUG_PRINTLN("Strategy: Emergency ending.");
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN(F("Strategy (Example): Ending"));
 
-  // Disable light
+  DetachSelectButton();
+
+  SystemDisable();
+
+  DEBUG_PRINTLN(F("Strategy (Example): Finished"));
 }
+
+// Select button function for current strategy
+void SelectFunctionExample() {
+  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
+    lastMillisSelect = millis();
+    // Add functionality here
+  }
+}
+

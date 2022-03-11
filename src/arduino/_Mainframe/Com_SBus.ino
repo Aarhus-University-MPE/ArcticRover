@@ -10,13 +10,15 @@
 #include <SBUS.h>
 
 SBUS sbus(COM_SERIAL_RF);
+int sbusTestState = 0;
+long millisSbusTestStart = 0;
+long millisLastSbusPrint = 0;
 
 // Initialize RF Communication
 bool InitializeSBUS() {
   sbus.begin(false);
-  bool status = COM_SERIAL_RF;
 
-  return status;
+  return COM_SERIAL_RF;
 }
 
 void TerminateSBUS() {
@@ -27,18 +29,14 @@ bool SBusStatus() {
   return GetStatus(MODULE_RF);
 }
 
-int sbusTestState = 0;
-long millisSbusTestStart = 0;
-long millisLastSbusPrint = 0;
-
 bool SBusTest() {
   bool testDone = false;
 
   switch (sbusTestState) {
     case 0:
-      DEBUG_PRINT("SBUS feed starting for: ");
+      DEBUG_PRINT(F("SBUS feed starting for: "));
       DEBUG_PRINT(SYS_TEST_DURATION);
-      DEBUG_PRINTLN(" ms");
+      DEBUG_PRINTLN(F(" ms"));
       millisSbusTestStart = millis();
       sbusTestState++;
       break;
@@ -64,16 +62,15 @@ bool SBusTest() {
   return testDone;
 }
 
-
 void printChannels() {
   for (int i = 0; i < 8; i++) {
-    Serial.print("CH ");
+    Serial.print(F("CH "));
     Serial.print(i);
-    Serial.print(": ");
+    Serial.print(F(": "));
     Serial.print(getChannelFloat(i));
-    Serial.print("\t");
+    Serial.print(F("\t"));
   }
-  Serial.print("Good frames: ");
+  Serial.print(F("Good frames: "));
   Serial.print(sbus.getGoodFrames());
   Serial.println();
 }
@@ -107,4 +104,13 @@ int getChannel(int channel) {
   result *= 256;
 
   return (int)result;
+}
+
+// Scale SBUS channel value from range [0, 256] to [-1, 1]
+float getChannelFloatFull(int channel) {
+  int value = getChannel(channel);
+
+  float valueFloat = value / 256.0;
+
+  return valueFloat;
 }

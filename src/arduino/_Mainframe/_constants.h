@@ -26,8 +26,8 @@
   BlackBoxAppendln(x, y);    \
   Serial.println(x, y)
 #define DEBUG_PRINTLINE()                                   \
-  BlackBoxAppendln("------------------------------------"); \
-  Serial.println("------------------------------------")
+  BlackBoxAppendln(F("------------------------------------")); \
+  Serial.println(F("------------------------------------"))
 #define DEBUG_WRITE(x) Serial.write(x)
 #define RECEIVE_CMDS() recvWithStartEndMarkers()
 #else
@@ -35,7 +35,7 @@
 #define DEBUG_PRINT(x)       BlackBoxAppend(x)
 #define DEBUG_PRINTLN(x)     BlackBoxAppendln(x)
 #define DEBUG_PRINTLN2(x, y) BlackBoxAppendln(x, y)
-#define DEBUG_PRINTLINE()    BlackBoxAppendln("------------------------------------")
+#define DEBUG_PRINTLINE()    BlackBoxAppendln(F("------------------------------------"))
 #define DEBUG_WRITE(x)
 #define RECEIVE_CMDS()
 #endif
@@ -46,7 +46,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion          "0.88.336"
+#define SystemVersion          "0.91.126"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN    B001  // 001
@@ -104,12 +104,14 @@ const unsigned long SYSREQ_REMOTE_CONTROL =
     (1L << MODULE_PWR_MOTOR) +
     (1L << MODULE_MOTORS) +
     (1L << MODULE_RF) +
+    (1L << MODULE_CANBUS) +
     (1L << MODULE_ESTOP);
 
 const unsigned long SYSREQ_AUTONOMOUS =
     (1L << MODULE_PWR) +
     (1L << MODULE_PWR_MOTOR) +
     (1L << MODULE_MOTORS) +
+    (1L << MODULE_CANBUS) +
     (1L << MODULE_IRIDIUM) +
     (1L << MODULE_GNSS) +
     (1L << MODULE_ACCEL) +
@@ -118,59 +120,57 @@ const unsigned long SYSREQ_AUTONOMOUS =
     (1L << MODULE_BACKUPCPU) +
     (1L << MODULE_ESTOP);
 
-
 // ------------------------------------------------------------ //
 //                          COMMANDS                            //
 // ------------------------------------------------------------ //
-#define CMD_START_MARK                  '<'
-#define CMD_END_MARK                    '>'
+#define CMD_START_MARK         '<'
+#define CMD_END_MARK           '>'
 
-#define CMD_FILES                       'F'
-#define CMD_FILES_LIST                  'L'
-#define CMD_FILES_SIZE                  'S'
-#define CMD_FILES_DOWNLOAD              'D'
-#define CMD_FILES_DELETE                'R'
-#define CMD_FILES_BLCKBOX               'B'
-#define CMD_FILES_BLCKBOXCLEAR          'C'
+#define CMD_FILES              'F'
+#define CMD_FILES_LIST         'L'
+#define CMD_FILES_SIZE         'S'
+#define CMD_FILES_DOWNLOAD     'D'
+#define CMD_FILES_DELETE       'R'
+#define CMD_FILES_BLCKBOX      'B'
+#define CMD_FILES_BLCKBOXCLEAR 'C'
 
-#define CMD_STRATEGY                    'S'
-#define CMD_STRATEGY_SET                'S'
-#define CMD_STRATEGY_FUNCTION           'F'
-#define CMD_STRATEGY_OVERRIDE           'O'
+#define CMD_STRATEGY           'S'
+#define CMD_STRATEGY_SET       'S'
+#define CMD_STRATEGY_FUNCTION  'F'
+#define CMD_STRATEGY_OVERRIDE  'O'
 
-#define CMD_BACKUP                      'B'
-#define CMD_BACKUP_RST                  'R'
-#define CMD_BACKUP_PRIMSTATUS           'S'
-#define CMD_BACKUP_HB                   'H'
-#define CMD_BACKUP_FREEZE               'F'
+#define CMD_BACKUP             'B'
+#define CMD_BACKUP_RST         'R'
+#define CMD_BACKUP_PRIMSTATUS  'S'
+#define CMD_BACKUP_HB          'H'
+#define CMD_BACKUP_FREEZE      'F'
 
-#define CMD_MODULE                      'M'
-#define CMD_MODULE_ENABLE               'E'
-#define CMD_MODULE_DISABLE              'D'
-#define CMD_MODULE_OVERRIDE             'O'
-#define CMD_MODULE_STATUS               'S'
-#define CMD_MODULE_RESET                'R'
-#define CMD_MODULE_TEST                 'T'
-#define CMD_MODULE_STOPTEST             'Q'
+#define CMD_MODULE             'M'
+#define CMD_MODULE_ENABLE      'E'
+#define CMD_MODULE_DISABLE     'D'
+#define CMD_MODULE_OVERRIDE    'O'
+#define CMD_MODULE_STATUS      'S'
+#define CMD_MODULE_RESET       'R'
+#define CMD_MODULE_TEST        'T'
+#define CMD_MODULE_STOPTEST    'Q'
 
-#define CMD_ROUTE                       'R'
-#define CMD_ROUTE_SET                   'S'
-#define CMD_ROUTE_PRINT                 'P'
-
+#define CMD_ROUTE              'R'
+#define CMD_ROUTE_SET          'S'
+#define CMD_ROUTE_PRINT        'P'
 
 // ------------------------------------------------------------ //
 //                       STRATEGY MODES                         //
 // ------------------------------------------------------------ //
 
-#define MODES_MAX           6  // Total number of modes
-#define MODES_MIN_BROWSABLE 2  // Minimum mode index, that could be set via mode button.
+#define MODES_MAX              6  // Total number of modes
+#define MODES_MIN_BROWSABLE    2  // Minimum mode index, that could be set via mode button.
 
-#define MODE_EMERGENCY      0  // Emergency Stop Mode
-#define MODE_MODELIBRARY    1  // Mode Library
-#define MODE_IDLE           2  // Standby mode
-#define MODE_SYSTEMTEST     3  // Test main systems
-#define MODE_REMOTECONTROL  4  // System remotely controllable
-#define MODE_AUTONOMOUS     5  // Autonomous driving mode
+#define MODE_EMERGENCY         0  // Emergency Stop Mode
+#define MODE_MODELIBRARY       1  // Mode Library
+#define MODE_IDLE              2  // Standby mode
+#define MODE_SYSTEMTEST        3  // Test main systems
+#define MODE_REMOTECONTROL     4  // System remotely controllable
+#define MODE_AUTONOMOUS        5  // Autonomous driving mode
 
 #define ModeToString(m) \
   ((m) == 0 ? "Emergency" : ((m) == 1 ? "Mode Library" : ((m) == 2 ? "Idle" : ((m) == 3 ? "System Test" : ((m) == 4 ? "Remote Control" : ((m) == 5 ? "Autonomous" : "Unknown"))))))
@@ -214,6 +214,11 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define REMOTE_SIGNAL_SCALE             100.0 / 87.0
 
+#define REMOTE_CHANNEL_LOW              50
+#define REMOTE_CHANNEL_HIGH             200
+#define CONTROLLER_DEADZONE             10
+#define CONTROLLER_DEADZONE_FLOAT       0.05
+
 // ------------------------------------------------------------ //
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
@@ -223,7 +228,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                           HEATING                            //
 // ------------------------------------------------------------ //
-#define TEMP_SYSTEM_MIN                 10      // ~28 V
+#define TEMP_SYSTEM_MIN                 10  // ~28 V
 #define HEATING_DURATION                20000
 #define HEATING_TIMEOUT                 40000
 
@@ -265,7 +270,6 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define CANBBUS_SPEED                   CAN_125KBPS
 #define COM_TEST_PERIOD                 5000
-#define CANBUS_TX_PERIOD                100
 
 // ------------------------------------------------------------ //
 //                        BATTERY LEVEL                         //
@@ -311,35 +315,6 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define MEMADDR_FREEIMU_START           MEMADDR_IRCACHE_END                 //! important - this constant is also in Freeimu.cpp
 #define MEMADDR_FREEIMU_END             MEMADDR_FREEIMU_START + 36 + 1 + 3  // 36 bytes for values , 1 for signature, 3 empty space
 
-
 // ------------------------------------------------------------ //
 //                          FUNCTIONS                           //
 // ------------------------------------------------------------ //
-
-void BlackBoxAppendln();
-void BlackBoxAppend(String blackBoxInput);
-void BlackBoxAppendln(String blackBoxInput);
-
-void BlackBoxAppend(int blackBoxInput);
-void BlackBoxAppendln(int blackBoxInput);
-
-void BlackBoxAppend(long int blackBoxInput, int Type);
-void BlackBoxAppendln(long int blackBoxInput, int Type);
-
-void BlackBoxAppend(float blackBoxInput);
-void BlackBoxAppendln(float blackBoxInput);
-
-void BlackBoxAppend(long int blackBoxInput);
-void BlackBoxAppendln(long int blackBoxInput);
-
-void BlackBoxAppend(unsigned long blackBoxInput);
-void BlackBoxAppendln(unsigned long blackBoxInput);
-
-// void BlackBoxAppend(byte blackBoxInput);
-// void BlackBoxAppendln(byte blackBoxInput);
-
-// void BlackBoxAppend(bool blackBoxInput);
-// void BlackBoxAppendln(bool blackBoxInput);
-
-// void BlackBoxAppend(char blackBoxInput);
-// void BlackBoxAppendln(char blackBoxInput);
