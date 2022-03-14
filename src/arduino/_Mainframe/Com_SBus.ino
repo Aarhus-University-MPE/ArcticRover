@@ -114,3 +114,44 @@ float getChannelFloatFull(int channel) {
 
   return valueFloat;
 }
+
+// Read RF signal and update motors accordingly
+void SBusProcess() {
+  if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
+    MotorUpdate(0, 0, 0);
+    return;
+  }
+
+  float throttle1 = getChannelFloatFull(1);  // Left stick Vertical
+  float dir1      = getChannelFloat(2);      // Left stick Horisontal
+  float throttle2 = getChannelFloat(3);      // Right stick Vertical
+  float dir2      = getChannelFloat(4);      // Right stick Horisontal
+  int gear        = getChannel(5);           // Gear select (SA)
+
+  int forwardDir;
+  float speed, dir;
+  bool enabled;
+
+  // Primary input (Left Stick)
+  if (throttle1 > CONTROLLER_DEADZONE_FLOAT) {
+    if (gear < REMOTE_CHANNEL_LOW) {
+      speed = throttle1 * MOTOR_MAX_SPEED_BWD;
+    } else if (gear > REMOTE_CHANNEL_HIGH) {
+      speed = throttle1 * MOTOR_MAX_SPEED_FWD;
+    }
+    dir = dir1;
+    enabled = true;
+  }
+  // Secondary input (Right Stick)
+  else if (abs(throttle2) > CONTROLLER_DEADZONE_FLOAT) {
+    if (throttle2 > 0) {
+      speed = throttle2 * MOTOR_MAX_SPEED_FWD / 4;
+    } else {
+      speed = throttle2 * MOTOR_MAX_SPEED_BWD / 4;
+    }
+    dir = dir2;
+    enabled = true;
+  }
+
+  MotorUpdate(dir, speed, enabled);
+}

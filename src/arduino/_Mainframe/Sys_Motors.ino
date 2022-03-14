@@ -43,8 +43,8 @@ void MotorUpdate(float dir, float speed, float enable) {
   motorRight.Update(velocityRight);
 }
 
+// Calculates skid steering based on direction and speed
 void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight) {
-  // Move, handle direction
   float steerFactorLeft  = 1;
   float steerFactorRight = 1;
 
@@ -60,26 +60,25 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
   float speedLeft  = speed * steerFactorLeft;
   float speedRight = speed * steerFactorRight;
 
-  if (speedLeft < 0)
+  if (speedLeft < 0) {
     velocityLeft = MOTOR_MAX_SPEED_BWD * speedLeft;
-  else
+  } else {
     velocityLeft = MOTOR_MAX_SPEED_FWD * speedLeft;
+  }
 
-  if (speedRight < 0)
+  if (speedRight < 0) {
     velocityRight = MOTOR_MAX_SPEED_BWD * speedRight;
-  else
+  } else {
     velocityRight = MOTOR_MAX_SPEED_FWD * speedRight;
+  }
 
   if (abs(velocityLeft) < MIN_VELOCITY) velocityLeft = 0;
   if (abs(velocityRight) < MIN_VELOCITY) velocityRight = 0;
 }
 
+// Returns true if both motors are operational
 bool MotorState() {
-  return GetStatus(MODULE_MOTORS);
-}
-
-bool MotorPowerStatus() {
-  return MotorStatus();  // <-------- Update from CAN Power Error only
+  return motorLeft.GetState() || motorRight.GetState();
 }
 
 // Motors operational?
@@ -87,10 +86,12 @@ bool MotorStatus() {
   return (MotorStatusLeft() && MotorStatusRight());
 }
 
+// Left motor status
 bool MotorStatusLeft() {
   return motorLeft.Status();
 }
 
+// Right motor status
 bool MotorStatusRight() {
   return motorRight.Status();
 }
@@ -111,6 +112,7 @@ float steerFactor(float dir) {
   return scale;
 }
 
+// Full motor test
 bool MotorTest() {
   if (!GetStatus(MODULE_MOTORS)) {
     return true;

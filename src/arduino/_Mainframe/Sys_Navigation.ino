@@ -45,67 +45,58 @@ long lon_previous = 0;
 bool validCoordinate = false;
 bool gnssFixValid    = false;
 
-bool navigationPreCheck = false;
-bool navigationFlag     = false;
+bool navigationFlag = false;
 
 bool Navigate() {
-  if (navigationPreCheck) {
-    if (NavigationCheck()) {
-      // Calculate distance from current pos to target pos
-
-      // Check distance -> increment if < min accept
-
-      // Calculate bearing to target
-
-      // -> Run motor
-    }
+  if (!NavigationPreChecks()) {
+    return false;
   }
+  if (!NavigationRunCheck()) {
+    return false;
+  }
+
+  // Calculate distance from current pos to target pos
+
+  // Check distance -> increment if < min accept
+
+  // Calculate bearing to target
+
+  // -> Run motor
 }
 
-/*
-  Check system status while navigation is running.
-  GNSS status, Accelerometer output (tilt?), Battery Status
-*/
-bool NavigationCheck() {
-  DEBUG_PRINT(F("Running Navigation Checks... "));
-  // GNSS valid?
-
-  // Battery status?
-
-  // Accelerometer within limits?
-
-  // Motor heartbeat
-}
-
-/*
-  Checks to run before starting autonomous navigation
-  System checks, Route Checks, Sensor Checks
-*/
+//  Checks to run before starting autonomous navigation
+//  System checks, Route Checks
 bool NavigationPreChecks() {
-  // DEBUG_PRINT("Running Navigation Prechecks...");
-  // bool precheck = true;
-  // bool precheckCode[8];
+  static bool navigationPreCheck = false;
 
-  // // System Checks
-  // precheckCode[0] = VoltageCheck();  // Required
-  // precheckCode[1] = MotorStatus();   // Required
-  // precheckCode[2] = GPSValid();      // Required
+  if (!NavigationRunCheck()) {
+    navigationPreCheck = false;
+    return navigationPreCheck;
+  }
 
-  // // Route Checks
-  // precheckCode[3] = RouteFileCheck();    // Required
-  // precheckCode[4] = RouteFormatCheck();  // Required
-  // precheckCode[5] = RouteRangeCheck();   // Required
+  if (!navigationPreCheck) {
+    navigationPreCheck = RouteTest();
+  }
 
-  // // Sensor Checks
-  // precheckCode[6] = TempSensorCheck();   // Optional
-  // precheckCode[7] = AccelSensorCheck();  // Optional
+  return navigationPreCheck;
+}
 
-  // byte precheckCodeByte = boolarr_to_byte(precheckCode);
+// Check system status while navigation is running.
+// GNSS status, Accelerometer output (tilt?), Battery Status
+bool NavigationRunCheck() {
+  return SystemCheck(MODE_AUTONOMOUS);
+}
 
-  // // Compare precheck with required
-  // precheck = SystemCheck(MODE_AUTONOMOUS);
+bool RouteCheck() {
+  return navigationPreCheck;
+}
 
-  // return precheck;
+// Test full route (used in Navigation pre-check)
+bool RouteTest() {
+  DEBUG_PRINTLN(F("Running full route test"));
+  if (!RouteFileCheck()) return false;
+  if (!RouteFormatCheck()) return false;
+  if (!RouteRangeCheck()) return false;
   return true;
 }
 

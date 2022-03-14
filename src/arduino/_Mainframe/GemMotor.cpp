@@ -20,23 +20,32 @@ GemMotor::GemMotor(int _TX_id, int _RX_id) {
   GemMotor::canMsg.can_dlc = 3;
 }
 
+// returns latest motor RPM value
 int GemMotor::GetRpm() { return GemMotor::rpm; }
 
+// returns true if motor is currently running
+bool GemMotor::GetState() { return (GemMotor::motorState == MOTOR_RUN); }
+
+// returns true if TX flag is set, indicating ready to send msg to motor
 bool GemMotor::GetCanTxStatus() { return GemMotor::canTxStatus; }
 
+// returns true if RX flag is set, indicating awaiting motor response msg
 bool GemMotor::GetCanRxStatus() { return GemMotor::canRxStatus; }
 
+// Set TX flag, unset RX flag, indicate ready to send message to motor
 void GemMotor::SetCanTxStatus() {
   GemMotor::canTxStatus = true;
   GemMotor::canRxStatus = false;
 }
 
+// Set RX flag, unset TX flag, indicate ready awaiting motor return message, timestamp timeout
 void GemMotor::SetCanRxStatus() {
   GemMotor::canTxStatus       = false;
   GemMotor::canRxStatus       = true;
   GemMotor::canRxTimeoutStart = millis();
 }
 
+// Check time since RX flag set and compare to timeout duration, if timeout unset RX flag
 GemMotor::CAN_ERROR GemMotor::CheckCanRxTimeout() {
   if (!GemMotor::canRxStatus) {
     return GemMotor::CAN_ERROR_IDLE;
@@ -45,16 +54,19 @@ GemMotor::CAN_ERROR GemMotor::CheckCanRxTimeout() {
 
   if (GemMotor::canRxTimeout) {
     GemMotor::canRxStatus = false;
+    validStatus           = false;
     return GemMotor::CAN_ERROR_TIMEOUT;
   }
   return GemMotor::CAN_ERROR_WAITING;
 }
 
+// Unset RX and TX flag
 void GemMotor::ResetCanStatus() {
   GemMotor::canTxStatus = false;
   GemMotor::canRxStatus = false;
 }
 
+// Update controlvalue based on target velocity, if below min disables motor
 void GemMotor::Update(float velocity) {
   if (abs(velocity) < MIN_VELOCITY) {
     GemMotor::swEnable     = SW_DISABLE;
@@ -79,6 +91,7 @@ void GemMotor::Update(float velocity) {
   GemMotor::controlValue = min(GemMotor::rpmTarget, MAX_CONTROL_VALUE) * dir;
 }
 
+// Prints current motor parameters returns error if no motor messages received
 GemMotor::ERROR GemMotor::PrintStatus() {
   if (!validStatus) {
     Serial.print(F("Motor Status "));
@@ -95,6 +108,7 @@ GemMotor::ERROR GemMotor::PrintStatus() {
   return ERROR_OK;
 }
 
+// Returns canMsg pointer constructed from motor state, set using Update(velocity), sets RX status
 struct can_frame* GemMotor::GetCanMsg() {
   GemMotor::BuildCanMsg();
 
@@ -103,6 +117,7 @@ struct can_frame* GemMotor::GetCanMsg() {
   return GemMotor::canMsgPtr;
 }
 
+// Update canMsg values
 void GemMotor::BuildCanMsg() {
   // Control values
   GemMotor::canMsg.data[1] = GemMotor::controlValue >> 8 & 0xFF;
@@ -117,11 +132,35 @@ void GemMotor::BuildCanMsg() {
       GemMotor::controlMode | (GemMotor::mode) << 2 | (GemMotor::swEnable) << 5;
 }
 
+// Updates motor status and returns current motor status
 bool GemMotor::Status() {
-  MotorStateUpdate();
+  MotorStatusUpdate();
   return GemMotor::motorStatus && GemMotor::validStatus;
 }
 
+// Updates current motor status, if error reported for more than timeout duration (5000 ms) unsets motor status
+// Timeout implemented due to motor capacitor taking time to charge up
+void GemMotor::MotorStatusUpdate() {
+  // Check latest motor state for error
+  if (GemMotor::motorState != MOTOR_ERROR) {
+    GemMotor::motorStatus = true;
+    return;
+  }
+
+  // Check if error previously not reported - Set timestamp for first error
+  if (!GemMotor::motorError) {
+    GemMotor::motorError       = true;
+    GemMotor::firstErrorMillis = millis();
+    return;
+  }
+
+  // Check time passed since first error, if above timeout set motor state as error.
+  if (millis() - GemMotor::firstErrorMillis > MOTOR_ERROR_TIMEOUT) {
+    GemMotor::motorStatus = false;
+  }
+}
+
+// Parses incoming motor messages and convert to motor states
 bool GemMotor::ParseCanMsg(struct can_frame _canMsg) {
   GemMotor::canRxStatus = true;
   validStatus           = true;
@@ -130,63 +169,40 @@ bool GemMotor::ParseCanMsg(struct can_frame _canMsg) {
     case 0:
       ParseCanControl(_canMsg);
       break;
-
     case 1:
       PraseCanInverterState(_canMsg);
       break;
-
     case 2:
       ParseCanWarning(_canMsg);
       break;
-
     case 3:
       ParseCanError(_canMsg);
       break;
-
     default:
-      GemMotor::canRxStatus = false;
-      validStatus           = false;
       break;
   }
 
   return GemMotor::canRxStatus;
 }
 
-void GemMotor::MotorStateUpdate(){
-  // Check latest motor state for error
-  if(GemMotor::motorState != MOTOR_ERROR){
-    GemMotor::motorStatus = true;
-    return;
-  }
-
-  // Check if error previously not reported - Set timestamp for first error
-  if(!GemMotor::motorError){
-    GemMotor::motorError = true;
-    GemMotor::firstErrorMillis = millis();
-    return;
-  } 
-
-  // Check time passed since first error, if above timeout set motor state as error.
-  if(millis() - GemMotor::firstErrorMillis > MOTOR_ERROR_TIMEOUT){
-    GemMotor::motorStatus = false;
-  }
-}
-
+// Parse incoming canMsg to Primary control values (Motor RX+0)
 void GemMotor::ParseCanControl(struct can_frame _canMsg) {
   GemMotor::controlValueRx = (int)((_canMsg.data[1] << 8) | _canMsg.data[0]);
   GemMotor::motorState     = (byte)(_canMsg.data[3] >> 6);
   GemMotor::rpm            = (int)((_canMsg.data[6] << 8) | _canMsg.data[5]) / 10.0f;
   GemMotor::temperature    = (int)_canMsg.data[7];
-  
+
   // Update new motor state
-  MotorStateUpdate();
+  MotorStatusUpdate();
 }
 
+// Parse incoming canMsg to Motor inverter states (Motor RX+1)
 void GemMotor::PraseCanInverterState(struct can_frame _canMsg) {
   GemMotor::inverterPeakCurr = (int)((_canMsg.data[1] << 8) | _canMsg.data[0]);
   GemMotor::power            = (int)((_canMsg.data[3] << 8) | _canMsg.data[2]);
 }
 
+// Parse incoming canMsg to Motor Warnings (Motor RX+2)
 void GemMotor::ParseCanWarning(struct can_frame _canMsg) {
   for (size_t i = 0; i < 8; i++) {
     for (size_t j = 0; j < 8; j++) {
@@ -195,6 +211,7 @@ void GemMotor::ParseCanWarning(struct can_frame _canMsg) {
   }
 }
 
+// Parse incoming canMsg to Motor Errors (Motor RX+3)
 void GemMotor::ParseCanError(struct can_frame _canMsg) {
   for (size_t i = 0; i < 8; i++) {
     for (size_t j = 0; j < 8; j++) {
@@ -203,6 +220,7 @@ void GemMotor::ParseCanError(struct can_frame _canMsg) {
   }
 }
 
+// Print latest Motor Control Values
 void GemMotor::PrintControl(bool endline) {
   Serial.print(F("Control value: "));
   Serial.print(GemMotor::controlValueRx);
@@ -216,6 +234,7 @@ void GemMotor::PrintControl(bool endline) {
   if (endline) Serial.println();
 }
 
+// Print latest Motor Inverter states
 void GemMotor::PrintInverterState(bool endline) {
   Serial.print(F("Max inverter peak current: "));
   Serial.print(GemMotor::inverterPeakCurr);
@@ -226,6 +245,7 @@ void GemMotor::PrintInverterState(bool endline) {
   if (endline) Serial.println();
 }
 
+// Print latest Motor Warnings
 void GemMotor::PrintWarning(bool endline) {
   Serial.print(F("Warning: "));
   for (size_t i = 0; i < 64; i++) {
@@ -238,6 +258,7 @@ void GemMotor::PrintWarning(bool endline) {
   if (endline) Serial.println();
 }
 
+// Print latest Motor Errors
 void GemMotor::PrintError(bool endline) {
   Serial.print(F("Error: "));
   for (size_t i = 0; i < 64; i++) {

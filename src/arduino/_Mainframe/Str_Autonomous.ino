@@ -1,10 +1,12 @@
-/*  Autonomous mode
+/*  Strategy - Autonomous
 
-    Primary Strategy for Autonomous Navigation 
+    Primary Strategy for Autonomous Navigation
 */
+bool autonomyActive;
 
 // Start sequence of strategy
 void StartStrategyAutonomous() {
+  DEBUG_PRINTLINE();
   DEBUG_PRINTLN(F("Strategy (Autonomous): Starting."));
 
   SystemEnableMode();
@@ -12,33 +14,51 @@ void StartStrategyAutonomous() {
   AttachSelectButton();
 
   DEBUG_PRINTLN(F("Strategy (Autonomous): Initialized."));
+  DEBUG_PRINTLINE();
+
+  StrategyStartLed();
 }
 
 // Main sequence of strategy
 void RunStrategyAutonomous() {
+  if (!autonomyActive) {
+    SystemDisable(MODULE_MOTORS);
+    StrategyRunLed(MODE_IDLE);
+    return;
+  }
+
+  if (!Navigate()){
+    autonomyActive = false;
+    SystemDisable(MODULE_MOTORS);
+    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
+    return;
+  }
+
+  SystemEnable(MODULE_PWR_MOTOR);
+  SystemEnable(MODULE_MOTORS);
+
   // Blink light
   StrategyRunLed();
 }
 
 // End sequence of strategy
 void FinishStrategyAutonomous() {
+  DEBUG_PRINTLINE();
   DEBUG_PRINTLN(F("Strategy (Autonomous): Ending."));
-  delay(20);
 
   DetachSelectButton();
 
-  // Disable all outputs
   SystemDisable();
-  delay(20);
 
   DEBUG_PRINTLN(F("Strategy (Autonomous): Finished."));
+  DEBUG_PRINTLINE();
 }
 
-/* -------------------------------------------------
-    Functions
-------------------------------------------------- */
-
-// Enable/Disable motor power
+// Select button function, starts autonomous driving
 void SelectFunctionAutonomous() {
-  // Start Driving
+  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
+    lastMillisSelect = millis();
+    lastSystemCheck  = millis() - SYSTEM_CHECK_DT;
+    remoteActive     = !autonomyActive;
+  }
 }

@@ -5,7 +5,7 @@
   Aarhus University
   2021
 */
-
+unsigned long lastSystemCheck = 9999999;
 
 void SystemEnable(int module) {
   if (GetStatus(module)) return;
@@ -65,6 +65,9 @@ void SystemEnable(int module) {
     case MODULE_BLACKBOX:
       status = InitBlackBox();
       break;
+    case MODULE_ROUTE:
+      status = RouteCheck();
+      break;
     case MODULE_HEATING:
       status = HeatingStart();
       break;
@@ -111,10 +114,8 @@ void SystemEnableMode() {
       // SystemEnable(MODULE_CANBUS);
       break;
     case MODE_AUTONOMOUS:
-      // SystemEnable();
-      break;
-    case MODE_SYSTEMTEST:
-      //
+      SystemEnable(MODULE_ACCEL);
+      SystemEnable(MODULE_CANBUS);
       break;
     default:
       break;
@@ -229,15 +230,22 @@ void SystemDisable() {
   SystemDisable(MODULE_PWR_24V);
 }
 
+// Runs system check if time since last check > timeout, returns comparison between required modules to current
 bool SystemCheck(int mode) {
-  static bool status = false;
+  static bool status = true;
+
+  if (millis() - lastSystemCheck < SYSTEM_CHECK_DT) {
+    return status;
+  }
+
+  lastSystemCheck = millis();
   SystemCheck();
 
   switch (mode) {
     case MODE_REMOTECONTROL:
       status = ((((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
-                 SYSREQ_REMOTE_CONTROL) |
-                (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
+                  SYSREQ_REMOTE_CONTROL) |
+                 (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
         DEBUG_PRINT(F("ERROR Code: "));
         DEBUG_PRINTLN(String(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
@@ -248,7 +256,7 @@ bool SystemCheck(int mode) {
     case MODE_AUTONOMOUS:
       status =
           ((((ToLong(SystemStatus) ^ SYSREQ_AUTONOMOUS) & SYSREQ_AUTONOMOUS) |
-           (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
+            (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
         DEBUG_PRINT(F("ERROR Code: "));
         DEBUG_PRINTLN(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
@@ -325,23 +333,26 @@ bool SystemTest() {
       if (SystemTestModule(MODULE_LED)) systemTestState++;
       break;
     case 14:
+      if (SystemTestModule(MODULE_ROUTE)) systemTestState++;
+      break;
+    case 15:
       DEBUG_PRINTLN(F("Test (3/4) - Subsystems (Complete)"));
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
-    case 15:
+    case 16:
       DEBUG_PRINTLN(F("Running test (4/4) - Motors"));
       systemTestState++;
       break;
-    case 16:
+    case 17:
       if (SystemTestModule(MODULE_MOTORS)) systemTestState++;
       break;
-    case 17:
+    case 18:
       DEBUG_PRINTLN(F("Test (4/4) - Motors (Complete)"));
       DEBUG_PRINTLINE();
       systemTestState++;
       break;
-    case 18:
+    case 19:
       DEBUG_PRINTLN(F("Disabeling all systems"));
       DEBUG_PRINTLINE();
       testResults = ToLong(SystemStatus);
@@ -352,13 +363,13 @@ bool SystemTest() {
       DEBUG_PRINT(F("  Results: "));
       DEBUG_PRINTLN(String(testResults));
       DEBUG_PRINTLINE();
-      testDone = true;
+      testDone        = true;
       systemTestState = 0;
       break;
     default:
       DEBUG_PRINTLN(F("System Test Error: Stopping"));
       systemTestState = 0;
-      testDone = true;
+      testDone        = true;
       break;
   }
 
@@ -367,7 +378,7 @@ bool SystemTest() {
 
 bool SystemTestModule(byte module) {
   SystemEnable(module);
-  bool status = false;
+  bool status   = false;
   bool testDone = true;
 
   if (GetStatus(module)) {
@@ -385,11 +396,11 @@ bool SystemTestModule(byte module) {
         status = digitalRead(PO_POWER_24V);
         break;
       case MODULE_PWR_MOTOR:
-        status = MotorPowerStatus();
+        status = digitalRead(PO_POWER_MOTOR);
         break;
       case MODULE_MOTORS:
         testDone = MotorTest();
-        status = MotorStatus();
+        status   = MotorStatus();
         break;
       case MODULE_MOTOR_L:
         status = MotorStatusLeft();
@@ -402,28 +413,31 @@ bool SystemTestModule(byte module) {
         break;
       case MODULE_CANBUS:
         testDone = CanBusTest();
-        status = CanBusStatus();
+        status   = CanBusStatus();
         break;
       case MODULE_RF:
         testDone = SBusTest();
-        status = SBusStatus();
+        status   = SBusStatus();
         break;
       case MODULE_IRIDIUM:
         status = IridiumTest();
         break;
       case MODULE_GNSS:
         testDone = GnssTest();
-        status = GnssStatus();
+        status   = GnssStatus();
         break;
       case MODULE_ACCEL:
         testDone = AccelTest();
-        status = AccelStatus();
+        status   = AccelStatus();
         break;
       case MODULE_SD:
         status = SDReaderStatus();
         break;
       case MODULE_BLACKBOX:
         status = BlackBoxStatus();
+        break;
+      case MODULE_ROUTE:
+        status = RouteTest();
         break;
       case MODULE_BACKUPCPU:
         status = HeartBeatStatus();
@@ -442,7 +456,7 @@ bool SystemTestModule(byte module) {
         status = true;
         break;
       case MODULE_TEMP:
-        status = TemperatureStatus();
+        status   = TemperatureStatus();
         testDone = TemperatureTest();
         break;
       case MODULE_ESTOP:
@@ -463,12 +477,12 @@ bool SystemTestModule(byte module) {
   return testDone;
 }
 
-// System check
+// Checks all Systems
 void SystemCheck() {
   for (int i = 0; i < MODULE_COUNT - 2; i++) {
     SystemCheckModule(i);
   }
-  
+
   SetStatus(MODULE_ESTOP, EmergencyStopStatus());
   SetStatus(MODULE_RESERVED, true);
 }
@@ -491,19 +505,19 @@ bool SystemCheckModule(byte module) {
         status = digitalRead(PO_POWER_24V);
         break;
       case MODULE_PWR_MOTOR:
-        status = MotorStatus();
+        status = digitalRead(PO_POWER_MOTOR);
         break;
       case MODULE_MOTORS:
-        status = MotorStatus();  // <-- CAN ERROR MSG
+        status = MotorStatus();  // Left && Right motor
         break;
       case MODULE_MOTOR_L:
-        status = MotorStatusLeft();  // <-- CAN ERROR MSG
+        status = MotorStatusLeft();
         break;
       case MODULE_MOTOR_R:
-        status = MotorStatusRight();  // <-- CAN ERROR MSG
+        status = MotorStatusRight();
         break;
       case MODULE_MOTOR_ACT:
-        status = MotorState();  // <-- CAN ERROR MSG
+        status = MotorState();  // <-- Active or idle?
         break;
       case MODULE_CANBUS:
         status = CanBusStatus();
@@ -526,6 +540,9 @@ bool SystemCheckModule(byte module) {
       case MODULE_BLACKBOX:
         status = BlackBoxStatus();
         break;
+      case MODULE_ROUTE:
+        status = RouteCheck();
+        break;
       case MODULE_DBGCOMM:
         status = DebugCommStatus();
         break;
@@ -533,7 +550,7 @@ bool SystemCheckModule(byte module) {
         status = LedStatus();
         break;
       case MODULE_HEATING:
-        status = GetStatus(MODULE_HEATING);
+        status = HeatingStatus();
         break;
       case MODULE_TEMP:
         status = TemperatureStatus();
@@ -543,7 +560,7 @@ bool SystemCheckModule(byte module) {
         break;
       default:
         DEBUG_PRINT(F("MODULE CHECK: Unknown System Module: "));
-        DEBUG_PRINTLN(ModuleToString(module));
+        DEBUG_PRINTLN(module);
         break;
     }
   }

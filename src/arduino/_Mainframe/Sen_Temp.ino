@@ -7,7 +7,7 @@
   2021
 */
 
-int tempTestState = 0;
+int tempTestState        = 0;
 long millisTempTestStart = 0;
 long millisLastTempPrint = 0;
 
@@ -59,6 +59,10 @@ bool HeatingStop() {
   lastMillistHeatingOff = millis();
 }
 
+bool HeatingStatus() {
+  return GetStatus(MODULE_HEATING);
+}
+
 bool TemperatureStatus() {
   bool status = MeanThermTemp() > TEMP_SYSTEM_MIN;
 
@@ -81,7 +85,7 @@ bool TemperatureTest() {
     case 1:
       if (millis() - millisLastTempPrint > SYS_PRINT_PERIOD_LONG) {
         millisLastTempPrint = millis();
-        meanTemp = MeanThermTemp();
+        meanTemp            = MeanThermTemp();
         DEBUG_PRINT(F("Temperatures: "));
         DEBUG_PRINT(F("\tT1: "));
         DEBUG_PRINT(ThermTemp(0));
@@ -98,14 +102,13 @@ bool TemperatureTest() {
       if (millis() - millisTempTestStart > SYS_TEST_DURATION) tempTestState++;
       break;
     case 2:
-      testDone = true;
+      testDone      = true;
       tempTestState = 0;
       break;
     default:
       break;
   }
 
-  
   return testDone;
 }
 

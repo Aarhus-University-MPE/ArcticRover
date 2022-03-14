@@ -43,7 +43,9 @@ void ReadAccel() {
 }
 
 bool AccelStatus() {
-  return GetStatus(MODULE_ACCEL);
+  if(!GetStatus(MODULE_ACCEL)) return false;
+  
+  return accel.cz > MIN_ACCEL_TILT;
 }
 
 bool AccelTest() {

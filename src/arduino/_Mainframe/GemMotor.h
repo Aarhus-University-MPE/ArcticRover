@@ -10,7 +10,7 @@
 
 #include "mcp2515.h"
 
-#define MIN_VELOCITY         1      // kmh
+#define MIN_VELOCITY         1.0f   // kmh
 #define MOTOR_MAX_SPEED_FWD  10.0f  // kmh
 #define MOTOR_MAX_SPEED_BWD  -5.0f  // kmh
 
@@ -100,13 +100,6 @@ class GemMotor {
     MOTOR_ERROR_CPU_OVERLOAD                 = 40
   };
 
-  enum MOTOR_STATE {
-    MOTOR_INIT  = 0,
-    MOTOR_IDLE  = 1,
-    MOTOR_RUN   = 2,
-    MOTOR_ERROR = 3
-  };
-
   enum MOTOR_WARNING {
     MOTOR_WARNING_ABOUT_TO_STALL             = 2,
     MOTOR_WARNING_DELAY_TEMP_SENSOR          = 6,
@@ -145,29 +138,34 @@ class GemMotor {
     MOTOR_WARNING_STARTING_HIGH_RPM          = 42
   };
 
+  enum MOTOR_STATE {
+    MOTOR_INIT  = 0,
+    MOTOR_IDLE  = 1,
+    MOTOR_RUN   = 2,
+    MOTOR_ERROR = 3
+  };
+
  private:
-  int controlMode = CONTROL_SPEED;
-  int mode        = MOTOR_NORMAL;
-  int rpm;
-  int rpmTarget;
+  // Variables
+  const int controlMode = CONTROL_SPEED;
+  const int mode        = MOTOR_NORMAL;
+
+  int controlValue, controlValueRx;
+  int rpm, rpmTarget, temperature;
+  int inverterPeakCurr, power;
   int TX_id, RX_id;
-  byte motorState;
-  int temperature;
-  int controlValue;
-  int controlValueRx;
-  int inverterPeakCurr;
-  int power;
-  bool validStatus;
-  bool swEnable;
-  bool canTxStatus;
-  bool canRxStatus;
+  int motorState;
+
   unsigned long canRxTimeoutStart;
   unsigned long firstErrorMillis;
-  bool canRxTimeout;
+
+  bool validStatus, motorError, swEnable;
+  bool canTxStatus, canRxStatus, canRxTimeout;
   bool motorStatus = true;
-  bool motorError;
+
   bool warning[64];
   bool error[64];
+
   struct can_frame canMsg;
   struct can_frame* canMsgPtr = &canMsg;
 
@@ -182,7 +180,7 @@ class GemMotor {
   // Current motor errors
   void ParseCanError(struct can_frame _canMsg);
 
-  void MotorStateUpdate();
+  void MotorStatusUpdate();
 
   void PrintControl(bool endline);
   void PrintInverterState(bool endline);
@@ -193,6 +191,7 @@ class GemMotor {
   GemMotor(int _TX_id, int _RX_id);
 
   int GetRpm();
+  bool GetState();
   bool GetCanTxStatus();
   bool GetCanRxStatus();
 
@@ -222,5 +221,6 @@ class GemMotor {
   // Returns status of motor (Error)
   bool Status();
 
+  // Parses incoming motor messages and convert to motor variables
   bool ParseCanMsg(struct can_frame _canMsg);
 };

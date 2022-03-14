@@ -25,7 +25,7 @@
 #define DEBUG_PRINTLN2(x, y) \
   BlackBoxAppendln(x, y);    \
   Serial.println(x, y)
-#define DEBUG_PRINTLINE()                                   \
+#define DEBUG_PRINTLINE()                                      \
   BlackBoxAppendln(F("------------------------------------")); \
   Serial.println(F("------------------------------------"))
 #define DEBUG_WRITE(x) Serial.write(x)
@@ -70,7 +70,7 @@
 #define SYSTEM_CHECK_DT        1000
 #define SYSTEM_REBOOT_DT       5000
 
-#define MODULE_COUNT           23
+#define MODULE_COUNT           24
 
 #define MODULE_PWR             0
 #define MODULE_PWR_5V          1
@@ -88,13 +88,14 @@
 #define MODULE_ACCEL           13
 #define MODULE_SD              14
 #define MODULE_BLACKBOX        15
-#define MODULE_DBGCOMM         16
-#define MODULE_LED             17
-#define MODULE_HEATING         18
-#define MODULE_TEMP            19
-#define MODULE_BACKUPCPU       20
-#define MODULE_ESTOP           21
-#define MODULE_RESERVED        22
+#define MODULE_ROUTE           16
+#define MODULE_DBGCOMM         17
+#define MODULE_LED             18
+#define MODULE_HEATING         19
+#define MODULE_TEMP            20
+#define MODULE_BACKUPCPU       21
+#define MODULE_ESTOP           22
+#define MODULE_RESERVED        23
 
 #define ModuleToString(m) \
   ((m) == 0 ? "Primary Power" : ((m) == 1 ? "Secondary Power (5V)" : ((m) == 2 ? "Secondary Power (12V)" : ((m) == 3 ? "Secondary Power (24V)" : ((m) == 4 ? "Secondary Power (Motors)" : ((m) == 5 ? "Motors" : ((m) == 6 ? "Motor Left" : ((m) == 7 ? "Motor Right" : ((m) == 8 ? "Motor Active" : ((m) == 9 ? "CAN-bus" : ((m) == 10 ? "Short Range Communication (RF)" : ((m) == 11 ? "Long Range Communication (Iridium)" : ((m) == 12 ? "Global Navigation Satellite System" : ((m) == 13 ? "Accelerometer" : ((m) == 14 ? "Local Storage" : ((m) == 15 ? "Blackbox" : ((m) == 16 ? "Debug Comm." : ((m) == 17 ? "System LED" : ((m) == 18 ? "Heating" : ((m) == 19 ? "Temperature" : ((m) == 20 ? "Backup CPU" : ((m) == 21 ? "Emergency Stop" : ((m) == 22 ? "Reserved" : ("Unknown"))))))))))))))))))))))))
@@ -194,6 +195,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // Orientation calculations
 #define MIN_DISTANCE_VALID_BEARING      1     // min valid distance to calculate bearing (meters)
 #define MAX_DISTANCE_VALID_WAYPOINT     1000  // max valid waypoint distance (meters)
+
 #define MIN_DISTANCE_WAYPOINT_ACCEPT    5     // max distance in to accept waypoint (meters)
 
 #define EARTH_RADIUS                    6371000  // (meters)
@@ -202,6 +204,8 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define MAX_LAT_VALUE                   900000000   // deg * 10^-7
 #define MAX_LONG_VALUE                  1800000000  // deg * 10^-7
+
+#define MIN_ACCEL_TILT                  0.8f  // approx 35°
 
 // ------------------------------------------------------------ //
 //                       REMOTE CONTROL                         //
@@ -223,8 +227,6 @@ const unsigned long SYSREQ_AUTONOMOUS =
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
 
-#define MOTOR_RAMP_TIME                 20
-
 // ------------------------------------------------------------ //
 //                           HEATING                            //
 // ------------------------------------------------------------ //
@@ -241,6 +243,8 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define SYS_PRINT_PERIOD                250
 #define SYS_PRINT_PERIOD_SHORT          100
 
+#define MOTOR_RAMP_TIME                 20
+
 // ------------------------------------------------------------ //
 //                        COMMUNICATION                         //
 // ------------------------------------------------------------ //
@@ -254,8 +258,9 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 // Iridium
 #define IRID_BAUDRATE                   19200
-#define IRID_START_TIMEOUT              2  // default value = 240 sec
-#define IRID_ATT_TIMEOUT                2  // default value = 20 sec
+#define IRID_START_TIMEOUT              2       // default value = 240 sec
+#define IRID_ATT_TIMEOUT                2       // default value = 20 sec
+#define IRID_PROCESS_PERIOD             900000  // 15 min
 
 // SBUS
 #define SBUS_RX_PERIOD                  300
