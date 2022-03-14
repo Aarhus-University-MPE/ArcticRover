@@ -48,7 +48,7 @@ bool gnssFixValid    = false;
 bool navigationFlag = false;
 
 bool Navigate() {
-  if (!NavigationPreChecks()) {
+  if (!NavigationPreCheck()) {
     return false;
   }
   if (!NavigationRunCheck()) {
@@ -66,7 +66,7 @@ bool Navigate() {
 
 //  Checks to run before starting autonomous navigation
 //  System checks, Route Checks
-bool NavigationPreChecks() {
+bool NavigationPreCheck() {
   static bool navigationPreCheck = false;
 
   if (!NavigationRunCheck()) {
@@ -88,7 +88,7 @@ bool NavigationRunCheck() {
 }
 
 bool RouteCheck() {
-  return navigationPreCheck;
+  return NavigationPreCheck();
 }
 
 // Test full route (used in Navigation pre-check)

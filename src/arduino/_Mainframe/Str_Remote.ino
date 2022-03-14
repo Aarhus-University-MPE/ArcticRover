@@ -66,7 +66,6 @@ void FinishStrategyRemote() {
 void SelectFunctionRemote() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
-    lastSystemCheck  = millis() - SYSTEM_CHECK_DT;
     remoteActive     = !remoteActive;
   }
 }

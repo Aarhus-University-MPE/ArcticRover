@@ -58,7 +58,6 @@ void FinishStrategyAutonomous() {
 void SelectFunctionAutonomous() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
-    lastSystemCheck  = millis() - SYSTEM_CHECK_DT;
-    remoteActive     = !autonomyActive;
+    autonomyActive     = !autonomyActive;
   }
 }
