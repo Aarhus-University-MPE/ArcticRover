@@ -4,7 +4,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <SD.h>
-#include "GemMotor.h"
+#include "src/GemMotor/GemMotor.h"
 
 void (*systemReset)(void) = 0;
 

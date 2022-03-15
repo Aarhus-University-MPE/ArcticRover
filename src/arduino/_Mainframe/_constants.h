@@ -205,6 +205,8 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define MAX_LAT_VALUE                   900000000   // deg * 10^-7
 #define MAX_LONG_VALUE                  1800000000  // deg * 10^-7
 
+#define MAX_ROUTE_LEN                   400
+
 #define MIN_ACCEL_TILT                  0.8f  // approx 35°
 
 // ------------------------------------------------------------ //

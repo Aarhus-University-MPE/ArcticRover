@@ -125,3 +125,44 @@ void SDCreate(char fileName[]) {
     }
   }
 }
+
+bool SDRoute() {
+  return SD.exists("Waypoints.csv");
+}
+
+long latRoute[MAX_ROUTE_LEN];
+long lonRoute[MAX_ROUTE_LEN];
+const int maxSize = 8;
+char waypointBuffer[maxSize];
+
+// Fills lat and lon array with 0
+void ClearRoute(){
+  memset(latRoute, 0, sizeof(latRoute));
+  memset(lonRoute, 0, sizeof(lonRoute));
+}
+
+void LoadRoute() {
+  DEBUG_PRINTLN(F("Reading Waypoint file"));
+  
+  ClearRoute();
+
+  File waypoints = SD.open("Waypoints.csv", FILE_READ);
+
+  if (waypoints) {
+    while (waypoints.available()) {
+      PopulateRoute(waypoints.readStringUntil('\n'));
+    }
+    waypoints.close();
+    DEBUG_PRINTLN(F("End of File"));
+  } else {
+    DEBUG_PRINTLN(F("File not found!"));
+  }
+}
+
+void PopulateRoute(){
+
+}
+
+void ParseRoute(){
+
+}
