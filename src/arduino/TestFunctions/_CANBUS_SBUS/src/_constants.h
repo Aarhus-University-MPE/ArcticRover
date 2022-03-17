@@ -67,7 +67,7 @@
 #define RELAY_SWITCHING_TIME   10
 
 // Sensor and Module status
-#define SYSTEM_CHECK_DT        30000
+#define SYSTEM_CHECK_DT        1000
 #define SYSTEM_REBOOT_DT       5000
 
 #define MODULE_COUNT           24
@@ -216,7 +216,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define REMOTE_CHANNEL_STEER            1
 #define REMOTE_CHANNEL_ENABLE           2
 
-#define REMOTE_PROCESS_DT               100
+#define REMOTE_PROCESS_DT               250
 
 #define REMOTE_SIGNAL_SCALE             100.0 / 87.0
 
@@ -281,7 +281,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                        BATTERY LEVEL                         //
 // ------------------------------------------------------------ //
-#define BATTERY_MIN_LEVEL               0
+#define BATTERY_MIN_LEVEL               20
 
 // ------------------------------------------------------------ //
 //                           EEPROM                             //

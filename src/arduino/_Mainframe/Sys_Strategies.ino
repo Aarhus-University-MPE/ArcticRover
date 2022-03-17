@@ -45,15 +45,17 @@ void InitMode() {
 
 // Checks if mode is updated and finish exit operations before changing
 void ModeUpdater() {
-  while (isModeUpdated) {
-    isModeUpdated = false;
-    // Skip finish operation when going to emergency
-    if (mode != MODE_EMERGENCY) {
-      strategyMethods[2][prevMode]();  // finish any operations for prevMode here
-    }
-
-    strategyMethods[0][mode]();  // init new strategy according to the new mode value
+  if (!isModeUpdated) {
+    return;
   }
+  
+  isModeUpdated = false;
+  // Skip finish operation when going to emergency
+  if (mode != MODE_EMERGENCY) {
+    strategyMethods[2][prevMode]();  // finish any operations for prevMode here
+  }
+
+  strategyMethods[0][mode]();  // init new strategy according to the new mode value
 }
 
 void AttachSelectButton() {

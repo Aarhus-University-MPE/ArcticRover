@@ -154,9 +154,7 @@ void GemMotor::BuildCanMsg() {
 // Updates motor status and returns current motor status
 bool GemMotor::Status() {
   MotorStatusUpdate();
-  bool status = GemMotor::motorStatus && GemMotor::validStatus;
-  status = true;
-  return status;
+  return GemMotor::motorStatus && GemMotor::validStatus;
 }
 
 // Updates current motor status, if error reported for more than timeout duration (5000 ms) unsets motor status

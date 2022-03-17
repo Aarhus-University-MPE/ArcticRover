@@ -5,7 +5,6 @@
   Aarhus University
   2021
 */
-unsigned long lastSystemCheck = 9999999;
 
 void SystemEnable(int module) {
   if (GetStatus(module)) return;
@@ -91,7 +90,6 @@ void SystemEnable(int module) {
     DEBUG_PRINTLN(F(": ERROR"));
   }
   SetStatus(module, status);
-  delay(10);
 }
 
 // Enables Primary Systems
@@ -384,7 +382,7 @@ bool SystemTestModule(byte module) {
   if (GetStatus(module)) {
     switch (module) {
       case MODULE_PWR:
-        status = BatteryStatus(true);
+        status = BatteryStatus(false);
         break;
       case MODULE_PWR_5V:
         status = digitalRead(PO_POWER_5V);
@@ -490,79 +488,77 @@ void SystemCheck() {
 bool SystemCheckModule(byte module) {
   bool status = false;
 
-  if (GetStatus(module)) {
-    switch (module) {
-      case MODULE_PWR:
-        status = BatteryStatus(true);
-        break;
-      case MODULE_PWR_5V:
-        status = digitalRead(PO_POWER_5V);
-        break;
-      case MODULE_PWR_12V:
-        status = digitalRead(PO_POWER_12V);
-        break;
-      case MODULE_PWR_24V:
-        status = digitalRead(PO_POWER_24V);
-        break;
-      case MODULE_PWR_MOTOR:
-        status = digitalRead(PO_POWER_MOTOR);
-        break;
-      case MODULE_MOTORS:
-        status = MotorStatus();  // Left && Right motor
-        break;
-      case MODULE_MOTOR_L:
-        status = MotorStatusLeft();
-        break;
-      case MODULE_MOTOR_R:
-        status = MotorStatusRight();
-        break;
-      case MODULE_MOTOR_ACT:
-        status = MotorState();  // <-- Active or idle?
-        break;
-      case MODULE_CANBUS:
-        status = CanBusStatus();
-        break;
-      case MODULE_RF:
-        status = SBusStatus();
-        break;
-      case MODULE_IRIDIUM:
-        status = IridiumStatus();
-        break;
-      case MODULE_GNSS:
-        status = GnssStatus();
-        break;
-      case MODULE_ACCEL:
-        status = AccelStatus();
-        break;
-      case MODULE_SD:
-        status = SDReaderStatus();
-        break;
-      case MODULE_BLACKBOX:
-        status = BlackBoxStatus();
-        break;
-      case MODULE_ROUTE:
-        status = RouteCheck();
-        break;
-      case MODULE_DBGCOMM:
-        status = DebugCommStatus();
-        break;
-      case MODULE_LED:
-        status = LedStatus();
-        break;
-      case MODULE_HEATING:
-        status = HeatingStatus();
-        break;
-      case MODULE_TEMP:
-        status = TemperatureStatus();
-        break;
-      case MODULE_BACKUPCPU:
-        status = HeartBeatStatus();
-        break;
-      default:
-        DEBUG_PRINT(F("MODULE CHECK: Unknown System Module: "));
-        DEBUG_PRINTLN(module);
-        break;
-    }
+  switch (module) {
+    case MODULE_PWR:
+      status = BatteryStatus(false);
+      break;
+    case MODULE_PWR_5V:
+      status = digitalRead(PO_POWER_5V);
+      break;
+    case MODULE_PWR_12V:
+      status = digitalRead(PO_POWER_12V);
+      break;
+    case MODULE_PWR_24V:
+      status = digitalRead(PO_POWER_24V);
+      break;
+    case MODULE_PWR_MOTOR:
+      status = digitalRead(PO_POWER_MOTOR);
+      break;
+    case MODULE_MOTORS:
+      status = MotorStatus();  // Left && Right motor
+      break;
+    case MODULE_MOTOR_L:
+      status = MotorStatusLeft();
+      break;
+    case MODULE_MOTOR_R:
+      status = MotorStatusRight();
+      break;
+    case MODULE_MOTOR_ACT:
+      status = MotorState();  // <-- Active or idle?
+      break;
+    case MODULE_CANBUS:
+      status = CanBusStatus();
+      break;
+    case MODULE_RF:
+      status = SBusStatus();
+      break;
+    case MODULE_IRIDIUM:
+      status = IridiumStatus();
+      break;
+    case MODULE_GNSS:
+      status = GnssStatus();
+      break;
+    case MODULE_ACCEL:
+      status = AccelStatus();
+      break;
+    case MODULE_SD:
+      status = SDReaderStatus();
+      break;
+    case MODULE_BLACKBOX:
+      status = BlackBoxStatus();
+      break;
+    case MODULE_ROUTE:
+      status = RouteCheck();
+      break;
+    case MODULE_DBGCOMM:
+      status = DebugCommStatus();
+      break;
+    case MODULE_LED:
+      status = LedStatus();
+      break;
+    case MODULE_HEATING:
+      status = HeatingStatus();
+      break;
+    case MODULE_TEMP:
+      status = TemperatureStatus();
+      break;
+    case MODULE_BACKUPCPU:
+      status = HeartBeatStatus();
+      break;
+    default:
+      DEBUG_PRINT(F("MODULE CHECK: Unknown System Module: "));
+      DEBUG_PRINTLN(module);
+      break;
   }
 
   SetStatus(module, status);

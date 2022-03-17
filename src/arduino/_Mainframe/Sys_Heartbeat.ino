@@ -7,11 +7,11 @@
   2021
 */
 
-unsigned long lastMillisResetBackup  = 0;
-unsigned long lastMillisHeartbeatIn  = 0;
-unsigned long lastMillisHeartbeatOut = 0;
+unsigned long lastMillisResetBackup       = 0;
+unsigned long lastMillisHeartbeatIn       = 0;
+unsigned long lastMillisHeartbeatOut      = 0;
 unsigned long lastMillisHeartbeatBlackbox = HRTBEAT_DT_LOG;
-bool receivedHeartBeat               = false;
+bool receivedHeartBeat                    = false;
 
 // Runs heartbeat in and out
 void HeartBeat() {
@@ -23,13 +23,14 @@ void HeartBeat() {
 
 // Sends heartbeat with with frequency of HRTBEAT_FRQ
 void HeartBeatOut() {
-  if (millis() - lastMillisHeartbeatOut > HRTBEAT_DT_OUT) {
-    // DEBUG_PRINTLN("Sending Heartbeat!");
-    lastMillisHeartbeatOut = millis();
-    digitalWrite(PO_BACKUP_HRTBEAT, true);
-    delay(20);
-    digitalWrite(PO_BACKUP_HRTBEAT, false);
+  if (millis() - lastMillisHeartbeatOut < HRTBEAT_DT_OUT) {
+    return;
   }
+  // DEBUG_PRINTLN("Sending Heartbeat!");
+  lastMillisHeartbeatOut = millis();
+  digitalWrite(PO_BACKUP_HRTBEAT, true);
+  delay(20);
+  digitalWrite(PO_BACKUP_HRTBEAT, false);
 }
 
 bool HeartBeatStatus() {
@@ -41,23 +42,25 @@ bool HeartBeatStatus() {
 // Checks if time since last heartbeat received > maximum treshold
 // Will attempt to reset backup CPU with a frequency of  BACKUP_RST_FRQ
 void HeartBeatTimeout() {
-  if (millis() - lastMillisHeartbeatIn > HRTBEAT_TRESHOLD) {
-    // Reset backup CPU
-    if (GetStatus(MODULE_BACKUPCPU)) {
+  if (millis() - lastMillisHeartbeatIn < HRTBEAT_TRESHOLD) {
+    return;
+  }
+  
+  // Reset backup CPU
+  if (GetStatus(MODULE_BACKUPCPU)) {
+    lastMillisResetBackup = millis();
+    SetStatus(MODULE_BACKUPCPU, false);
+    DEBUG_PRINTLINE();
+    DEBUG_PRINTLN(F("Error: Backup CPU Heartbeat Timeout, attempting to Reset Backup System."));
+    ResetBackupCPU();
+    DEBUG_PRINTLINE();
+  } else {
+    if (millis() - lastMillisResetBackup > BACKUP_RST_DT) {
       lastMillisResetBackup = millis();
-      SetStatus(MODULE_BACKUPCPU, false);
       DEBUG_PRINTLINE();
-      DEBUG_PRINTLN(F("Error: Backup CPU Heartbeat Timeout, attempting to Reset Backup System."));
+      DEBUG_PRINTLN(F("Error: Backup CPU offline, attempting to Reset."));
+      DEBUG_PRINTLINE();
       ResetBackupCPU();
-      DEBUG_PRINTLINE();
-    } else {
-      if (millis() - lastMillisResetBackup > BACKUP_RST_DT) {
-        lastMillisResetBackup = millis();
-        DEBUG_PRINTLINE();
-        DEBUG_PRINTLN(F("Error: Backup CPU offline, attempting to Reset."));
-        DEBUG_PRINTLINE();
-        ResetBackupCPU();
-      }
     }
   }
 }

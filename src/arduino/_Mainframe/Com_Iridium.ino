@@ -18,12 +18,12 @@ bool iridiumTxStatus;
 unsigned long millisLastIridiumProcess;
 
 bool InitializeIridium() {
+  bool status = true;
   COM_SERIAL_IRID.begin(IRID_BAUDRATE);
 
-  modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
+  // modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
 
-  bool status = (modem.begin() == ISBD_SUCCESS);
-
+  //bool status = (modem.begin() == ISBD_SUCCESS);
   return status;
 }
 

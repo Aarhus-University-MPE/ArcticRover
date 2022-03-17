@@ -2,16 +2,9 @@
 #include <SPI.h>
 #include <mcp2515.h>
 
-#include "GemMotor.h"
-#include "_constants.h"
-
-#define PO_SPISS_CANBUS     26
-#define PO_SPISS_SBUS       44
-#define PO_MOTOR_EN         34
-#define PO_LED_STATUS_RED   28
-#define PO_LED_STATUS_YEL   30
-#define PO_LED_STATUS_GRN   32
-#define PO_POWER_MOTOR      36
+#include "src/GemMotor.h"
+#include "src/_constants.h"
+#include "src/_pinout.h"
 
 const int maxVelocity = 15;
 
@@ -32,9 +25,12 @@ void setup() {
   pinMode(PO_MOTOR_EN, OUTPUT);
   digitalWrite(PO_MOTOR_EN, true);
 
+  pinMode(PO_POWER_12V, OUTPUT);
+  digitalWrite(PO_POWER_12V, true);
+
   pinMode(PO_POWER_MOTOR, OUTPUT);
   digitalWrite(PO_POWER_MOTOR, LOW);
-  pinMode(PO_SPISS_SBUS, OUTPUT);
+  pinMode(PO_POWER_RF, OUTPUT);
 
   // Status LED/Sound
   pinMode(PO_LED_STATUS_RED, OUTPUT);
@@ -75,17 +71,18 @@ void loop() {
   digitalWrite(PO_POWER_MOTOR, HIGH);
 
   CanBusProcess();
-  // sbus.process();
+  sbus.process();
 
-  // ProcessSbus();
+  ProcessSbus();
 
   if (millis() - lastMillisPost > 1000) {
     lastMillisPost = millis();
 
-    bool motorLeftStatus  = motorLeft.PrintStatus();
+    // bool motorLeftStatus  = motorLeft.PrintStatus();
     bool motorRightStatus = motorRight.PrintStatus();
 
-    status = motorLeftStatus || motorRightStatus;
+    // status = motorLeftStatus || motorRightStatus;
+
     // printChannels();
     Serial.println("-------------------------------");
   }
@@ -110,7 +107,7 @@ void ProcessSbus() {
   }
 
   int gear = getChannel(5);
-  if (throttle1 > CONTROLLER_DEADZONE) {
+  if (throttle1 > CONTROLLER_DEADZONE_FLOAT) {
     if (gear < 50) {
       dir = -1;
     } else if (gear > 200) {
@@ -119,8 +116,8 @@ void ProcessSbus() {
       dir = 0;
     }
     speed = throttle1 * maxVelocity * dir;
-  } else if (abs(throttle2) > CONTROLLER_DEADZONE) {
-    speed = throttle2 * maxVelocity / 4;
+  } else if (abs(throttle2) > CONTROLLER_DEADZONE_FLOAT && gear < REMOTE_CHANNEL_HIGH && gear > REMOTE_CHANNEL_LOW) {
+    speed = throttle2 * maxVelocity / 2;
   } else {
     speed = 0;
   }
@@ -146,7 +143,7 @@ void CanBusProcess() {
     }
   }
 
-  if (motorLeft.GetCanRxStatus() | motorRight.GetCanRxStatus()) {
+  if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
     if (motorLeft.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
       motorRight.SetCanTxStatus();
     }
@@ -249,6 +246,9 @@ void parseCommand() {
     case 'A':
       active = true;
       break;
+    case 'M':
+      parseCommandMove();
+      break;
     case '\0':
       break;
     default:
@@ -257,9 +257,25 @@ void parseCommand() {
   }
 }
 
+void parseCommandMove() {
+  char *velocityPtr          = receivedCMD + 1;
+  char veloctyChar[numChars] = {0};
+
+  strcpy(veloctyChar, velocityPtr);
+  int velocity = atoi(veloctyChar);
+
+  active = (velocity != 0);
+
+  Serial.print(F("Setting velocity to: "));
+  Serial.println(velocity);
+
+  motorRight.Update(velocity);
+  motorLeft.Update(velocity);
+}
+
 // Initialize RF Communication
 bool InitializeSBUS() {
-  digitalWrite(44, HIGH);
+  digitalWrite(PO_POWER_RF, HIGH);
   Serial.println("Initializing Short Range Communication... ");
   sbus.begin(false);
   bool status = Serial3;

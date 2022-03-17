@@ -163,10 +163,9 @@ class GemMotor {
   unsigned long canRxTimeoutStart;
   unsigned long firstErrorMillis;
 
-  bool motorError, swEnable;
+  bool validStatus, motorError, swEnable;
   bool canTxStatus, canRxStatus, canRxTimeout;
   bool motorStatus = true;
-  bool validStatus = true;
 
   bool warning[64];
   bool error[64];

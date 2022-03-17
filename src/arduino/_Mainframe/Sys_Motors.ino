@@ -25,14 +25,7 @@ void TerminateMotors() {
 // Moves motors based on direction and speed input within the range of [-1 and 1]
 // -1 full left, 1 full right (dir)
 // -1 full reverse, 1 full forward (speed)
-void MotorUpdate(float dir, float speed, float enable) {
-  if (!enable) {
-    SystemDisable(MODULE_MOTORS);
-    return;
-  }
-
-  SystemEnable(MODULE_MOTORS);
-
+void MotorUpdate(float dir, float speed) {
   float velocityLeft;
   float velocityRight;
 
@@ -45,8 +38,8 @@ void MotorUpdate(float dir, float speed, float enable) {
 
 // Calculates skid steering based on direction and speed
 void SpeedCalculation(float dir, float speed, float &velocityLeft, float &velocityRight) {
-  float steerFactorLeft  = 1;
-  float steerFactorRight = 1;
+  float steerFactorLeft  = 1.0f;
+  float steerFactorRight = 1.0f;
 
   // turn right, right wheel moves slower
   if (dir > 0) {
@@ -83,7 +76,10 @@ bool MotorState() {
 
 // Motors operational?
 bool MotorStatus() {
-  return (MotorStatusLeft() && MotorStatusRight());
+  bool status = (MotorStatusLeft() && MotorStatusRight());
+
+  // status = true;
+  return status;
 }
 
 // Left motor status
@@ -100,14 +96,14 @@ bool MotorStatusRight() {
 float steerFactor(float dir) {
   float scale;
 
-  if (dir >= 1)
-    scale = -1;
+  if (dir >= 1.0f)
+    scale = -1.0f;
 
-  else if (dir <= -1)
-    scale = -1;
+  else if (dir <= -1.0f)
+    scale = -1.0f;
 
   else
-    scale = -2.0 * (dir * dir) + 1;
+    scale = -2.0f * (dir * dir) + 1.0f;
 
   return scale;
 }
@@ -140,7 +136,7 @@ bool MotorTest() {
     case 4:
       motorTestState = 0;
       testDone       = true;
-      MotorUpdate(0, 0, false);
+      MotorUpdate(0, 0);
     default:
       break;
   }
@@ -167,7 +163,7 @@ bool MotorTestRamp() {
       break;
     case 1:
       if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
-        MotorUpdate(0, speed, true);
+        MotorUpdate(0, speed);
         speed += 0.01;
         millisLastMotorStep = millis();
       }
@@ -180,13 +176,13 @@ bool MotorTestRamp() {
       break;
     case 3:
       if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
-        MotorUpdate(0, speed, true);
+        MotorUpdate(0, speed);
         speed -= 0.01;
         millisLastMotorStep = millis();
       }
       if (speed <= 0) {
         speed = 0;
-        MotorUpdate(0, speed, true);
+        MotorUpdate(0, speed);
         motorTestRampState++;
       }
       break;
@@ -197,7 +193,7 @@ bool MotorTestRamp() {
       break;
     case 5:
       if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
-        MotorUpdate(0, speed, true);
+        MotorUpdate(0, speed);
         speed -= 0.01;
         millisLastMotorStep = millis();
       }
@@ -210,14 +206,14 @@ bool MotorTestRamp() {
       break;
     case 7:
       if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
-        MotorUpdate(0, speed, true);
+        MotorUpdate(0, speed);
         speed += 0.01;
         millisLastMotorStep = millis();
       }
       if (speed >= 0) {
         speed = 0;
         motorTestRampState++;
-        MotorUpdate(0, speed, true);
+        MotorUpdate(0, speed);
       }
       break;
     case 8:
@@ -228,7 +224,7 @@ bool MotorTestRamp() {
     case 9:
       motorTestRampState = 0;
       testDone           = true;
-      MotorUpdate(0, 0, true);
+      MotorUpdate(0, 0);
     default:
       testDone = true;
       break;
@@ -254,7 +250,7 @@ bool MotorTestSteer() {
       break;
     case 1:
       if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
-        MotorUpdate(dir, speed, true);
+        MotorUpdate(dir, speed);
         dir += 0.02;
         millisLastMotorStep = millis();
       }
@@ -267,7 +263,7 @@ bool MotorTestSteer() {
       break;
     case 3:
       if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
-        MotorUpdate(dir, speed, true);
+        MotorUpdate(dir, speed);
         dir -= 0.02;
         millisLastMotorStep = millis();
       }
@@ -280,7 +276,7 @@ bool MotorTestSteer() {
       break;
     case 5:
       if (millis() - millisLastMotorStep > MOTOR_RAMP_TIME) {
-        MotorUpdate(dir, speed, true);
+        MotorUpdate(dir, speed);
         dir += 0.02;
         millisLastMotorStep = millis();
       }
@@ -289,7 +285,7 @@ bool MotorTestSteer() {
     case 6:
       motorTestSteerState = 0;
       testDone            = true;
-      MotorUpdate(0, 0, true);
+      MotorUpdate(0, 0);
     default:
       testDone = true;
       break;

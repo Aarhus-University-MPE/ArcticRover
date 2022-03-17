@@ -88,7 +88,6 @@ bool SystemStatus[MODULE_COUNT];
 bool HeartBeatStatus();
 bool BlackBoxStatus();
 
-
 void EstopButtonInterruptHandler();
 void ModeButtonInterruptHandler();
 
@@ -102,7 +101,6 @@ unsigned long lastMillistModeBlink = 0;
 unsigned long lastSystemReboot = 9999999;
 unsigned long lastMillistHeatingOff = 0;
 unsigned long lastMillistHeatingOn = 0;
-unsigned long lastSystemCheck = 9999999;
 
 int systemTestState = 0;
 byte mode;

@@ -41,7 +41,7 @@ void loop() {
 
   HeartBeat();
 
-  IridiumProcess();
+  // IridiumProcess();
 
   DBG_ONLY(recvWithStartEndMarkers());
   DBG_ONLY(PerformCommand());

@@ -33,21 +33,23 @@ void RunStrategyRemote() {
   SystemEnable(MODULE_RF);
   SystemEnable(MODULE_CANBUS);
 
-  if (!SystemCheck(MODE_REMOTECONTROL)) {
-    remoteActive = false;
-    SystemDisable(MODULE_MOTORS);
-    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
-    return;
-  }
+  // if (!SystemCheck(MODE_REMOTECONTROL)) {
+  //   remoteActive = false;
+  //   SystemDisable(MODULE_MOTORS);
+  //   LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
+  //   return;
+  // }
 
-  StrategyRunLed(MODE_AUTONOMOUS);
+  // StrategyRunLed(MODE_AUTONOMOUS);
 
   // Read RF signal
   sbus.process();
   SBusProcess();
+  // SBusPrint();
 
   // Transmit via CAN
   CanBusProcess();
+  //CanBusPrint();
 }
 
 // End sequence of strategy
@@ -66,7 +68,7 @@ void FinishStrategyRemote() {
 void SelectFunctionRemote() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
+    lastSystemCheck  = millis() - SYSTEM_CHECK_DT;
     remoteActive     = !remoteActive;
   }
 }
-

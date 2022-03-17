@@ -34,7 +34,10 @@ bool InitializeCanBus() {
   motorRight.ResetCanStatus();
   motorLeft.SetCanTxStatus();
 
-  return mcp2515.checkReceive();
+  bool status = mcp2515.checkReceive();
+  status      = true;
+
+  return status;
 }
 
 void TerminateCanBus() {
@@ -49,6 +52,22 @@ void TerminateCanBus() {
     ->
     Repeat
 */
+
+void CanBusPrint() {
+  if (millis() - millisLastCanPrint < 1000) {
+    return;
+  }
+  millisLastCanPrint = millis();
+
+  // bool motorLeftStatus  = motorLeft.PrintStatus();
+  bool motorRightStatus = motorRight.PrintStatus();
+
+  // status = motorLeftStatus || motorRightStatus;
+
+  // printChannels();
+  Serial.println(F("-------------------------------"));
+}
+
 void CanBusProcess() {
   if (millis() - CanBusTxLast < CANBUS_TX_PERIOD) {
     return;

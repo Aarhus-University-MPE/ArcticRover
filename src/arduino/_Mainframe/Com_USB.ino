@@ -31,6 +31,10 @@ void initializeDebugComm() {
 
 // Receive Commands
 void recvWithStartEndMarkers() {
+  if(Serial.available() <= 0){
+    return;
+  }
+  
   static boolean recvInProgress = false;
   static byte ndx = 0;
   char startMarker = '<';

@@ -1,7 +1,7 @@
 /*
   GeoRover SBUS communication protocols for RF communication
   using: https://github.com/zendes/SBUS
-  
+
   Mads Rosenhøj Jepepsen
   Aarhus University
   2021
@@ -10,9 +10,10 @@
 #include <SBUS.h>
 
 SBUS sbus(COM_SERIAL_RF);
-int sbusTestState = 0;
-long millisSbusTestStart = 0;
-long millisLastSbusPrint = 0;
+int sbusTestState;
+long millisSbusTestStart;
+long millisLastSbusPrint;
+long millisLastSBusUpdate;
 
 // Initialize RF Communication
 bool InitializeSBUS() {
@@ -42,7 +43,7 @@ bool SBusTest() {
       break;
     case 1:
       sbus.process();
-      
+
       if (millis() - millisLastSbusPrint > SYS_PRINT_PERIOD_SHORT) {
         millisLastSbusPrint = millis();
         printChannels();
@@ -52,8 +53,8 @@ bool SBusTest() {
       break;
     case 2:
       sbusTestState = 0;
-      testDone = true;
-      SetStatus(MODULE_RF,sbus.getGoodFrames() > 0);
+      testDone      = true;
+      SetStatus(MODULE_RF, sbus.getGoodFrames() > 0);
       DEBUG_PRINTLINE();
     default:
       break;
@@ -63,16 +64,24 @@ bool SBusTest() {
 }
 
 void printChannels() {
-  for (int i = 0; i < 8; i++) {
-    Serial.print(F("CH "));
+  for (int i = 1; i < 8; i++) {
+    Serial.print("CH ");
     Serial.print(i);
-    Serial.print(F(": "));
+    Serial.print(": ");
     Serial.print(getChannelFloat(i));
-    Serial.print(F("\t"));
+    Serial.print("\t");
   }
-  Serial.print(F("Good frames: "));
-  Serial.print(sbus.getGoodFrames());
   Serial.println();
+
+  Serial.print("Good frames: ");
+  Serial.print(sbus.getGoodFrames());
+
+  Serial.print(" \tData loss on connection: ");
+  Serial.print(sbus.getFrameLoss());
+  Serial.print("% \t");
+
+  Serial.print("Time diff: ");
+  Serial.println(millis() - (unsigned long)sbus.getLastTime());
 }
 
 // Scale SBUS channel value from range [0, 256] to [-1, 1]
@@ -117,41 +126,49 @@ float getChannelFloatFull(int channel) {
 
 // Read RF signal and update motors accordingly
 void SBusProcess() {
+  if (millis() - millisLastSBusUpdate < REMOTE_PROCESS_DT) {
+    return;
+  }
   if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
-    MotorUpdate(0, 0, 0);
+    MotorUpdate(0, 0);
     return;
   }
 
   float throttle1 = getChannelFloatFull(1);  // Left stick Vertical
-  float dir1      = getChannelFloat(2);      // Left stick Horisontal
+  float dir       = getChannelFloat(2);      // Right stick Horisontal
   float throttle2 = getChannelFloat(3);      // Right stick Vertical
-  float dir2      = getChannelFloat(4);      // Right stick Horisontal
   int gear        = getChannel(5);           // Gear select (SA)
 
   int forwardDir;
-  float speed, dir;
-  bool enabled;
+  float speed;
 
   // Primary input (Left Stick)
   if (throttle1 > CONTROLLER_DEADZONE_FLOAT) {
     if (gear < REMOTE_CHANNEL_LOW) {
-      speed = throttle1 * MOTOR_MAX_SPEED_BWD;
+      speed = throttle1 * -1.0f;
     } else if (gear > REMOTE_CHANNEL_HIGH) {
-      speed = throttle1 * MOTOR_MAX_SPEED_FWD;
+      speed = throttle1;
+    } else{
+      speed = 0;
     }
-    dir = dir1;
-    enabled = true;
   }
   // Secondary input (Right Stick)
-  else if (abs(throttle2) > CONTROLLER_DEADZONE_FLOAT) {
+  else if (abs(throttle2) > CONTROLLER_DEADZONE_FLOAT && gear < REMOTE_CHANNEL_HIGH && gear > REMOTE_CHANNEL_LOW) {
     if (throttle2 > 0) {
-      speed = throttle2 * MOTOR_MAX_SPEED_FWD / 4;
+      speed = throttle2 / 2.0f;
     } else {
-      speed = throttle2 * MOTOR_MAX_SPEED_BWD / 4;
+      speed = throttle2 / 2.0f;
     }
-    dir = dir2;
-    enabled = true;
   }
 
-  MotorUpdate(dir, speed, enabled);
+  MotorUpdate(dir, speed);
+}
+
+void SBusPrint() {
+  if (millis() - millisLastSbusPrint < 1000) {
+    return;
+  }
+  millisLastSbusPrint = millis();
+  printChannels();
+  Serial.println(F("-------------------------------"));
 }
