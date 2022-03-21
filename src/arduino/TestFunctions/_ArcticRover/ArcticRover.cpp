@@ -6,7 +6,7 @@
 
   Uses https://github.com/autowp/arduino-mcp2515
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2022
 */

@@ -1,7 +1,7 @@
 /*
   GeoRover Motor Class - Manages GEM Motor Functionalities.
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2022
 */
@@ -41,6 +41,14 @@ int GemMotor::GetRpm() { return GemMotor::rpm; }
 
 // returns true if motor is currently running
 bool GemMotor::GetState() { return (GemMotor::motorState == MOTOR_RUN); }
+
+void GemMotor::SetTorqueMode(bool torqueMode) {
+  if (torqueMode) {
+    GemMotor::controlMode = GemMotor::CONTROL_TORQUE;
+  } else {
+    GemMotor::controlMode = GemMotor::CONTROL_SPEED;
+  }
+}
 
 // returns true if TX flag is set, indicating ready to send msg to motor
 bool GemMotor::GetCanTxStatus() { return GemMotor::canTxStatus; }
@@ -101,11 +109,37 @@ void GemMotor::Update(float velocity) {
   GemMotor::swEnable = SW_ENABLE;
 
   // Clamp velocity to (max speed bwd < velocity < max speed fwd)
-  velocity = max(MOTOR_MAX_SPEED_BWD, min(MOTOR_MAX_SPEED_FWD, velocity));
+  velocity = max(-MOTOR_MAX_SPEED_BWD, min(MOTOR_MAX_SPEED_FWD, velocity));
 
-  GemMotor::rpmTarget = abs(velocity) * RPM_VEL_FACTOR * RPM_CONTROL_SCALE;
-
+  GemMotor::rpmTarget    = abs(velocity) * RPM_VEL_FACTOR * RPM_CONTROL_SCALE;
   GemMotor::controlValue = min(GemMotor::rpmTarget, MAX_CONTROL_VALUE) * dir;
+}
+
+// Update controlvalue based on target velocity, if below min disables motor
+void GemMotor::UpdateTorque(float torque) {
+  if (abs(torque) < MIN_TORQUE) {
+    GemMotor::swEnable     = SW_DISABLE;
+    GemMotor::controlValue = 0;
+    return;
+  }
+
+  int dir;
+  if (torque < 0) {
+    dir = -1;
+  } else {
+    dir = 1;
+  }
+
+  GemMotor::swEnable = SW_ENABLE;
+
+  // Clamp torque to (max torque bwd < torque < max torque fwd)
+  torque = max(-MOTOR_MAX_TORQUE_BWD, min(MOTOR_MAX_TORQUE_FWD, torque));
+    
+  GemMotor::torqueTarget = abs(torque) * TORQUE_CONTROL;
+
+  GemMotor::controlValue = min(GemMotor::torqueTarget, MAX_CONTROL_VALUE_TORQUE) * dir;
+  Serial.print("Motor Control: ");
+  Serial.println(GemMotor::controlValue);
 }
 
 // Prints current motor parameters returns error if no motor messages received
@@ -155,7 +189,6 @@ void GemMotor::BuildCanMsg() {
 bool GemMotor::Status() {
   MotorStatusUpdate();
   bool status = GemMotor::motorStatus && GemMotor::validStatus;
-  status = true;
   return status;
 }
 
@@ -185,7 +218,7 @@ void GemMotor::MotorStatusUpdate() {
 bool GemMotor::ParseCanMsg(struct can_frame _canMsg) {
   GemMotor::canRxStatus = false;
   GemMotor::validStatus = true;
-  
+
   RECEIVEDMSG();
 
   switch (_canMsg.can_id - RX_id) {
@@ -293,4 +326,3 @@ void GemMotor::PrintError(bool endline) {
   Serial.print(F("\t"));
   if (endline) Serial.println();
 }
-

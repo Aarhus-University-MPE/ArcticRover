@@ -2,7 +2,7 @@
   GeoRover Temperature Sensor functionalities, utilizing a 10kOhm NTC thermistor
   (https://dk.rs-online.com/web/p/termistor-ic/7062759)
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */

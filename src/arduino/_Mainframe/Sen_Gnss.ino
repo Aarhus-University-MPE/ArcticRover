@@ -5,7 +5,7 @@
   Primary library used:
     https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */

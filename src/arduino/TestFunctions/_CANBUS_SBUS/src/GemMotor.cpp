@@ -1,7 +1,8 @@
 /*
   GeoRover Motor Class - Manages GEM Motor Functionalities.
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
+
   Aarhus University
   2022
 */

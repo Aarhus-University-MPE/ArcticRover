@@ -1,7 +1,7 @@
 /*
   GeoRover Blackbox protocols
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */

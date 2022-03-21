@@ -2,7 +2,7 @@
   GeoRover Heartbeat functions.
   Send and receive heartbeat to backup MCU.
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */
@@ -29,7 +29,7 @@ void HeartBeatOut() {
   // DEBUG_PRINTLN("Sending Heartbeat!");
   lastMillisHeartbeatOut = millis();
   digitalWrite(PO_BACKUP_HRTBEAT, true);
-  delay(20);
+  delay(5);
   digitalWrite(PO_BACKUP_HRTBEAT, false);
 }
 
@@ -97,7 +97,7 @@ void HeartBeatInInterrupt() {
 // Attempt to reset backup CPU
 void ResetBackupCPU() {
   digitalWrite(PO_BACKUP_RST, false);
-  delay(20);
+  delay(5);
   digitalWrite(PO_BACKUP_RST, true);
 }
 

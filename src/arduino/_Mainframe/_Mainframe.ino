@@ -1,7 +1,7 @@
 /*
   GeoRover mainframe - Manages primary systems as the Rover backbone.
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2022
 */
@@ -44,5 +44,5 @@ void loop() {
   // IridiumProcess();
 
   DBG_ONLY(recvWithStartEndMarkers());
-  DBG_ONLY(PerformCommand());
+   DBG_ONLY(PerformCommand());
 }

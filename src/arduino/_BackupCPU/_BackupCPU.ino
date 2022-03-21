@@ -4,7 +4,7 @@
   Detects and sends heartbeat to mainframe of GeoRover.
   Resets system if no heartbeat detected within limit.
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021s
 */

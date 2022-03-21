@@ -1,7 +1,7 @@
 /*
   GeoRover SBUS communication protocols for RF communication
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */

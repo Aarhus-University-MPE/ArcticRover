@@ -1,7 +1,7 @@
 /*
   GeoRover system constants
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */
@@ -281,7 +281,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                        BATTERY LEVEL                         //
 // ------------------------------------------------------------ //
-#define BATTERY_MIN_LEVEL               0
+#define BATTERY_MIN_LEVEL               20
 
 // ------------------------------------------------------------ //
 //                           EEPROM                             //

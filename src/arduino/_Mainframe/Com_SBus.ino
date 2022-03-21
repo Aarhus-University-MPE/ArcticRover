@@ -2,7 +2,7 @@
   GeoRover SBUS communication protocols for RF communication
   using: https://github.com/zendes/SBUS
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */
@@ -17,6 +17,8 @@ long millisLastSBusUpdate;
 
 // Initialize RF Communication
 bool InitializeSBUS() {
+  digitalWrite(PO_POWER_RF, HIGH);
+  
   sbus.begin(false);
 
   return COM_SERIAL_RF;
@@ -61,27 +63,6 @@ bool SBusTest() {
   }
 
   return testDone;
-}
-
-void printChannels() {
-  for (int i = 1; i < 8; i++) {
-    Serial.print("CH ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.print(getChannelFloat(i));
-    Serial.print("\t");
-  }
-  Serial.println();
-
-  Serial.print("Good frames: ");
-  Serial.print(sbus.getGoodFrames());
-
-  Serial.print(" \tData loss on connection: ");
-  Serial.print(sbus.getFrameLoss());
-  Serial.print("% \t");
-
-  Serial.print("Time diff: ");
-  Serial.println(millis() - (unsigned long)sbus.getLastTime());
 }
 
 // Scale SBUS channel value from range [0, 256] to [-1, 1]
@@ -129,6 +110,8 @@ void SBusProcess() {
   if (millis() - millisLastSBusUpdate < REMOTE_PROCESS_DT) {
     return;
   }
+  millisLastSBusUpdate = millis();
+
   if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
     MotorUpdate(0, 0);
     return;
@@ -161,7 +144,7 @@ void SBusProcess() {
     }
   }
 
-  MotorUpdate(dir, speed);
+  MotorUpdateTorque(dir, speed);
 }
 
 void SBusPrint() {
@@ -172,3 +155,30 @@ void SBusPrint() {
   printChannels();
   Serial.println(F("-------------------------------"));
 }
+
+void printChannels() {
+  // for (int i = 1; i < 8; i++) {
+  //   Serial.print("CH ");
+  //   Serial.print(i);
+  //   Serial.print(": ");
+  //   Serial.print(getChannelFloat(i));
+  //   Serial.print("\t");
+  // }
+  // Serial.println();
+
+  Serial.print("Good frames: ");
+  Serial.print(sbus.getGoodFrames());
+
+  Serial.print(" \tData loss on connection: ");
+  Serial.print(sbus.getFrameLoss());
+  Serial.print("% \t");
+
+  Serial.print("Time diff: ");
+  Serial.println(millis() - (unsigned long)sbus.getLastTime());
+}
+
+// Timer2 triggers ever 1ms and processes the incoming SBUS datastream
+// ISR(TIMER2_COMPA_vect)
+// {
+//   if(GetStatus(MODULE_RF)) sbus.process();
+// }

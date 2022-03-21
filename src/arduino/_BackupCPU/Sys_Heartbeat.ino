@@ -2,7 +2,7 @@
   GeoRover Heartbeat functions.
   Send and receive heartbeat to primary CPU.
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */

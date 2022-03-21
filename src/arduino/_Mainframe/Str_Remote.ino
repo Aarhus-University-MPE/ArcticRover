@@ -2,7 +2,7 @@
 
     Allows manual control of motors
 */
-bool remoteActive;
+bool remoteActive, remoteStart;
 
 // Start sequence of strategy
 void StartStrategyRemote() {
@@ -11,6 +11,12 @@ void StartStrategyRemote() {
   SystemDisable();
 
   SystemEnableMode();
+  
+  motorLeft.SetTorqueMode(true);
+  motorRight.SetTorqueMode(true);
+
+  remoteActive = false;
+  remoteStart = false;
 
   AttachSelectButton();
 
@@ -23,33 +29,37 @@ void StartStrategyRemote() {
 // Main sequence of strategy
 void RunStrategyRemote() {
   if (!remoteActive) {
-    SystemDisable(MODULE_MOTORS);
+    SystemDisable();
     StrategyRunLed(MODE_IDLE);
     return;
   }
 
-  SystemEnable(MODULE_PWR_MOTOR);
-  SystemEnable(MODULE_MOTORS);
-  SystemEnable(MODULE_RF);
-  SystemEnable(MODULE_CANBUS);
+  if(remoteStart){
+    remoteStart = false;
+    SystemEnable(MODULE_PWR_12V); // Temporary due to 12V DCDC replacement
+    SystemEnable(MODULE_PWR_MOTOR);
+    SystemEnable(MODULE_MOTORS);
+    SystemEnable(MODULE_RF);
+    SystemEnable(MODULE_CANBUS);
+  }
 
-  // if (!SystemCheck(MODE_REMOTECONTROL)) {
-  //   remoteActive = false;
-  //   SystemDisable(MODULE_MOTORS);
-  //   LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
-  //   return;
-  // }
+  if (!SystemCheckMode(MODE_REMOTECONTROL)) {
+    remoteActive = false;
+    SystemDisable(MODULE_MOTORS);
+    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
+    return;
+  }
 
   // StrategyRunLed(MODE_AUTONOMOUS);
 
   // Read RF signal
   sbus.process();
   SBusProcess();
-  // SBusPrint();
+  SBusPrint();
 
   // Transmit via CAN
   CanBusProcess();
-  //CanBusPrint();
+  CanBusPrint();
 }
 
 // End sequence of strategy
@@ -70,5 +80,6 @@ void SelectFunctionRemote() {
     lastMillisSelect = millis();
     lastSystemCheck  = millis() - SYSTEM_CHECK_DT;
     remoteActive     = !remoteActive;
+    remoteStart      = true;
   }
 }

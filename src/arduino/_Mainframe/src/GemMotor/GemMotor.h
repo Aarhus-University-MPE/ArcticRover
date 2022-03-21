@@ -3,7 +3,7 @@
 
   Uses https://github.com/autowp/arduino-mcp2515
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2022
 */
@@ -14,20 +14,27 @@
 
 #define MIN_VELOCITY         1.0f   // kmh
 #define MOTOR_MAX_SPEED_FWD  10.0f  // kmh
-#define MOTOR_MAX_SPEED_BWD  5.0f  // kmh
+#define MOTOR_MAX_SPEED_BWD  5.0f   // kmh
+
+#define MIN_TORQUE            0.1f   // %
+#define MOTOR_MAX_TORQUE_FWD  1.0f   // %
+#define MOTOR_MAX_TORQUE_BWD  0.5f   // %
 
 #define MAX_RPM              200
+#define MAX_TORQUE           60
 
 #define RPM_VEL              1000.0f / 60.0f
 #define WHEEL_CIRCUMFERENCE  1.570f
 #define RPM_VEL_FACTOR       RPM_VEL / WHEEL_CIRCUMFERENCE
 #define RPM_CONTROL_SCALE    10
 #define MAX_CONTROL_VALUE    MAX_RPM* RPM_CONTROL_SCALE
+
+#define TORQUE_CONTROL       100.0f / 1.0f
+#define MAX_CONTROL_VALUE_TORQUE 100
+
 #define CAN_TIMEOUT_DURATION 50
 #define CANBUS_TX_PERIOD     10
 #define MOTOR_ERROR_TIMEOUT  5000
-
-
 
 class GemMotor {
   enum CONTROL_MODE {
@@ -151,11 +158,11 @@ class GemMotor {
 
  private:
   // Variables
-  const int controlMode = CONTROL_SPEED;
-  const int mode        = MOTOR_NORMAL;
+  const int mode  = MOTOR_NORMAL;
+  int controlMode = CONTROL_SPEED;
 
   int controlValue, controlValueRx;
-  int rpm, rpmTarget, temperature;
+  int rpm, rpmTarget, torqueTarget, temperature;
   int inverterPeakCurr, power;
   int TX_id, RX_id;
   int motorState;
@@ -200,6 +207,8 @@ class GemMotor {
   bool GetCanTxStatus();
   bool GetCanRxStatus();
 
+  void SetTorqueMode(bool torqueMode);
+
   // Indicates CAN msg sent.
   // Unset TX flag, Set RX flag indicate awaiting response
   void SetCanRxStatus();
@@ -216,6 +225,9 @@ class GemMotor {
 
   // Updates controlvalues based on input velocity
   void Update(float velocity);
+
+  // Updates controlvalues based on input torque
+  void UpdateTorque(float torque);
 
   // Prints latest Motor Status
   ERROR PrintStatus();

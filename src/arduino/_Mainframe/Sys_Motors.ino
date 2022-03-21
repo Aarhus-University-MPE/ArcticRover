@@ -1,7 +1,7 @@
 /*
   GeoRover Motor control
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2022
 */
@@ -12,7 +12,11 @@ bool InitializeMotors() {
   if (!GetStatus(MODULE_PWR_MOTOR)) {
     return false;
   }
+
   digitalWrite(PO_MOTOR_EN, true);
+
+  SetStatus(MODULE_MOTOR_L,true);
+  SetStatus(MODULE_MOTOR_R,true);
 
   return true;
 }
@@ -34,6 +38,41 @@ void MotorUpdate(float dir, float speed) {
   // Update CAN messages
   motorLeft.Update(velocityLeft);
   motorRight.Update(velocityRight);
+}
+
+// Moves motors based on direction and speed input within the range of [-1 and 1]
+// -1 full left, 1 full right (dir)
+// -1 full reverse, 1 full forward (speed)
+void MotorUpdateTorque(float dir, float speed) {
+  float torqueLeft;
+  float torqueRight;
+
+  TorqueCalculation(dir, speed, torqueLeft, torqueRight);
+
+  // Update CAN messages
+  motorLeft.UpdateTorque(torqueLeft);
+  motorRight.UpdateTorque(torqueRight);
+}
+
+
+void TorqueCalculation(float dir, float speed, float &torqueLeft, float &torqueRight){
+  float steerFactorLeft  = 1.0f;
+  float steerFactorRight = 1.0f;
+
+  // turn right, right wheel moves slower
+  if (dir > 0) {
+    steerFactorRight = steerFactor(dir);
+  }
+  // turn left, left wheel moves slower
+  else if (dir < 0) {
+    steerFactorLeft = steerFactor(dir);
+  }
+
+  torqueLeft  = speed * steerFactorLeft;
+  torqueRight = speed * steerFactorRight;
+
+  if (abs(torqueLeft) < MIN_TORQUE) torqueLeft = 0;
+  if (abs(torqueRight) < MIN_TORQUE) torqueRight = 0;
 }
 
 // Calculates skid steering based on direction and speed
@@ -84,12 +123,14 @@ bool MotorStatus() {
 
 // Left motor status
 bool MotorStatusLeft() {
-  return motorLeft.Status();
+  // return motorLeft.Status();
+  return GetStatus(MODULE_MOTOR_L);
 }
 
 // Right motor status
 bool MotorStatusRight() {
-  return motorRight.Status();
+  // return motorRight.Status();
+  return GetStatus(MODULE_MOTOR_R);
 }
 
 // Calculates steering factor from 2nd order function (-2x^2 + 1), used in skid steering

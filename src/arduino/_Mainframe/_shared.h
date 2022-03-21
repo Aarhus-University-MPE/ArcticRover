@@ -115,6 +115,10 @@ bool GetStatus(int module) {
   return SystemStatus[module];
 }
 void SetStatus(int module, bool status) {
+  // Serial.print("Setting module: ");
+  // Serial.print(ModuleToString(module));
+  // Serial.print("\t");
+  // Serial.println(status);
   SystemStatus[module] = status;
 }
 void SetStatus(bool status) {

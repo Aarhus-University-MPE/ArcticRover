@@ -1,7 +1,7 @@
 /*
   GeoRover Power control
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */
@@ -30,6 +30,8 @@ bool BatteryStatus(bool print) {
   DEBUG_PRINT(F("Battery Level: "));
   DEBUG_PRINTLN(BatteryLevel());
 
+  DEBUG_PRINT(F("Battery Voltage: "));
+  DEBUG_PRINTLN(BatteryVoltage());
   return VoltageCheck();
 }
 
@@ -43,4 +45,14 @@ int BatteryLevel() {
   }
 
   return batteryLevelPct[i];
+}
+
+float BatteryVoltage(){
+  int voltageInt = analogRead(PA_SENSOR_BATT);
+
+  float voltageRead = voltageInt * 5.0f/1024.0f; 
+  
+  float voltageBattery = voltageRead *  129.2f/19.2f;
+  
+  return voltageBattery;
 }

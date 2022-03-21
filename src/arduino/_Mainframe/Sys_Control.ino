@@ -1,7 +1,7 @@
 /*
   GeoRover System Control
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */
@@ -45,7 +45,6 @@ void SystemEnable(int module) {
       status = InitializeCanBus();
       break;
     case MODULE_RF:
-      digitalWrite(PO_POWER_RF, HIGH);
       status = InitializeSBUS();
       break;
     case MODULE_IRIDIUM:
@@ -90,6 +89,7 @@ void SystemEnable(int module) {
     DEBUG_PRINTLN(F(": ERROR"));
   }
   SetStatus(module, status);
+  delay(5);
 }
 
 // Enables Primary Systems
@@ -144,7 +144,6 @@ void SystemDisable(int module) {
       break;
     case MODULE_MOTORS:
       TerminateMotors();
-      SystemDisable(MODULE_PWR_MOTOR);
       break;
     case MODULE_MOTOR_L:
       status = MotorStatusLeft();
@@ -220,6 +219,7 @@ void SystemDisable() {
   // SystemDisable(MODULE_IRIDIUM);
   // SystemDisable(MODULE_GNSS);
   SystemDisable(MODULE_ACCEL);
+  SystemDisable(MODULE_PWR_MOTOR);
   SystemDisable(MODULE_MOTORS);
   SystemDisable(MODULE_CANBUS);
   SystemDisable(MODULE_PWR_MOTOR);
@@ -229,7 +229,7 @@ void SystemDisable() {
 }
 
 // Runs system check if time since last check > timeout, returns comparison between required modules to current
-bool SystemCheck(int mode) {
+bool SystemCheckMode(int mode) {
   static bool status = true;
 
   if (millis() - lastSystemCheck < SYSTEM_CHECK_DT) {
@@ -477,6 +477,10 @@ bool SystemTestModule(byte module) {
 
 // Checks all Systems
 void SystemCheck() {
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN(F("Running full system check"));
+  BatteryStatus(true);
+  DEBUG_PRINTLINE();
   for (int i = 0; i < MODULE_COUNT - 2; i++) {
     SystemCheckModule(i);
   }

@@ -2,7 +2,7 @@
   GeoRover CanBUS communication protocols for openCAN communication (Motors)
   https://github.com/autowp/arduino-mcp2515
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2022
 */
@@ -59,7 +59,7 @@ void CanBusPrint() {
   }
   millisLastCanPrint = millis();
 
-  // bool motorLeftStatus  = motorLeft.PrintStatus();
+  bool motorLeftStatus  = motorLeft.PrintStatus();
   bool motorRightStatus = motorRight.PrintStatus();
 
   // status = motorLeftStatus || motorRightStatus;
@@ -78,15 +78,15 @@ void CanBusProcess() {
     err = mcp2515.sendMessage(motorLeft.GetCanMsg());
     if (err == MCP2515::ERROR_OK) {
     } else {
-      Serial.print("Motor Left Error - ");
-      Serial.println(err);
+      // Serial.print("Motor Left Error - ");
+      // Serial.println(err);
     }
   } else if (motorRight.GetCanTxStatus()) {
     err = mcp2515.sendMessage(motorRight.GetCanMsg());
     if (err == MCP2515::ERROR_OK) {
     } else {
-      Serial.print("Motor Right Error - ");
-      Serial.println(err);
+      // Serial.print("Motor Right Error - ");
+      // Serial.println(err);
     }
   }
 

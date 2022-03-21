@@ -2,7 +2,7 @@
   GeoRover Iridium communication protocols for long range communication
   using: https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */

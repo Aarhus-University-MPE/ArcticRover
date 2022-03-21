@@ -2,7 +2,7 @@
 /*
   GeoRover Navigation Stack
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */
@@ -84,11 +84,12 @@ bool NavigationPreCheck() {
 // Check system status while navigation is running.
 // GNSS status, Accelerometer output (tilt?), Battery Status
 bool NavigationRunCheck() {
-  return SystemCheck(MODE_AUTONOMOUS);
+  return SystemCheckMode(MODE_AUTONOMOUS); 
 }
 
 bool RouteCheck() {
-  return NavigationPreCheck();
+  // Check route...
+  return true;
 }
 
 // Test full route (used in Navigation pre-check)

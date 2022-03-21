@@ -7,7 +7,7 @@
     + <purpose>_
     + <where applicable: left, right, top, bottom, position etc...>
 
-  Mads Rosenhøj Jepepsen
+  Mads Rosenhøj Jeppesen
   Aarhus University
   2021
 */
