@@ -134,6 +134,7 @@ void SBusProcess() {
     } else{
       speed = 0;
     }
+    MotorUpdate(dir, speed);
   }
   // Secondary input (Right Stick)
   else if (abs(throttle2) > CONTROLLER_DEADZONE_FLOAT && gear < REMOTE_CHANNEL_HIGH && gear > REMOTE_CHANNEL_LOW) {
@@ -142,9 +143,12 @@ void SBusProcess() {
     } else {
       speed = throttle2 / 2.0f;
     }
+    MotorUpdateTorque(dir, speed);
+
+  } else {
+    MotorUpdate(0, 0);
   }
 
-  MotorUpdateTorque(dir, speed);
 }
 
 void SBusPrint() {

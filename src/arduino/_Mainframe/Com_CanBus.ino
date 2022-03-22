@@ -78,6 +78,7 @@ void CanBusProcess() {
     err = mcp2515.sendMessage(motorLeft.GetCanMsg());
     if (err == MCP2515::ERROR_OK) {
     } else {
+      LedBlinkSingleShort(BINARY_CODE_LED_RED);
       // Serial.print("Motor Left Error - ");
       // Serial.println(err);
     }
@@ -85,6 +86,7 @@ void CanBusProcess() {
     err = mcp2515.sendMessage(motorRight.GetCanMsg());
     if (err == MCP2515::ERROR_OK) {
     } else {
+      LedBlinkSingleShort(BINARY_CODE_LED_RED);
       // Serial.print("Motor Right Error - ");
       // Serial.println(err);
     }

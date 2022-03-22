@@ -22,6 +22,7 @@ void LedSet(byte color) {
   // Do nothing if arguments are the same
   if (color == currentLedStatus)
     return;
+  SystemEnable(MODULE_PWR_12V); // <-- Temporary due to 12VDCDC missing
 
   digitalWrite(PO_LED_STATUS_GRN, (BINARY_CODE_LED_GRN & color) > 0);
   digitalWrite(PO_LED_STATUS_YEL, (BINARY_CODE_LED_YEL & color) > 0);
@@ -191,8 +192,11 @@ void ModuleStopLed(int module) {
 }
 
 void LedTest() {
+  Serial.println("Red");
   LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
+  Serial.println("Yellow");
   LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
+  Serial.println("Green");
   LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
 
   // LedBlinkDoubleShort(BINARY_CODE_LED_RED,BINARY_CODE_LED_RED);

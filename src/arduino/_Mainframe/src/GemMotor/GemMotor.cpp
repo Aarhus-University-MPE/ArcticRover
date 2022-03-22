@@ -107,6 +107,7 @@ void GemMotor::Update(float velocity) {
   }
 
   GemMotor::swEnable = SW_ENABLE;
+  GemMotor::SetTorqueMode(false);
 
   // Clamp velocity to (max speed bwd < velocity < max speed fwd)
   velocity = max(-MOTOR_MAX_SPEED_BWD, min(MOTOR_MAX_SPEED_FWD, velocity));
@@ -131,6 +132,7 @@ void GemMotor::UpdateTorque(float torque) {
   }
 
   GemMotor::swEnable = SW_ENABLE;
+  GemMotor::SetTorqueMode(true);
 
   // Clamp torque to (max torque bwd < torque < max torque fwd)
   torque = max(-MOTOR_MAX_TORQUE_BWD, min(MOTOR_MAX_TORQUE_FWD, torque));
@@ -138,8 +140,6 @@ void GemMotor::UpdateTorque(float torque) {
   GemMotor::torqueTarget = abs(torque) * TORQUE_CONTROL;
 
   GemMotor::controlValue = min(GemMotor::torqueTarget, MAX_CONTROL_VALUE_TORQUE) * dir;
-  Serial.print("Motor Control: ");
-  Serial.println(GemMotor::controlValue);
 }
 
 // Prints current motor parameters returns error if no motor messages received

@@ -98,7 +98,31 @@
 #define MODULE_RESERVED        23
 
 #define ModuleToString(m) \
-  ((m) == 0 ? "Primary Power" : ((m) == 1 ? "Secondary Power (5V)" : ((m) == 2 ? "Secondary Power (12V)" : ((m) == 3 ? "Secondary Power (24V)" : ((m) == 4 ? "Secondary Power (Motors)" : ((m) == 5 ? "Motors" : ((m) == 6 ? "Motor Left" : ((m) == 7 ? "Motor Right" : ((m) == 8 ? "Motor Active" : ((m) == 9 ? "CAN-bus" : ((m) == 10 ? "Short Range Communication (RF)" : ((m) == 11 ? "Long Range Communication (Iridium)" : ((m) == 12 ? "Global Navigation Satellite System" : ((m) == 13 ? "Accelerometer" : ((m) == 14 ? "Local Storage" : ((m) == 15 ? "Blackbox" : ((m) == 16 ? "Debug Comm." : ((m) == 17 ? "System LED" : ((m) == 18 ? "Heating" : ((m) == 19 ? "Temperature" : ((m) == 20 ? "Backup CPU" : ((m) == 21 ? "Emergency Stop" : ((m) == 22 ? "Reserved" : ("Unknown"))))))))))))))))))))))))
+  ((m) == 0 ? "Primary Power" : \
+  ((m) == 1 ? "Secondary Power (5V)" :\
+   ((m) == 2 ? "Secondary Power (12V)" :\
+    ((m) == 3 ? "Secondary Power (24V)" :\
+     ((m) == 4 ? "Secondary Power (Motors)" :\
+      ((m) == 5 ? "Motors" :\
+       ((m) == 6 ? "Motor Left" :\
+        ((m) == 7 ? "Motor Right" :\
+         ((m) == 8 ? "Motor Active" :\
+          ((m) == 9 ? "CAN-bus" :\
+           ((m) == 10 ? "Short Range Communication (RF)" :\
+            ((m) == 11 ? "Long Range Communication (Iridium)" :\
+             ((m) == 12 ? "Global Navigation Satellite System" :\
+              ((m) == 13 ? "Accelerometer" :\
+               ((m) == 14 ? "Local Storage" :\
+                ((m) == 15 ? "Blackbox" :\
+                 ((m) == 16 ? "Waypoint Route" :\
+                  ((m) == 17 ? "Debug Comm." :\
+                   ((m) == 18 ? "System LED" :\
+                    ((m) == 19 ? "Heating" :\
+                     ((m) == 20 ? "Temperature" :\
+                      ((m) == 21 ? "Backup CPU" :\
+                       ((m) == 22 ? "Emergency Stop" :\
+                        ((m) == 23 ? "Reserved" :\
+                         ("Unknown")))))))))))))))))))))))))
 
 const unsigned long SYSREQ_REMOTE_CONTROL =
     (1L << MODULE_PWR) +

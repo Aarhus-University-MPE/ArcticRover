@@ -12,9 +12,6 @@ void StartStrategyRemote() {
 
   SystemEnableMode();
   
-  motorLeft.SetTorqueMode(true);
-  motorRight.SetTorqueMode(true);
-
   remoteActive = false;
   remoteStart = false;
 
@@ -55,11 +52,11 @@ void RunStrategyRemote() {
   // Read RF signal
   sbus.process();
   SBusProcess();
-  SBusPrint();
+  // SBusPrint();
 
   // Transmit via CAN
   CanBusProcess();
-  CanBusPrint();
+  // CanBusPrint();
 }
 
 // End sequence of strategy

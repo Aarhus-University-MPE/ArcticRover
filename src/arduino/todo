@@ -16,6 +16,7 @@
 - Status LED
     - Test durations
     - Test run-time LED (non-blocking)
+    - Remove 12V enable (temp dcdc)
 
 - Iridium
     - Test Send
