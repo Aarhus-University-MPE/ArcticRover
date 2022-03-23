@@ -45,7 +45,8 @@ long lon_previous = 0;
 bool validCoordinate = false;
 bool gnssFixValid    = false;
 
-bool navigationFlag = false;
+bool navigationFlag     = false;
+bool navigationPreCheck = false;
 
 bool Navigate() {
   if (!NavigationPreCheck()) {
@@ -64,19 +65,28 @@ bool Navigate() {
   // -> Run motor
 }
 
+bool NavigationStart() {
+  if (!NavigationPreCheck()) {
+    return false;
+  }
+}
+
+void NavigationPreCheckReset() {
+  navigationPreCheck = false;
+}
+
 //  Checks to run before starting autonomous navigation
 //  System checks, Route Checks
 bool NavigationPreCheck() {
-  static bool navigationPreCheck = false;
-
-  if (!NavigationRunCheck()) {
-    navigationPreCheck = false;
-    return navigationPreCheck;
+  if (navigationPreCheck) {
+    return true;
   }
 
-  if (!navigationPreCheck) {
-    navigationPreCheck = RouteTest();
-  }
+  navigationPreCheck = true;
+
+  if (!RouteTest()) navigationPreCheck = false;
+  if (!GnssSignal()) navigationPreCheck = false;
+  if (!MotorStatus()) navigationPreCheck = false;
 
   return navigationPreCheck;
 }
@@ -84,7 +94,7 @@ bool NavigationPreCheck() {
 // Check system status while navigation is running.
 // GNSS status, Accelerometer output (tilt?), Battery Status
 bool NavigationRunCheck() {
-  return SystemCheckMode(MODE_AUTONOMOUS); 
+  return SystemCheckMode(MODE_AUTONOMOUS);
 }
 
 bool RouteCheck() {
@@ -109,13 +119,11 @@ bool RouteFileCheck() {
   int routeLen = EEPROM_READ_INT(MEMADDR_ROUTELEN_START);
 
   if (routeLen <= 0) {
-     // LoadRoute(); // Load route from SD card
+    // LoadRoute(); // Load route from SD card
   }
 
-  if(SDRoute()){
-    
+  if (SDRoute()) {
   }
-
 
   for (int i = 0; i < routeLen; i++) {
     // load value

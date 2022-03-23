@@ -105,15 +105,18 @@ void SystemEnablePrimary() {
 void SystemEnableMode() {
   switch (mode) {
     case MODE_REMOTECONTROL:
-      // SystemEnable(MODULE_PWR);
-      // SystemEnable(MODULE_PWR_MOTOR); // <-- Enabled by user input (along with motor initialization)
-      // SystemEnable(MODULE_MOTORS); // <-- Enabled by user input
-      // SystemEnable(MODULE_RF);
-      // SystemEnable(MODULE_CANBUS);
+      SystemEnable(MODULE_PWR_12V);  // Temporary due to 12V DCDC replacement
+      SystemEnable(MODULE_PWR_MOTOR);
+      SystemEnable(MODULE_MOTORS);
+      SystemEnable(MODULE_RF);
+      SystemEnable(MODULE_CANBUS);
       break;
     case MODE_AUTONOMOUS:
-      SystemEnable(MODULE_ACCEL);
+      SystemEnable(MODULE_PWR_12V);  // Temporary due to 12V DCDC replacement
+      SystemEnable(MODULE_PWR_MOTOR);
+      SystemEnable(MODULE_MOTORS);
       SystemEnable(MODULE_CANBUS);
+      SystemEnable(MODULE_ACCEL);
       break;
     default:
       break;

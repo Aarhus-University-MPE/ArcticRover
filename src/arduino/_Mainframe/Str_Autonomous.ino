@@ -2,14 +2,17 @@
 
     Primary Strategy for Autonomous Navigation
 */
-bool autonomyActive;
+bool autonomyActive, autonomyStart;
 
 // Start sequence of strategy
 void StartStrategyAutonomous() {
   DEBUG_PRINTLINE();
   DEBUG_PRINTLN(F("Strategy (Autonomous): Starting."));
 
-  SystemEnableMode();
+  SystemDisable();
+
+  autonomyActive = false;
+  autonomyStart  = false;
 
   AttachSelectButton();
 
@@ -21,23 +24,37 @@ void StartStrategyAutonomous() {
 
 // Main sequence of strategy
 void RunStrategyAutonomous() {
+  // Run autonomous navigation precheck
+  if (!NavigationPreCheck()) {
+    StatusRunLed(SIGNAL_LOADING);
+    return;
+  }
+
+  // System ready to start, waiting idle
   if (!autonomyActive) {
-    SystemDisable(MODULE_MOTORS);
-    StrategyRunLed(MODE_IDLE);
+    StatusRunLed(SIGNAL_IDLE);
     return;
   }
 
-  if (!Navigate()){
+  // Select button pressed, start navigation
+  if (autonomyStart) {
+    autonomyStart = false;
+    SystemEnableMode();
+    if (!NavigationStart()) {
+      SystemDisable(MODULE_MOTORS);
+      StatusHaltLed(SIGNAL_ERROR);
+      autonomyActive = false;
+      return;
+    }
+  }
+
+  // Autonomous navigation
+  if (!Navigate()) {
+    StatusHaltLed(SIGNAL_ERROR);
     autonomyActive = false;
-    SystemDisable(MODULE_MOTORS);
-    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
     return;
   }
 
-  SystemEnable(MODULE_PWR_MOTOR);
-  SystemEnable(MODULE_MOTORS);
-
-  // Blink light
   StrategyRunLed();
 }
 
@@ -58,6 +75,8 @@ void FinishStrategyAutonomous() {
 void SelectFunctionAutonomous() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
-    autonomyActive     = !autonomyActive;
+    autonomyActive   = !autonomyActive;
+    autonomyStart    = true;
+    NavigationPreCheckReset();
   }
 }

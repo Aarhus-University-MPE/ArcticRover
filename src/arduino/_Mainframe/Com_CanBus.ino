@@ -22,6 +22,10 @@ MCP2515 mcp2515(PO_SPISS_CANBUS);
 
 bool InitializeCanBus() {
   int err;
+
+  digitalWrite(PO_MOTOR_EN, true);
+  delay(5);
+
   SPI.begin();  // Begins SPI communication
   mcp2515.reset();
 
@@ -42,6 +46,7 @@ bool InitializeCanBus() {
 
 void TerminateCanBus() {
   SPI.end();
+  digitalWrite(PO_MOTOR_EN, false);
 }
 
 /*
@@ -68,28 +73,19 @@ void CanBusPrint() {
   Serial.println(F("-------------------------------"));
 }
 
-void CanBusProcess() {
+bool CanBusProcess() {
   if (millis() - CanBusTxLast < CANBUS_TX_PERIOD) {
-    return;
+    return MotorStatus();
   }
   int err;
+  bool status;
 
   if (motorLeft.GetCanTxStatus()) {
     err = mcp2515.sendMessage(motorLeft.GetCanMsg());
-    if (err == MCP2515::ERROR_OK) {
-    } else {
-      LedBlinkSingleShort(BINARY_CODE_LED_RED);
-      // Serial.print("Motor Left Error - ");
-      // Serial.println(err);
-    }
+    status = (err == MCP2515::ERROR_OK);
   } else if (motorRight.GetCanTxStatus()) {
     err = mcp2515.sendMessage(motorRight.GetCanMsg());
-    if (err == MCP2515::ERROR_OK) {
-    } else {
-      LedBlinkSingleShort(BINARY_CODE_LED_RED);
-      // Serial.print("Motor Right Error - ");
-      // Serial.println(err);
-    }
+    status = (err == MCP2515::ERROR_OK);
   }
 
   if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
@@ -100,6 +96,7 @@ void CanBusProcess() {
       ParseData();
     }
   }
+  return MotorStatus();
 }
 
 bool CanBusStatus() {

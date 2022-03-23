@@ -12,26 +12,26 @@
 
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
 
-SFE_UBLOX_GNSS myGNSS;
+SFE_UBLOX_GNSS gnss;
 
 long lastTimeGNSS = 0;  // Local timer, limits I2C traffic to u-blox module.
 
-int gnssTestState = 0;
+int gnssTestState        = 0;
 long millisGnssTestStart = 0;
 long millisLastGnssPrint = 0;
 
 bool InitializeGnss() {
   Wire.begin();
-  bool status = myGNSS.begin();
+  bool status = gnss.begin();
   if (status) {
-    myGNSS.setI2COutput(COM_TYPE_UBX);                                //Set the I2C port to output UBX only (turn off NMEA noise)
-    myGNSS.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY);  //Set measurement rate to 1000ms (1Hz update rate)
+    gnss.setI2COutput(COM_TYPE_UBX);                                // Set the I2C port to output UBX only (turn off NMEA noise)
+    gnss.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY);  // Set measurement rate to 1000ms (1Hz update rate)
   }
   return status;
 }
 
 bool GnssStatus() {
-  return GetStatus(MODULE_GNSS);
+  return gnss.isConnected();
 }
 
 bool GnssTest() {
@@ -55,7 +55,7 @@ bool GnssTest() {
     case 2:
       SetStatus(MODULE_GNSS, GnssTime(true));
       gnssTestState = 0;
-      testDone = true;
+      testDone      = true;
       DEBUG_PRINTLINE();
     default:
       break;
@@ -67,17 +67,17 @@ bool GnssTest() {
 bool GnssTime(bool print) {
   bool status;
   if (print) DEBUG_PRINT(F("Time and Date is: "));
-  if (!myGNSS.getTimeValid() || !myGNSS.getDateValid()) {
+  if (!gnss.getTimeValid() || !gnss.getDateValid()) {
     if (print) DEBUG_PRINTLN(F("not valid"));
     status = false;
   } else {
     if (print) {
       DEBUG_PRINTLN(F("valid"));
-      int year = myGNSS.getYear();
-      int month = myGNSS.getMonth();
-      int day = myGNSS.getDay();
-      int hour = myGNSS.getHour();
-      int minute = myGNSS.getMinute();
+      int year   = gnss.getYear();
+      int month  = gnss.getMonth();
+      int day    = gnss.getDay();
+      int hour   = gnss.getHour();
+      int minute = gnss.getMinute();
 
       DEBUG_PRINT(F("Current time: "));
       DEBUG_PRINT(year);
@@ -97,40 +97,44 @@ bool GnssTime(bool print) {
 }
 
 void TerminateGnss() {
-  myGNSS.end();
+  gnss.end();
 }
 
 // Gets positional data in Latitude in degrees * 10^-7
 long GnssGetLat() {
-  return myGNSS.getLatitude();
+  return gnss.getLatitude();
 }
 
 // Gets positional data in Longitude in degrees * 10^-7
 long GnssGetLong() {
-  return myGNSS.getLongitude();
+  return gnss.getLongitude();
 }
 
+// Returns heading in degrees * 10^-5
+long GnssGetHeading(){
+  return gnss.getHeading();
+}
 // Query module and prints Lat, Long, Alt, Acc
 void QueryGnss() {
   DEBUG_PRINT(F("GNSS: "));
 
   if (GnssStatus()) {
-    long latitude = myGNSS.getLatitude();
+    long latitude = gnss.getLatitude();
     DEBUG_PRINT(F("Lat: "));
     DEBUG_PRINT(latitude);
     DEBUG_PRINT(F(" (deg * 10^-7)"));
 
-    long longitude = myGNSS.getLongitude();
+    long longitude = gnss.getLongitude();
     DEBUG_PRINT(F("\tLong: "));
     DEBUG_PRINT(longitude);
     DEBUG_PRINT(F(" (deg * 10^-7)"));
 
-    long altitude = myGNSS.getAltitude();
+    long altitude = gnss.getAltitude();
     DEBUG_PRINT(F("\tAlt: "));
     DEBUG_PRINT(altitude);
     DEBUG_PRINT(F(" (mm)"));
 
-    long accuracy = myGNSS.getPositionAccuracy();
+    long accuracy = gnss.getPositionAccuracy();
     DEBUG_PRINT(F("\t3D Positional Accuracy: "));
     DEBUG_PRINT(accuracy);
     DEBUG_PRINTLN(F(" (mm)"));
@@ -139,42 +143,51 @@ void QueryGnss() {
   }
 }
 
+// Returns current signal status
+bool GnssSignal(){
+  if(!GetStatus(MODULE_GNSS)){
+    return false;
+  }
+
+  return (gnss.getTimeValid() && gnss.getDateValid() && gnss.getGnssFixOk());
+}
+
+// returns distance in meters between two positions, both specified
+// as signed decimal-degrees latitude and longitude. Uses great-circle
+// distance computation for hypothetical sphere of radius 6372795 meters.
+// Because Earth is no exact sphere, rounding errors may be up to 0.5%.
+// Courtesy of Maarten Lamers
 double DistanceBetween(double lat1, double long1, double lat2, double long2) {
-  // returns distance in meters between two positions, both specified
-  // as signed decimal-degrees latitude and longitude. Uses great-circle
-  // distance computation for hypothetical sphere of radius 6372795 meters.
-  // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
-  // Courtesy of Maarten Lamers
-  double delta = radians(long1 - long2);
+  double delta  = radians(long1 - long2);
   double sdlong = sin(delta);
   double cdlong = cos(delta);
-  lat1 = radians(lat1);
-  lat2 = radians(lat2);
-  double slat1 = sin(lat1);
-  double clat1 = cos(lat1);
-  double slat2 = sin(lat2);
-  double clat2 = cos(lat2);
-  delta = (clat1 * slat2) - (slat1 * clat2 * cdlong);
-  delta = sq(delta);
+  lat1          = radians(lat1);
+  lat2          = radians(lat2);
+  double slat1  = sin(lat1);
+  double clat1  = cos(lat1);
+  double slat2  = sin(lat2);
+  double clat2  = cos(lat2);
+  delta         = (clat1 * slat2) - (slat1 * clat2 * cdlong);
+  delta         = sq(delta);
   delta += sq(clat2 * sdlong);
-  delta = sqrt(delta);
+  delta        = sqrt(delta);
   double denom = (slat1 * slat2) + (clat1 * clat2 * cdlong);
-  delta = atan2(delta, denom);
+  delta        = atan2(delta, denom);
   return delta * 6372795;
 }
 
+// returns course in degrees (North=0, West=270) from position 1 to position 2,
+// both specified as signed decimal-degrees latitude and longitude.
+// Because Earth is no exact sphere, calculated course may be off by a tiny fraction.
+// Courtesy of Maarten Lamers
 double CourseTo(double lat1, double long1, double lat2, double long2) {
-  // returns course in degrees (North=0, West=270) from position 1 to position 2,
-  // both specified as signed decimal-degrees latitude and longitude.
-  // Because Earth is no exact sphere, calculated course may be off by a tiny fraction.
-  // Courtesy of Maarten Lamers
   double dlon = radians(long2 - long1);
-  lat1 = radians(lat1);
-  lat2 = radians(lat2);
-  double a1 = sin(dlon) * cos(lat2);
-  double a2 = sin(lat1) * cos(lat2) * cos(dlon);
-  a2 = cos(lat1) * sin(lat2) - a2;
-  a2 = atan2(a1, a2);
+  lat1        = radians(lat1);
+  lat2        = radians(lat2);
+  double a1   = sin(dlon) * cos(lat2);
+  double a2   = sin(lat1) * cos(lat2) * cos(dlon);
+  a2          = cos(lat1) * sin(lat2) - a2;
+  a2          = atan2(a1, a2);
   if (a2 < 0.0) {
     a2 += TWO_PI;
   }

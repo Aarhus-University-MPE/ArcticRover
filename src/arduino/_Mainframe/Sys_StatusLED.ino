@@ -1,8 +1,14 @@
-byte currentLedStatus       = B000;
+byte currentLedStatus = B000;
 unsigned long lastMillisLed;
 unsigned long millisSinceLast;
 unsigned long lastMillisModeBlinkState;
 
+enum SIGNAL {
+  SIGNAL_OK      = 0,
+  SIGNAL_ERROR   = 1,
+  SIGNAL_IDLE    = 2,
+  SIGNAL_LOADING = 3
+};
 
 // Set LED
 void InitStatusLed() {
@@ -22,7 +28,8 @@ void LedSet(byte color) {
   // Do nothing if arguments are the same
   if (color == currentLedStatus)
     return;
-  SystemEnable(MODULE_PWR_12V); // <-- Temporary due to 12VDCDC missing
+
+  SystemEnable(MODULE_PWR_12V);  // <-- Temporary due to 12VDCDC missing
 
   digitalWrite(PO_LED_STATUS_GRN, (BINARY_CODE_LED_GRN & color) > 0);
   digitalWrite(PO_LED_STATUS_YEL, (BINARY_CODE_LED_YEL & color) > 0);
@@ -136,51 +143,76 @@ void StrategyStartLed() {
   // }
 }
 
-// Blink light of current mode (Non-blocking)
-void StrategyRunLed() {
+// Blink light of given mode (Non-blocking)
+void StrategyRunLed(byte mode) {
   switch (mode) {
     case MODE_EMERGENCY:
-      LedBlink(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
       break;
     case MODE_IDLE:
-      LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
       break;
     case MODE_SYSTEMTEST:
-      LedBlink(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
       break;
     case MODE_REMOTECONTROL:
-      LedBlink(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
       break;
     case MODE_AUTONOMOUS:
-      LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
       break;
     default:
       break;
   }
 }
 
-// Blink light of given mode (Non-blocking)
-void StrategyRunLed(byte mode) {
+// Blink light of current mode (Non-blocking)
+void StrategyRunLed() {
+  StrategyRunLed(mode);
+}
+
+// Blink light with specific signal (Non-blocking)
+void StatusRunLed(byte signal) {
   switch (mode) {
-    case MODE_EMERGENCY:
+    case SIGNAL_OK:
+      LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
+      break;
+    case SIGNAL_ERROR:
       LedBlink(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;
-    case MODE_IDLE:
+    case SIGNAL_IDLE:
       LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;
-    case MODE_SYSTEMTEST:
+    case SIGNAL_LOADING:
       LedBlink(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
-      break;
-    case MODE_REMOTECONTROL:
-      LedBlink(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
-      break;
-    case MODE_AUTONOMOUS:
-      LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;
     default:
       break;
   }
 }
+
+// Blink light with specific signal (Non-blocking)
+void StatusHaltLed(byte signal) {
+  switch (mode) {
+    case SIGNAL_OK:
+      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_SHORT);
+      break;
+    case SIGNAL_ERROR:
+      LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_NORMAL);
+      break;
+    case SIGNAL_IDLE:
+      LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT);
+      break;
+    case SIGNAL_LOADING:
+      LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_SHORT);
+      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_SHORT);
+      break;
+    default:
+      break;
+  }
+}
+
+
 
 void StrategyFinishLed(int strategy) {
 }

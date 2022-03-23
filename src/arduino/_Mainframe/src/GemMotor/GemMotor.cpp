@@ -136,7 +136,7 @@ void GemMotor::UpdateTorque(float torque) {
 
   // Clamp torque to (max torque bwd < torque < max torque fwd)
   torque = max(-MOTOR_MAX_TORQUE_BWD, min(MOTOR_MAX_TORQUE_FWD, torque));
-    
+
   GemMotor::torqueTarget = abs(torque) * TORQUE_CONTROL;
 
   GemMotor::controlValue = min(GemMotor::torqueTarget, MAX_CONTROL_VALUE_TORQUE) * dir;
@@ -188,16 +188,15 @@ void GemMotor::BuildCanMsg() {
 // Updates motor status and returns current motor status
 bool GemMotor::Status() {
   MotorStatusUpdate();
-  bool status = GemMotor::motorStatus && GemMotor::validStatus;
-  return status;
+  return GemMotor::motorStatus;
 }
 
 // Updates current motor status, if error reported for more than timeout duration (5000 ms) unsets motor status
 // Timeout implemented due to motor capacitor taking time to charge up
 void GemMotor::MotorStatusUpdate() {
   // Check latest motor state for error
-  if (GemMotor::motorState != MOTOR_ERROR) {
-    GemMotor::motorStatus = true;
+  if (GemMotor::motorState != MOTOR_ERROR && GemMotor::validStatus) {
+    GemMotor::ResetMotorStatus();
     return;
   }
 
@@ -212,6 +211,13 @@ void GemMotor::MotorStatusUpdate() {
   if (millis() - GemMotor::firstErrorMillis > MOTOR_ERROR_TIMEOUT) {
     GemMotor::motorStatus = false;
   }
+}
+
+// Reset status of motor
+void GemMotor::ResetMotorStatus() {
+  GemMotor::motorStatus      = true;
+  GemMotor::motorError       = false;
+  GemMotor::firstErrorMillis = millis();
 }
 
 // Parses incoming motor messages and convert to motor states

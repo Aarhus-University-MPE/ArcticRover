@@ -159,8 +159,9 @@ void LoadRoute() {
   }
 }
 
-void PopulateRoute(String ){
-
+void PopulateRoute(String waypoint){
+  char *ptr = NULL;
+  //waypoint.strtok(waypoint,",");
 }
 
 void ParseRoute(){

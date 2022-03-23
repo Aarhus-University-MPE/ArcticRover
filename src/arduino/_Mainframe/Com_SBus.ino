@@ -10,6 +10,7 @@
 #include <SBUS.h>
 
 SBUS sbus(COM_SERIAL_RF);
+bool sBusStatus;
 int sbusTestState;
 long millisSbusTestStart;
 long millisLastSbusPrint;
@@ -18,7 +19,8 @@ long millisLastSBusUpdate;
 // Initialize RF Communication
 bool InitializeSBUS() {
   digitalWrite(PO_POWER_RF, HIGH);
-  
+  sBusStatus = true;
+
   sbus.begin(false);
 
   return COM_SERIAL_RF;
@@ -106,15 +108,15 @@ float getChannelFloatFull(int channel) {
 }
 
 // Read RF signal and update motors accordingly
-void SBusProcess() {
+bool SBusProcess() {
   if (millis() - millisLastSBusUpdate < REMOTE_PROCESS_DT) {
-    return;
+    return sBusStatus;
   }
   millisLastSBusUpdate = millis();
 
   if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
     MotorUpdate(0, 0);
-    return;
+    return sBusStatus;
   }
 
   float throttle1 = getChannelFloatFull(1);  // Left stick Vertical
@@ -131,7 +133,7 @@ void SBusProcess() {
       speed = throttle1 * -1.0f;
     } else if (gear > REMOTE_CHANNEL_HIGH) {
       speed = throttle1;
-    } else{
+    } else {
       speed = 0;
     }
     MotorUpdate(dir, speed);
@@ -149,6 +151,15 @@ void SBusProcess() {
     MotorUpdate(0, 0);
   }
 
+  // First timeout error returns true (catches large first read getLastTime)
+  if (millis() - (unsigned long)sbus.getLastTime() < SBUS_TIMEOUT && sBusStatus) {
+    sBusStatus = false;
+    return true;
+  } else {
+    sBusStatus = true;
+  }
+
+  return sBusStatus;
 }
 
 void SBusPrint() {

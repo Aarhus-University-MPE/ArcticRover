@@ -15,10 +15,13 @@ bool InitializeMotors() {
 
   digitalWrite(PO_MOTOR_EN, true);
 
-  SetStatus(MODULE_MOTOR_L,true);
-  SetStatus(MODULE_MOTOR_R,true);
+  motorLeft.ResetMotorStatus();
+  motorRight.ResetMotorStatus();
 
-  return true;
+  SetStatus(MODULE_MOTOR_L, true);
+  SetStatus(MODULE_MOTOR_R, true);
+
+  return MotorStatus();
 }
 
 // Disable Motor HW Enable
@@ -54,8 +57,7 @@ void MotorUpdateTorque(float dir, float speed) {
   motorRight.UpdateTorque(torqueRight);
 }
 
-
-void TorqueCalculation(float dir, float speed, float &torqueLeft, float &torqueRight){
+void TorqueCalculation(float dir, float speed, float &torqueLeft, float &torqueRight) {
   float steerFactorLeft  = 1.0f;
   float steerFactorRight = 1.0f;
 
@@ -123,14 +125,12 @@ bool MotorStatus() {
 
 // Left motor status
 bool MotorStatusLeft() {
-  // return motorLeft.Status();
-  return GetStatus(MODULE_MOTOR_L);
+  return motorLeft.Status();
 }
 
 // Right motor status
 bool MotorStatusRight() {
-  // return motorRight.Status();
-  return GetStatus(MODULE_MOTOR_R);
+  return motorRight.Status();
 }
 
 // Calculates steering factor from 2nd order function (-2x^2 + 1), used in skid steering

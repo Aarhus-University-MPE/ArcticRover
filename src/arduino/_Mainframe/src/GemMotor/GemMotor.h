@@ -238,6 +238,9 @@ class GemMotor {
   // Returns status of motor (Error)
   bool Status();
 
+  // Resets status of motor
+  void ResetMotorStatus();
+
   // Parses incoming motor messages and convert to motor variables
   bool ParseCanMsg(struct can_frame _canMsg);
 };

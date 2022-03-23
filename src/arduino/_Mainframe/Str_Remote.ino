@@ -10,10 +10,9 @@ void StartStrategyRemote() {
   DEBUG_PRINTLN(F("Strategy (Remote): Starting"));
   SystemDisable();
 
-  SystemEnableMode();
-  
+
   remoteActive = false;
-  remoteStart = false;
+  remoteStart  = false;
 
   AttachSelectButton();
 
@@ -31,13 +30,9 @@ void RunStrategyRemote() {
     return;
   }
 
-  if(remoteStart){
+  if (remoteStart) {
     remoteStart = false;
-    SystemEnable(MODULE_PWR_12V); // Temporary due to 12V DCDC replacement
-    SystemEnable(MODULE_PWR_MOTOR);
-    SystemEnable(MODULE_MOTORS);
-    SystemEnable(MODULE_RF);
-    SystemEnable(MODULE_CANBUS);
+    SystemEnableMode();
   }
 
   if (!SystemCheckMode(MODE_REMOTECONTROL)) {
@@ -51,12 +46,22 @@ void RunStrategyRemote() {
 
   // Read RF signal
   sbus.process();
-  SBusProcess();
-  // SBusPrint();
+  if (!SBusProcess()) {
+    remoteActive = false;
+    SystemDisable();
+    StatusHaltLed(SIGNAL_ERROR);
+    return;
+  }
+  SBusPrint();
 
   // Transmit via CAN
-  CanBusProcess();
-  // CanBusPrint();
+  if (!CanBusProcess()) {
+    remoteActive = false;
+    SystemDisable();
+    StatusHaltLed(SIGNAL_ERROR);
+    return;
+  }
+  CanBusPrint();
 }
 
 // End sequence of strategy
