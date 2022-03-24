@@ -3,13 +3,6 @@ unsigned long lastMillisLed;
 unsigned long millisSinceLast;
 unsigned long lastMillisModeBlinkState;
 
-enum SIGNAL {
-  SIGNAL_OK      = 0,
-  SIGNAL_ERROR   = 1,
-  SIGNAL_IDLE    = 2,
-  SIGNAL_LOADING = 3
-};
-
 // Set LED
 void InitStatusLed() {
   // LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_SHORT);
@@ -29,13 +22,38 @@ void LedSet(byte color) {
   if (color == currentLedStatus)
     return;
 
-  SystemEnable(MODULE_PWR_12V);  // <-- Temporary due to 12VDCDC missing
+  SystemEnable(MODULE_PWR_12V);  // TODO: Remove temporary due to 12VDCDC missing
 
   digitalWrite(PO_LED_STATUS_GRN, (BINARY_CODE_LED_GRN & color) > 0);
   digitalWrite(PO_LED_STATUS_YEL, (BINARY_CODE_LED_YEL & color) > 0);
   digitalWrite(PO_LED_STATUS_RED, (BINARY_CODE_LED_RED & color) > 0);
 
   currentLedStatus = color;
+}
+
+void LedSetSignal(SIGNAL signal){
+  switch (signal)
+  {
+  case SIGNAL_OK:
+    LedSet(BINARY_CODE_LED_GRN);
+    break;
+  case SIGNAL_IDLE:
+    LedSet(BINARY_CODE_LED_YEL);
+    break;
+  case SIGNAL_LOADING:
+    LedSet(BINARY_CODE_LED_YEL);
+    break;
+  case SIGNAL_ERROR:
+    LedSet(BINARY_CODE_LED_RED);
+    break;
+  default:
+    LedSet(0);
+    break;
+  }
+}
+
+void LedSetSignal(){
+  LedSet(0);
 }
 
 // Sets current LED Status from byte and alternate blink based on input durations
@@ -172,7 +190,7 @@ void StrategyRunLed() {
 }
 
 // Blink light with specific signal (Non-blocking)
-void StatusRunLed(byte signal) {
+void StatusRunLed(SIGNAL signal) {
   switch (mode) {
     case SIGNAL_OK:
       LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
@@ -192,13 +210,25 @@ void StatusRunLed(byte signal) {
 }
 
 // Blink light with specific signal (Non-blocking)
-void StatusHaltLed(byte signal) {
+void StatusHaltLed(SIGNAL signal) {
   switch (mode) {
     case SIGNAL_OK:
-      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_SHORT);
+      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_NORMAL);
+      break;
+    case SIGNAL_OK_SHORT:
+      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT);
+      break;
+    case SIGNAL_OK_SHORT_HALT:
+      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
       break;
     case SIGNAL_ERROR:
       LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_NORMAL);
+      break;
+    case SIGNAL_ERROR_SHORT:
+      LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_SHORT);
+      break;
+    case SIGNAL_ERROR_SHORT_HALT:
+      LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
       break;
     case SIGNAL_IDLE:
       LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT);
@@ -211,8 +241,6 @@ void StatusHaltLed(byte signal) {
       break;
   }
 }
-
-
 
 void StrategyFinishLed(int strategy) {
 }

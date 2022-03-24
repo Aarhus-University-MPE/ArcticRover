@@ -203,10 +203,12 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define GNSS_QUERY_UPDATE_FREQUENCY     1000  // in milliseconds
 
-#define MAX_LAT_VALUE                   900000000   // deg * 10^-7
-#define MAX_LONG_VALUE                  1800000000  // deg * 10^-7
+#define NAVIGATION_CHECK_DT             3000
 
-#define MAX_ROUTE_LEN                   400
+#define MAX_LAT_VALUE                   900000000   // deg * 10^-7
+#define MAX_LON_VALUE                   1800000000  // deg * 10^-7
+
+#define MAX_ROUTE_LEN                   1
 
 #define MIN_ACCEL_TILT                  0.8f  // approx 35°
 
@@ -229,6 +231,13 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
+#define MOTOR_STARTUP_TIMEOUT           5000
+
+// CAN BUS
+#define CANBUS_TX_MOTOR_LEFT            0x12
+#define CANBUS_RX_MOTOR_LEFT            0x64
+#define CANBUS_TX_MOTOR_RIGHT           0x22
+#define CANBUS_RX_MOTOR_RIGHT           0x74
 
 // ------------------------------------------------------------ //
 //                           HEATING                            //
@@ -268,12 +277,6 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // SBUS
 #define SBUS_TIMEOUT                    2000
 
-// CAN BUS
-#define CANBUS_TX_MOTOR_LEFT            0x12
-#define CANBUS_RX_MOTOR_LEFT            0x64
-#define CANBUS_TX_MOTOR_RIGHT           0x22
-#define CANBUS_RX_MOTOR_RIGHT           0x74
-
 #define CANBUS_DATA_LENGTH              8
 
 #define CANBBUS_SPEED                   CAN_125KBPS
@@ -298,7 +301,10 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define MEMADDR_HOME_START              1
 #define MEMADDR_HOME_END                MEMADDR_HOME_START + 8
 
-#define MEMADDR_ROUTELEN_START          MEMADDR_HOME_END
+#define MEMADDR_ROUTEIDX_START          MEMADDR_HOME_END
+#define MEMADDR_ROUTEIDX_END            MEMADDR_ROUTEIDX_START + 2
+
+#define MEMADDR_ROUTELEN_START          MEMADDR_ROUTEIDX_END
 #define MEMADDR_ROUTELEN_END            MEMADDR_ROUTELEN_START + 2
 
 #define MEMADDR_ROUTE_START             MEMADDR_ROUTELEN_END

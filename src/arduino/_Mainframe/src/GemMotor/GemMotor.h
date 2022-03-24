@@ -194,6 +194,8 @@ class GemMotor {
 
   void MotorStatusUpdate();
 
+  void ErrorTimeout();
+
   void PrintControl(bool endline);
   void PrintInverterState(bool endline);
   void PrintWarning(bool endline);

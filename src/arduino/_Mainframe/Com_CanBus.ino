@@ -73,19 +73,16 @@ void CanBusPrint() {
   Serial.println(F("-------------------------------"));
 }
 
+// Process CANbus commands, returns false if MCP2515 throws error
 bool CanBusProcess() {
   if (millis() - CanBusTxLast < CANBUS_TX_PERIOD) {
-    return MotorStatus();
+    return true;
   }
-  int err;
-  bool status;
 
   if (motorLeft.GetCanTxStatus()) {
-    err = mcp2515.sendMessage(motorLeft.GetCanMsg());
-    status = (err == MCP2515::ERROR_OK);
+    if(mcp2515.sendMessage(motorLeft.GetCanMsg()) != MCP2515::ERROR_OK) return false;
   } else if (motorRight.GetCanTxStatus()) {
-    err = mcp2515.sendMessage(motorRight.GetCanMsg());
-    status = (err == MCP2515::ERROR_OK);
+    if(mcp2515.sendMessage(motorRight.GetCanMsg()) != MCP2515::ERROR_OK) return false;
   }
 
   if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
@@ -96,7 +93,7 @@ bool CanBusProcess() {
       ParseData();
     }
   }
-  return MotorStatus();
+  return true;
 }
 
 bool CanBusStatus() {

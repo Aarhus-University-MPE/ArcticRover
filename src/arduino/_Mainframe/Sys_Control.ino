@@ -6,8 +6,8 @@
   2021
 */
 
-void SystemEnable(int module) {
-  if (GetStatus(module)) return;
+bool SystemEnable(int module) {
+  if (GetStatus(module)) return true;
   DEBUG_PRINT(F("SYS Enable: "));
   DEBUG_PRINT(ModuleToString(module));
 
@@ -90,6 +90,7 @@ void SystemEnable(int module) {
   }
   SetStatus(module, status);
   delay(5);
+  return status;
 }
 
 // Enables Primary Systems
@@ -101,26 +102,40 @@ void SystemEnablePrimary() {
   SystemEnable(MODULE_IRIDIUM);
 }
 
+bool SystemSignalEnable(byte module) {
+  bool status = SystemEnable(module);
+  if (status) {
+    StatusHaltLed(SIGNAL_OK_SHORT_HALT);
+  } else {
+    StatusHaltLed(SIGNAL_ERROR_SHORT_HALT);
+  }
+  return status;
+}
+
 // Enable systems for current mode
-void SystemEnableMode() {
+bool SystemEnableMode() {
+  bool status = true;
   switch (mode) {
     case MODE_REMOTECONTROL:
-      SystemEnable(MODULE_PWR_12V);  // Temporary due to 12V DCDC replacement
-      SystemEnable(MODULE_PWR_MOTOR);
-      SystemEnable(MODULE_MOTORS);
-      SystemEnable(MODULE_RF);
-      SystemEnable(MODULE_CANBUS);
+      if (!SystemSignalEnable(MODULE_PWR_12V)) status = false;  // TODO: Remove Temporary due to 12V DCDC replacement
+      if (!SystemSignalEnable(MODULE_CANBUS)) status = false;
+      if (!SystemSignalEnable(MODULE_PWR_MOTOR)) status = false;
+      if (!SystemSignalEnable(MODULE_MOTORS)) status = false;
+      if (!SystemSignalEnable(MODULE_RF)) status = false;
       break;
     case MODE_AUTONOMOUS:
-      SystemEnable(MODULE_PWR_12V);  // Temporary due to 12V DCDC replacement
-      SystemEnable(MODULE_PWR_MOTOR);
-      SystemEnable(MODULE_MOTORS);
-      SystemEnable(MODULE_CANBUS);
-      SystemEnable(MODULE_ACCEL);
+      if (!SystemSignalEnable(MODULE_PWR_12V)) status = false;  // TODO: Remove Temporary due to 12V DCDC replacement
+      if (!SystemSignalEnable(MODULE_CANBUS)) status = false;
+      if (!SystemSignalEnable(MODULE_PWR_MOTOR)) status = false;
+      if (!SystemSignalEnable(MODULE_MOTORS)) status = false;
+      if (!SystemSignalEnable(MODULE_ACCEL)) status = false;
+      if (!SystemSignalEnable(MODULE_RF)) status = false;
       break;
     default:
+      status = false;
       break;
   }
+  return status;
 }
 
 void SystemDisable(int module) {

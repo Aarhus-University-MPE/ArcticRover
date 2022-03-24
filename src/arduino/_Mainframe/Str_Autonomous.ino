@@ -25,8 +25,13 @@ void StartStrategyAutonomous() {
 // Main sequence of strategy
 void RunStrategyAutonomous() {
   // Run autonomous navigation precheck
+  if (!SystemEnableMode()){
+    StatusHaltLed(SIGNAL_ERROR);
+    delay(500);
+    return;
+  }
+
   if (!NavigationPreCheck()) {
-    StatusRunLed(SIGNAL_LOADING);
     return;
   }
 
@@ -39,7 +44,6 @@ void RunStrategyAutonomous() {
   // Select button pressed, start navigation
   if (autonomyStart) {
     autonomyStart = false;
-    SystemEnableMode();
     if (!NavigationStart()) {
       SystemDisable(MODULE_MOTORS);
       StatusHaltLed(SIGNAL_ERROR);

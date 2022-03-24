@@ -37,9 +37,9 @@
 
 // Power control (Relays)
 #define PO_POWER_MOTOR       36   // Relay to motor battery power
-#define PO_POWER_5V          38   // External 5V power 
+#define PO_POWER_24V         38   // External 24V power 
 #define PO_POWER_12V         40   // External 12V power 
-#define PO_POWER_24V         42   // External 24V power 
+#define PO_POWER_5V          42   // External 5V power 
 #define PO_POWER_RF          44
 #define PO_POWER_IRIDIUM     46
 #define PO_POWER_HEATING     48

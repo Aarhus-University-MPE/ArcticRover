@@ -1,9 +1,10 @@
 // Function Prototypes
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <SD.h>
+
 #include "src/GemMotor/GemMotor.h"
 
 void (*systemReset)(void) = 0;
@@ -88,21 +89,20 @@ bool SystemStatus[MODULE_COUNT];
 bool HeartBeatStatus();
 bool BlackBoxStatus();
 
-
 void EstopButtonInterruptHandler();
 void ModeButtonInterruptHandler();
 
 void InitBluetooth(unsigned long baudRate = 115200);
 
-//current and previous mode (strategy)
-unsigned long lastMillisSelect = 0;
-unsigned long lastMillisMode = 0;
-unsigned long lastMillisEstop = 0;
-unsigned long lastMillistModeBlink = 0;
-unsigned long lastSystemReboot = 9999999;
+// current and previous mode (strategy)
+unsigned long lastMillisSelect      = 0;
+unsigned long lastMillisMode        = 0;
+unsigned long lastMillisEstop       = 0;
+unsigned long lastMillistModeBlink  = 0;
+unsigned long lastSystemReboot      = 9999999;
 unsigned long lastMillistHeatingOff = 0;
-unsigned long lastMillistHeatingOn = 0;
-unsigned long lastSystemCheck = 9999999;
+unsigned long lastMillistHeatingOn  = 0;
+unsigned long lastSystemCheck       = 9999999;
 
 int systemTestState = 0;
 byte mode;
@@ -125,7 +125,7 @@ void SetStatus(bool status) {
   for (int i = 0; i < MODULE_COUNT; i++) {
     SystemStatus[i] = status;
   }
-  SystemStatus[MODULE_ESTOP] = true;
+  SystemStatus[MODULE_ESTOP]    = true;
   SystemStatus[MODULE_RESERVED] = true;
 }
 
@@ -134,11 +134,8 @@ void GetStatus(bool printRes);
 
 bool AccelTest(bool printRes);
 
-
-GemMotor motorLeft = GemMotor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);
+GemMotor motorLeft  = GemMotor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);
 GemMotor motorRight = GemMotor(CANBUS_TX_MOTOR_RIGHT, CANBUS_RX_MOTOR_RIGHT);
-
-
 
 void BlackBoxAppendln();
 void BlackBoxAppend(String blackBoxInput);
@@ -158,3 +155,14 @@ void BlackBoxAppendln(long int blackBoxInput);
 
 void BlackBoxAppend(unsigned long blackBoxInput);
 void BlackBoxAppendln(unsigned long blackBoxInput);
+
+enum SIGNAL {
+  SIGNAL_OK = 0,
+  SIGNAL_OK_SHORT,
+  SIGNAL_OK_SHORT_HALT,
+  SIGNAL_ERROR,
+  SIGNAL_ERROR_SHORT,
+  SIGNAL_ERROR_SHORT_HALT,
+  SIGNAL_IDLE,
+  SIGNAL_LOADING
+};

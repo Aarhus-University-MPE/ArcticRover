@@ -200,6 +200,13 @@ void GemMotor::MotorStatusUpdate() {
     return;
   }
 
+  // GemMotor::ErrorTimeout();
+  
+  GemMotor::motorStatus = false;
+}
+
+// Timeout error model -
+void GemMotor::ErrorTimeout() {
   // Check if error previously not reported - Set timestamp for first error
   if (!GemMotor::motorError) {
     GemMotor::motorError       = true;

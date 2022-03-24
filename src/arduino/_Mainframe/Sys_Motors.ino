@@ -15,11 +15,7 @@ bool InitializeMotors() {
 
   digitalWrite(PO_MOTOR_EN, true);
 
-  motorLeft.ResetMotorStatus();
-  motorRight.ResetMotorStatus();
-
-  SetStatus(MODULE_MOTOR_L, true);
-  SetStatus(MODULE_MOTOR_R, true);
+  if (!MotorCycle()) return false;
 
   return MotorStatus();
 }
@@ -63,11 +59,11 @@ void TorqueCalculation(float dir, float speed, float &torqueLeft, float &torqueR
 
   // turn right, right wheel moves slower
   if (dir > 0) {
-    steerFactorRight = steerFactor(dir);
+    steerFactorRight = SteerFactor(dir);
   }
   // turn left, left wheel moves slower
   else if (dir < 0) {
-    steerFactorLeft = steerFactor(dir);
+    steerFactorLeft = SteerFactor(dir);
   }
 
   torqueLeft  = speed * steerFactorLeft;
@@ -84,11 +80,11 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
 
   // turn right, right wheel moves slower
   if (dir > 0) {
-    steerFactorRight = steerFactor(dir);
+    steerFactorRight = SteerFactor(dir);
   }
   // turn left, left wheel moves slower
   else if (dir < 0) {
-    steerFactorLeft = steerFactor(dir);
+    steerFactorLeft = SteerFactor(dir);
   }
 
   float speedLeft  = speed * steerFactorLeft;
@@ -110,6 +106,26 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
   if (abs(velocityRight) < MIN_VELOCITY) velocityRight = 0;
 }
 
+// Run CAN cycle until both motors report NO ERROR or times out
+bool MotorCycle() {
+  if (!GetStatus(MODULE_CANBUS)) {
+    return false;
+  }
+  if (!GetStatus(MODULE_PWR_MOTOR)) {
+    return false;
+  }
+
+  MotorUpdate(0, 0);
+  long millisMotorStart = millis();
+
+  // Run canbus for a while to get motor states and test data conection
+  while ((!MotorStatus()) && (millis() - millisMotorStart < MOTOR_STARTUP_TIMEOUT)) {
+    if (!CanBusProcess()) return false;
+  }
+
+  return MotorStatus();
+}
+
 // Returns true if both motors are operational
 bool MotorState() {
   return motorLeft.GetState() || motorRight.GetState();
@@ -119,7 +135,6 @@ bool MotorState() {
 bool MotorStatus() {
   bool status = (MotorStatusLeft() && MotorStatusRight());
 
-  // status = true;
   return status;
 }
 
@@ -134,7 +149,7 @@ bool MotorStatusRight() {
 }
 
 // Calculates steering factor from 2nd order function (-2x^2 + 1), used in skid steering
-float steerFactor(float dir) {
+float SteerFactor(float dir) {
   float scale;
 
   if (dir >= 1.0f)
