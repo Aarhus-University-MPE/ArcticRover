@@ -30,44 +30,56 @@
 
 bool navigationPreCheck = false;
 long millisLastNavCheck;
+float maxSpeedScale;
 
 bool Navigate() {
-  if (!NavigationPreCheck()) {
+  if (millis() - millisLastNavCheck < NAVIGATION_CYCLE_DT) {
     return false;
   }
+
+  millisLastNavCheck = millis();
+
   if (!NavigationRunCheck()) {
+    MotorUpdate(0, 0);
     return false;
   }
 
-  // Calculate distance from current pos to target pos
+  PathingProcess();
 
-  // Check distance -> increment if < min accept
-
-  // Calculate bearing to target
-
-  // -> Run motor
+  NavigationMotorUpdate();
 }
 
-bool NavigationStart() {
-  if (!NavigationPreCheck()) {
-    return false;
-  }
+// Autonomous Motor Controller, updates motor targets based on 
+void NavigationMotorUpdate(){
+  AutonomousTopSpeedUpdate();
+
+  MotorUpdate(BearingDirection(), MAX_AUTONOMOUS_SPEED * maxSpeedScale);
+}
+
+// Increases top speed based on time since autonomy start to avoid high speed start up
+void AutonomousTopSpeedUpdate(){
+  float timeScaledSpeed = millisAutonomyStart * AUTONOMY_SPEED_SCALE;
+  maxSpeedScale = min(1.0f,  timeScaledSpeed);
 }
 
 void NavigationPreCheckReset() {
   navigationPreCheck = false;
   ResetRouteStatus();
 
-  millisLastNavCheck = millis() - NAVIGATION_CHECK_DT;
+  millisLastNavCheck = millis() - NAVIGATION_CYCLE_DT;
+}
+
+// Resets current waypoint index and restarts route
+void ResetNavigation() {
+  waypointIndex = 0;
+  UpdateWaypoint();
 }
 
 //  Checks to run before starting autonomous navigation
 bool NavigationPreCheck() {
-  if (navigationPreCheck) {
-    return true;
-  }
+  if (navigationPreCheck) return true;
 
-  if (millis() - millisLastNavCheck < NAVIGATION_CHECK_DT) {
+  if (millis() - millisLastNavCheck < NAVIGATION_CYCLE_DT) {
     return navigationPreCheck;
   }
 
@@ -88,7 +100,7 @@ bool NavigationPreCheck() {
   return navigationPreCheck;
 }
 
-// Sets navigationPreCheck flag to false and signals 
+// Sets navigationPreCheck flag to false and signals
 void PreCheckStatus(bool status) {
   if (!status) {
     navigationPreCheck = false;

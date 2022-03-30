@@ -10,31 +10,33 @@
 
 #include "mcp2515.h"
 
-#define DIAGNOSTICS          false
+#define DIAGNOSTICS              false
 
-#define MIN_VELOCITY         1.0f   // kmh
-#define MOTOR_MAX_SPEED_FWD  10.0f  // kmh
-#define MOTOR_MAX_SPEED_BWD  5.0f   // kmh
+#define MIN_VELOCITY             1.0f   // kmh
+#define MOTOR_MAX_SPEED_FWD      10.0f  // kmh
+#define MOTOR_MAX_SPEED_BWD      5.0f   // kmh
 
-#define MIN_TORQUE            0.1f   // %
-#define MOTOR_MAX_TORQUE_FWD  1.0f   // %
-#define MOTOR_MAX_TORQUE_BWD  0.5f   // %
+#define MIN_TORQUE               0.1f  // %
+#define MOTOR_MAX_TORQUE_FWD     1.0f  // %
+#define MOTOR_MAX_TORQUE_BWD     0.5f  // %
 
-#define MAX_RPM              200
-#define MAX_TORQUE           60
+#define MAX_RPM                  200
+#define MAX_TORQUE               60  // Nm
 
-#define RPM_VEL              1000.0f / 60.0f
-#define WHEEL_CIRCUMFERENCE  1.570f
-#define RPM_VEL_FACTOR       RPM_VEL / WHEEL_CIRCUMFERENCE
-#define RPM_CONTROL_SCALE    10
-#define MAX_CONTROL_VALUE    MAX_RPM* RPM_CONTROL_SCALE
+#define RPM_VEL                  1000.0f / 60.0f                // Conversion from km/h to rpm
+#define WHEEL_CIRCUMFERENCE      1.570f                         // m
+#define VEL_RPM_SCALE            RPM_VEL / WHEEL_CIRCUMFERENCE  // Scale from linear velocity (kmh) to RPM
+#define RPM_CONTROL_SCALE        10
+#define MAX_CONTROL_VALUE        MAX_RPM* RPM_CONTROL_SCALE
 
-#define TORQUE_CONTROL       100.0f / 1.0f
+#define TORQUE_CONTROL_SCALE     100.0f / 1.0f  // Conversion from torque to control
 #define MAX_CONTROL_VALUE_TORQUE 100
 
-#define CAN_TIMEOUT_DURATION 50
-#define CANBUS_TX_PERIOD     10
-#define MOTOR_ERROR_TIMEOUT  5000
+#define CAN_TIMEOUT_DURATION     50
+#define CANBUS_TX_PERIOD         10
+#define MOTOR_ERROR_TIMEOUT      5000  // Time before
+
+#define MAX_INPUT_STEP           0.1f  // maximum increase from current state
 
 class GemMotor {
   enum CONTROL_MODE {

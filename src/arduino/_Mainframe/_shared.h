@@ -1,3 +1,5 @@
+#pragma once
+
 // Function Prototypes
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -103,11 +105,18 @@ unsigned long lastSystemReboot      = 9999999;
 unsigned long lastMillistHeatingOff = 0;
 unsigned long lastMillistHeatingOn  = 0;
 unsigned long lastSystemCheck       = 9999999;
+unsigned long millisAutonomyStart   = 0;
 
 int systemTestState = 0;
 byte mode;
 byte modeCycle;
 byte prevMode;
+
+// Navigation
+long latCurrent   = 0;
+long lonCurrent   = 0;
+
+int waypointIndex   = 0;
 
 boolean isModeUpdated = false;
 
@@ -155,6 +164,8 @@ void BlackBoxAppendln(long int blackBoxInput);
 
 void BlackBoxAppend(unsigned long blackBoxInput);
 void BlackBoxAppendln(unsigned long blackBoxInput);
+
+double CoordLong2Double(long longValue);
 
 enum SIGNAL {
   SIGNAL_OK = 0,

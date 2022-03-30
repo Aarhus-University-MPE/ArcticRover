@@ -31,14 +31,14 @@ void initializeDebugComm() {
 
 // Receive Commands
 void recvWithStartEndMarkers() {
-  if(Serial.available() <= 0){
+  if (Serial.available() <= 0) {
     return;
   }
-  
+
   static boolean recvInProgress = false;
-  static byte ndx = 0;
-  char startMarker = '<';
-  char endMarker = '>';
+  static byte ndx               = 0;
+  char startMarker              = '<';
+  char endMarker                = '>';
   char rc;
 
   while (Serial.available() > 0) {
@@ -53,8 +53,8 @@ void recvWithStartEndMarkers() {
         }
       } else {
         receivedCMD[ndx] = '\0';  // terminate the string
-        recvInProgress = false;
-        ndx = 0;
+        recvInProgress   = false;
+        ndx              = 0;
         parseCommand();
       }
     }
@@ -109,7 +109,7 @@ void parseCommand() {
 }
 
 void parseCommandFiles() {
-  char *fileNamePtr = receivedCMD + 2;
+  char *fileNamePtr       = receivedCMD + 2;
   char fileName[numChars] = {0};
   strcpy(fileName, fileNamePtr);
 
@@ -189,7 +189,7 @@ void parseCommandBackup() {
 }
 
 void parseCommandModule() {
-  char *modulePtr = receivedCMD + 2;
+  char *modulePtr           = receivedCMD + 2;
   char moduleChar[numChars] = {0};
   strcpy(moduleChar, modulePtr);
 
@@ -258,7 +258,7 @@ void parseCommandModule() {
       DEBUG_PRINTLN(F("Manual System Test Stop"));
       SystemDisable(moduleSlct);
       DEBUG_PRINTLINE();
-      activeCommand = false;
+      activeCommand   = false;
       systemTestState = -1;
       break;
     case '\0':
@@ -274,34 +274,34 @@ void parseCommandRoute() {
   char *strtokIndx;
   strcpy(tempChars, receivedCMD);
 
-  long latInt;
-  long lonInt;
+  long latLong;
+  long lonLong;
 
   strtokIndx = strtok(tempChars, ",");
   strtokIndx = strtok(NULL, ",");
-  latInt = atol(strtokIndx);
+  latLong     = atol(strtokIndx);
   strtokIndx = strtok(NULL, ",");
-  lonInt = atol(strtokIndx);
+  lonLong     = atol(strtokIndx);
 
   switch (receivedCMD[1]) {
     case CMD_ROUTE_SET:
       // write coordinate
       DEBUG_PRINT(F("Lat: "));
-      DEBUG_PRINT(latInt);
+      DEBUG_PRINT(latLong);
       DEBUG_PRINT(F(" Lon: "));
-      DEBUG_PRINTLN(lonInt);
+      DEBUG_PRINTLN(lonLong);
 
-      EEPROM_WRITE_LAT((long)(receivedCMD[2] - '0'), latInt);
-      EEPROM_WRITE_LON((long)(receivedCMD[2] - '0'), lonInt);
+      EEPROM_WRITE_LAT((long)(receivedCMD[2] - '0'), latLong);
+      EEPROM_WRITE_LON((long)(receivedCMD[2] - '0'), lonLong);
       break;
     case CMD_ROUTE_PRINT:
-      EEPROM_READ_LAT((long)(receivedCMD[2] - '0'), latInt);
-      EEPROM_READ_LON((long)(receivedCMD[2] - '0'), lonInt);
+      EEPROM_READ_LAT((long)(receivedCMD[2] - '0'), latLong);
+      EEPROM_READ_LON((long)(receivedCMD[2] - '0'), lonLong);
 
       DEBUG_PRINT(F("Lat: "));
-      DEBUG_PRINT(latInt);
+      DEBUG_PRINT(latLong);
       DEBUG_PRINT(F(" Lon: "));
-      DEBUG_PRINTLN(lonInt);
+      DEBUG_PRINTLN(lonLong);
       break;
     default:
       break;

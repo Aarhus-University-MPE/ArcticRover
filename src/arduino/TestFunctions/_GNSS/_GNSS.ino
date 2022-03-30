@@ -1,5 +1,5 @@
 /*
-  GeoRover GNSS functionalities, utilizing the ZED-F9P
+  GeoRover GNSS test, utilizing the ZED-F9P
   (SparkFun GPS-RTK-SMA Breakout https://www.sparkfun.com/products/16481)
 
   Primary library used:
@@ -7,7 +7,7 @@
 
   Mads Rosenhøj Jeppesen
   Aarhus University
-  2021
+  2022
 */
 
 #include <SparkFun_u-blox_GNSS_Arduino_Library.h>
@@ -19,6 +19,72 @@ long lastTimeGNSS = 0;  // Local timer, limits I2C traffic to u-blox module.
 int gnssTestState        = 0;
 long millisGnssTestStart = 0;
 long millisLastGnssPrint = 0;
+
+const long lat1 = 561593900;
+const long lon1 = 102160500;
+
+const long lat2 = 561588200;
+const long lon2 = 102172900;
+long latCurrent;
+long lonCurrent;
+bool activeGnss = false;
+
+double scale = 1.0d / 10000000.0d;
+
+#define GNSS_QUERY_UPDATE_FREQUENCY 1000
+
+void setup() {
+  Serial.begin(115200);
+
+  Serial.print(F("Starting GNSS... "));
+
+  while (!InitializeGnss()) {
+  }
+  Serial.println(F("Initialized"));
+}
+
+void loop() {
+  if (Serial.available()) {
+    char rc = Serial.read();
+    if(rc == 'S') activeGnss = false;
+    if(rc == 'Q') activeGnss = true;
+  }
+  if(activeGnss){
+    if (!GnssSignal()) {
+      Serial.print(F("Signal Error - Time Valid: "));
+      Serial.print(gnss.getTimeValid());
+      Serial.print(F("\tDate Valid: "));
+      Serial.print(gnss.getDateValid());
+      Serial.print(F("\tGnssFixOk: "));
+      Serial.println(gnss.getGnssFixOk());
+      delay(2000);
+      return;
+    }
+    GnssUpdate();
+    Serial.print(F("Current pos - lat: "));
+    Serial.print(latCurrent);
+    Serial.print(F("\tlong: "));
+    Serial.print(lonCurrent);
+    Serial.print(F("\tHeading: "));
+    Serial.print(GnssGetHeading());
+    Serial.print(F("\tSignal Strength: "));
+    Serial.print(GnssSignal());
+    Serial.print(F("\t3D Positional Accuracy: "));
+    Serial.print(gnss.getPositionAccuracy());
+    Serial.println(F(" (mm)"));
+    GnssTime(true);
+
+    Serial.print(F("Distance to target: "));
+    Serial.print(DistanceBetweenLong(latCurrent, lonCurrent, lat2, lon2));
+    Serial.print(F("\tBearing to target: "));
+    Serial.print(CourseToLong(latCurrent, lonCurrent, lat2, lon2));
+    delay(2000);
+  }
+}
+
+double CoordLong2Double(long longValue) {
+  return ((double)longValue) * scale;
+}
 
 bool InitializeGnss() {
   Wire.begin();
@@ -35,66 +101,36 @@ bool GnssStatus() {
 }
 
 // Updates current position and Gnss status
-bool GnssUpdate(){
+bool GnssUpdate() {
   latCurrent = GnssGetLat();
   lonCurrent = GnssGetLong();
 }
 
-bool GnssTest() {
-  bool testDone = false;
-  switch (gnssTestState) {
-    case 0:
-      DEBUG_PRINT(F("GNSS feed starting for: "));
-      DEBUG_PRINT(SYS_TEST_DURATION);
-      DEBUG_PRINTLN(F(" ms"));
-      millisGnssTestStart = millis();
-      gnssTestState++;
-      break;
-    case 1:
-      if (millis() - millisLastGnssPrint > SYS_PRINT_PERIOD_LONG) {
-        millisLastGnssPrint = millis();
-        QueryGnss();
-      }
-
-      if (millis() - millisGnssTestStart > SYS_TEST_DURATION) gnssTestState++;
-      break;
-    case 2:
-      SetStatus(MODULE_GNSS, GnssTime(true));
-      gnssTestState = 0;
-      testDone      = true;
-      DEBUG_PRINTLINE();
-    default:
-      break;
-  }
-
-  return testDone;
-}
-
 bool GnssTime(bool print) {
   bool status;
-  if (print) DEBUG_PRINT(F("Time and Date is: "));
+  if (print) Serial.print(F("Time and Date is: "));
   if (!gnss.getTimeValid() || !gnss.getDateValid()) {
-    if (print) DEBUG_PRINTLN(F("not valid"));
+    if (print) Serial.println(F("not valid"));
     status = false;
   } else {
     if (print) {
-      DEBUG_PRINTLN(F("valid"));
+      Serial.println(F("valid"));
       int year   = gnss.getYear();
       int month  = gnss.getMonth();
       int day    = gnss.getDay();
       int hour   = gnss.getHour();
       int minute = gnss.getMinute();
 
-      DEBUG_PRINT(F("Current time: "));
-      DEBUG_PRINT(year);
-      DEBUG_PRINT(F("-"));
-      DEBUG_PRINT(month);
-      DEBUG_PRINT(F("-"));
-      DEBUG_PRINT(day);
-      DEBUG_PRINT(F("-"));
-      DEBUG_PRINT(hour);
-      DEBUG_PRINT(F(":"));
-      DEBUG_PRINTLN(minute);
+      Serial.print(F("Current time: "));
+      Serial.print(year);
+      Serial.print(F("-"));
+      Serial.print(month);
+      Serial.print(F("-"));
+      Serial.print(day);
+      Serial.print(F("-"));
+      Serial.print(hour);
+      Serial.print(F(":"));
+      Serial.println(minute);
     }
     status = true;
   }
@@ -117,44 +153,44 @@ long GnssGetLong() {
 }
 
 // Returns heading in degrees * 10^-5
-long GnssGetHeading(){
+long GnssGetHeading() {
   return gnss.getHeading();
 }
 
 // Query module and prints Lat, Long, Alt, Acc
 void QueryGnss() {
-  DEBUG_PRINT(F("GNSS: "));
+  Serial.print(F("GNSS: "));
 
   if (GnssStatus()) {
     long latitude = gnss.getLatitude();
-    DEBUG_PRINT(F("Lat: "));
-    DEBUG_PRINT(latitude);
-    DEBUG_PRINT(F(" (deg * 10^-7)"));
+    Serial.print(F("Lat: "));
+    Serial.print(latitude);
+    Serial.print(F(" (deg * 10^-7)"));
 
     long longitude = gnss.getLongitude();
-    DEBUG_PRINT(F("\tLong: "));
-    DEBUG_PRINT(longitude);
-    DEBUG_PRINT(F(" (deg * 10^-7)"));
+    Serial.print(F("\tLong: "));
+    Serial.print(longitude);
+    Serial.print(F(" (deg * 10^-7)"));
 
     long altitude = gnss.getAltitude();
-    DEBUG_PRINT(F("\tAlt: "));
-    DEBUG_PRINT(altitude);
-    DEBUG_PRINT(F(" (mm)"));
+    Serial.print(F("\tAlt: "));
+    Serial.print(altitude);
+    Serial.print(F(" (mm)"));
 
     long accuracy = gnss.getPositionAccuracy();
-    DEBUG_PRINT(F("\t3D Positional Accuracy: "));
-    DEBUG_PRINT(accuracy);
-    DEBUG_PRINTLN(F(" (mm)"));
+    Serial.print(F("\t3D Positional Accuracy: "));
+    Serial.print(accuracy);
+    Serial.println(F(" (mm)"));
   } else {
-    DEBUG_PRINTLN("ERROR");
+    Serial.println("ERROR");
   }
 }
 
 // Returns current signal status
-bool GnssSignal(){
-  if(!GetStatus(MODULE_GNSS)){
-    return false;
-  }
+bool GnssSignal() {
+  // if(!GetStatus(MODULE_GNSS)){
+  // return false;
+  // }
 
   return (gnss.getTimeValid() && gnss.getDateValid() && gnss.getGnssFixOk());
 }
@@ -202,11 +238,11 @@ double CourseTo(double lat1, double long1, double lat2, double long2) {
 }
 
 // Returns Distance between two sets of coordinates
-double DistanceBetweenLong(long lat1, long long1, long lat2, long long2){
-  return DistanceBetween(CoordLong2Double(lat1),CoordLong2Double(long1),CoordLong2Double(lat2),CoordLong2Double(long2));
+double DistanceBetweenLong(long lat1, long long1, long lat2, long long2) {
+  return DistanceBetween(CoordLong2Double(lat1), CoordLong2Double(long1), CoordLong2Double(lat2), CoordLong2Double(long2));
 }
 
 // Returns Distance between two sets of coordinates
-double CourseToLong(long lat1, long long1, long lat2, long long2){
-  return CourseTo(CoordLong2Double(lat1),CoordLong2Double(long1),CoordLong2Double(lat2),CoordLong2Double(long2));
+double CourseToLong(long lat1, long long1, long lat2, long long2) {
+  return CourseTo(CoordLong2Double(lat1), CoordLong2Double(long1), CoordLong2Double(lat2), CoordLong2Double(long2));
 }

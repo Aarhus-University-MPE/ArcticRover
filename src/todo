@@ -1,0 +1,49 @@
+# Overall TODO: list 
+
+- Navigation
+    - Pre-check
+        - Route File (SD) @done
+        - Route Format @done
+        - Route Ranges @done
+        - Alternative in case Route pre-check fails
+    - Handle power down/reboot (continue where left off) if autonomous
+    - Handle distance to current waypoint > maximum length (in case waypoint gets corrupted)
+        - Cycle alternative targets until sufficient
+    - Return to Home location
+    - Direction updates based on (linear?) regression of previous X points @done
+    - Waypoints reached @done
+
+    - Update route
+        - from Iridium
+            - Stream full route
+            - Acknowledge Confirm
+        - from SD @done
+        - from USB @done
+
+    - Handle 360° to 0° transition, steering @done
+        - Take smallest angle difference @done
+
+- GNSS
+    - Coordinate Bearing + Distance (Long to Radians) @done
+    - Test Pathing
+    - Test bearing output
+
+- Status LED
+    - Test durations
+    - Test run-time LED (non-blocking)
+    - Remove 12V enable (temp dcdc)
+
+- Iridium
+    - Test Send
+    - Test Receive
+    - Create Message Constructor
+    - Create Message Parser
+    - Create Standardized Packages
+
+- Motors
+    - Test Error timeout
+    - Add input smoothing
+
+
+- General Software
+    - Rework folder structure (src/Communication/.., src/Sensor/.., src/Strategies/.., src/System/..)

@@ -11,18 +11,18 @@ int idxRoute;             //
 int lengthRoute;
 int indexRoute;
 
-bool routeStatus = false;
+bool routeStatus  = false;
 bool routeTestRun = false;
 
 char operatorName[numChars];
 
 // Target coordinate (read from EEPROM)
-long latTarget = 0;
-long lonTarget = 0;
+long latTarget      = 0;
+long lonTarget      = 0;
+float navigationDir = 0;
 
 // Current coordinate (From GNSS)
-long latCurrent = 0;
-long lonCurrent = 0;
+long headingError = 0;  // deg * 10^-5
 
 // returns true if waypoint file exists
 bool SDRoute() {
@@ -54,33 +54,32 @@ bool LoadRoute() {
   return true;
 }
 
-
 // Test full route, only run once (used in Navigation pre-check). To perform new test, run ResetRouteStatus()
 bool RouteTest() {
-  if (routeStatus || routeTestRun) {
-    return routeStatus;
-  }
+  if (routeTestRun) routeStatus;
 
-  routeTestRun = true; // Avoid several route tests being run
+  routeTestRun = true;  // Avoid several route tests being run
 
   DEBUG_PRINTLN(F("Running full route test"));
 
+  routeStatus = false;
   if (!LoadRoute()) {
-    return false;
+    return routeStatus;
   }
-  if (!RouteCheck()) {
-    return false;
+  if (!RouteSDValid()) {
+    return routeStatus;
   }
   if (!CompareEepromSdRoute()) {
     if (!FlashRouteEeprom()) {
-      return false;
+      return routeStatus;
     }
     if (!CompareEepromSdRoute()) {
-      return false;
+      return routeStatus;
     }
   }
 
   routeStatus = true;
+
   return routeStatus;
 }
 
@@ -127,8 +126,7 @@ bool CompareEepromSdRoute() {
   return validity;
 }
 
-// Check if SD waypoint route is valid (format and range)
-bool RouteCheck() {
+bool RouteSDValid(){
   if (!SDRoute) {
     return false;
   }
@@ -166,6 +164,79 @@ bool RouteCheck() {
   }
 
   return true;
+}
+// Check if route is valid (SD and EEPROM)
+bool RouteCheck() {
+  return RouteSDValid() && CompareEepromSdRoute();
+}
+
+bool PathingProcess() {
+  GnssUpdate();
+
+  // Calculate distance from current pos to target pos
+  WaypointUpdate();
+
+  // Calculate bearing to target
+  BearingUpdate();
+}
+
+// Updates waypoint based on distance to target
+void WaypointUpdate() {
+  if (WaypointWithinRange) {
+    IncrementWaypoint();
+  }
+}
+
+// Updates bearing offset based on target and current bearing
+void BearingUpdate() {
+  long heading       = GnssGetHeading();  // deg * 10^-5
+  long targetHeading = (long)(CourseToLong(latCurrent, lonCurrent, latTarget, lonTarget)) * 100000;
+
+  headingError = targetHeading - heading;
+
+  // Check headingError > 180 degree to take smallest rotation (190 degrees to avoid rotation overlap)
+  if(headingError > 190){
+    headingError -= 360;
+  } else if (headingError < -190){
+    headingError += 360;
+  }
+
+  if (abs(headingError) < MAX_VALID_BEARING) {
+    navigationDir = 0;
+  } else if (headingError > MAX_VALID_BEARING) {
+    navigationDir = MAX_AUTONOMOUS_TURN;
+  } else {
+    navigationDir = -MAX_AUTONOMOUS_TURN;
+  }
+
+}
+
+// Returns latest navigation direction
+float BearingDirection() {
+  return navigationDir;
+}
+
+// Checks if distance from current position to target is < min
+bool WaypointWithinRange() {
+  long distance = DistanceBetweenLong(latCurrent, lonCurrent, latTarget, lonTarget);
+  return distance < MAX_DISTANCE_WAYPOINT_ACCEPT;
+}
+
+// Increments current waypoint returns to 0 if > total number of points
+void IncrementWaypoint() {
+  if (waypointIndex == lengthRoute) {
+    waypointIndex = 0;
+  } else {
+    waypointIndex++;
+  }
+
+  UpdateWaypoint();
+}
+
+// Reads EEPROM waypoint lat, lon from current waypointIndex
+void UpdateWaypoint() {
+  EEPROMReadLatLon(waypointIndex);
+  EEPROM_WRITE_INDEX(waypointIndex);
 }
 
 // Reads latitude and longitude at given index
@@ -331,7 +402,7 @@ void ParseWaypoint(String waypoint, int index) {
 
 // Reset route status flag
 void ResetRouteStatus() {
-  routeStatus = false;
+  routeStatus  = false;
   routeTestRun = false;
 }
 
@@ -339,6 +410,12 @@ void ResetRouteStatus() {
 void EEPROMWriteLatLon(int index) {
   EEPROM_WRITE_LAT(index, latRoute);
   EEPROM_WRITE_LON(index, lonRoute);
+}
+
+// Populate buffer latitude longitude from EEPROM
+void EEPROMReadLatLon(int index) {
+  EEPROM_READ_LAT(index, latRoute);
+  EEPROM_READ_LON(index, lonRoute);
 }
 
 // Checks validity of coordinate format (-90 <= lat <= 90 && -180 <= lon <= 180)
@@ -382,7 +459,7 @@ bool CoordinateValidityRange(long lat1, long lon1, long lat2, long lon2) {
   DEBUG_PRINT(F(" lon: "));
   DEBUG_PRINTLN(lon2);
 
-  long distance = CoordinateDistance(lat1, lon1, lat2, lon2);
+  long distance = DistanceBetweenLong(lat1, lon1, lat2, lon2);
 
   DEBUG_PRINT(F("Distance: "));
   DEBUG_PRINTLN(distance);

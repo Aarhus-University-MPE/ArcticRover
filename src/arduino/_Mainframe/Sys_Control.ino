@@ -115,25 +115,47 @@ bool SystemSignalEnable(byte module) {
 // Enable systems for current mode
 bool SystemEnableMode() {
   bool status = true;
+  bool enableStatus[10];
   switch (mode) {
     case MODE_REMOTECONTROL:
-      if (!SystemSignalEnable(MODULE_PWR_12V)) status = false;  // TODO: Remove Temporary due to 12V DCDC replacement
-      if (!SystemSignalEnable(MODULE_CANBUS)) status = false;
-      if (!SystemSignalEnable(MODULE_PWR_MOTOR)) status = false;
-      if (!SystemSignalEnable(MODULE_MOTORS)) status = false;
-      if (!SystemSignalEnable(MODULE_RF)) status = false;
+      enableStatus[0] = SystemEnable(MODULE_PWR_12V);  // TODO: Remove, Temporary due to 12V DCDC replacement
+      enableStatus[1] = SystemEnable(MODULE_PWR);
+      enableStatus[2] = SystemEnable(MODULE_CANBUS);
+      enableStatus[3] = SystemEnable(MODULE_PWR_MOTOR);
+      enableStatus[4] = SystemEnable(MODULE_MOTORS);
+      enableStatus[5] = SystemEnable(MODULE_RF);
+
+      for (int i = 0; i < 6; i++) {
+        if (!SystemEnableStatus(enableStatus[i])) status = false;
+      }
+
       break;
     case MODE_AUTONOMOUS:
-      if (!SystemSignalEnable(MODULE_PWR_12V)) status = false;  // TODO: Remove Temporary due to 12V DCDC replacement
-      if (!SystemSignalEnable(MODULE_CANBUS)) status = false;
-      if (!SystemSignalEnable(MODULE_PWR_MOTOR)) status = false;
-      if (!SystemSignalEnable(MODULE_MOTORS)) status = false;
-      if (!SystemSignalEnable(MODULE_ACCEL)) status = false;
-      if (!SystemSignalEnable(MODULE_RF)) status = false;
+      enableStatus[0] = SystemEnable(MODULE_PWR_12V);  // TODO: Remove, Temporary due to 12V DCDC replacement
+      enableStatus[1] = SystemEnable(MODULE_PWR);
+      enableStatus[2] = SystemEnable(MODULE_CANBUS);
+      enableStatus[3] = SystemEnable(MODULE_PWR_MOTOR);
+      enableStatus[4] = SystemEnable(MODULE_MOTORS);
+      enableStatus[5] = SystemEnable(MODULE_ACCEL);
+      enableStatus[6] = SystemEnable(MODULE_RF);
+
+      for (int i = 0; i < 7; i++) {
+        if (!SystemEnableStatus(enableStatus[i])) status = false;
+      }
       break;
     default:
       status = false;
       break;
+  }
+  return status;
+}
+
+// Sets navigationPreCheck flag to false and signals
+bool SystemEnableStatus(bool status) {
+  if (!status) {
+    StatusHaltLed(SIGNAL_ERROR_SHORT_HALT);
+  } else {
+    StatusHaltLed(SIGNAL_OK_SHORT_HALT);
   }
   return status;
 }

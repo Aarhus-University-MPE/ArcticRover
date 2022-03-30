@@ -112,7 +112,7 @@ void GemMotor::Update(float velocity) {
   // Clamp velocity to (max speed bwd < velocity < max speed fwd)
   velocity = max(-MOTOR_MAX_SPEED_BWD, min(MOTOR_MAX_SPEED_FWD, velocity));
 
-  GemMotor::rpmTarget    = abs(velocity) * RPM_VEL_FACTOR * RPM_CONTROL_SCALE;
+  GemMotor::rpmTarget    = abs(velocity) * VEL_RPM_SCALE * RPM_CONTROL_SCALE;
   GemMotor::controlValue = min(GemMotor::rpmTarget, MAX_CONTROL_VALUE) * dir;
 }
 
@@ -137,7 +137,7 @@ void GemMotor::UpdateTorque(float torque) {
   // Clamp torque to (max torque bwd < torque < max torque fwd)
   torque = max(-MOTOR_MAX_TORQUE_BWD, min(MOTOR_MAX_TORQUE_FWD, torque));
 
-  GemMotor::torqueTarget = abs(torque) * TORQUE_CONTROL;
+  GemMotor::torqueTarget = abs(torque) * TORQUE_CONTROL_SCALE;
 
   GemMotor::controlValue = min(GemMotor::torqueTarget, MAX_CONTROL_VALUE_TORQUE) * dir;
 }
@@ -205,7 +205,7 @@ void GemMotor::MotorStatusUpdate() {
   GemMotor::motorStatus = false;
 }
 
-// Timeout error model -
+// Timeout error model - Currently unused
 void GemMotor::ErrorTimeout() {
   // Check if error previously not reported - Set timestamp for first error
   if (!GemMotor::motorError) {

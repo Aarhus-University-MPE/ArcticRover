@@ -2,7 +2,7 @@
 
     Primary Strategy for Autonomous Navigation
 */
-bool autonomyActive, autonomyStart;
+
 
 // Start sequence of strategy
 void StartStrategyAutonomous() {
@@ -11,8 +11,9 @@ void StartStrategyAutonomous() {
 
   SystemDisable();
 
-  autonomyActive = false;
-  autonomyStart  = false;
+  // TODO: Will reset autonomy upon reboot
+  // - Add bool in EEPROM autonomous active, if true skip reset. Unset bool upon in FinishStrategyAutonomous
+  AutonomyReset(); 
 
   AttachSelectButton();
 
@@ -24,42 +25,11 @@ void StartStrategyAutonomous() {
 
 // Main sequence of strategy
 void RunStrategyAutonomous() {
-  // Run autonomous navigation precheck
-  if (!SystemEnableMode()){
-    StatusHaltLed(SIGNAL_ERROR);
-    delay(500);
-    return;
-  }
 
-  if (!NavigationPreCheck()) {
-    return;
-  }
+  AutonomousProcess();
 
-  // System ready to start, waiting idle
-  if (!autonomyActive) {
-    StatusRunLed(SIGNAL_IDLE);
-    return;
-  }
+  StrategyRunLed(); 
 
-  // Select button pressed, start navigation
-  if (autonomyStart) {
-    autonomyStart = false;
-    if (!NavigationStart()) {
-      SystemDisable(MODULE_MOTORS);
-      StatusHaltLed(SIGNAL_ERROR);
-      autonomyActive = false;
-      return;
-    }
-  }
-
-  // Autonomous navigation
-  if (!Navigate()) {
-    StatusHaltLed(SIGNAL_ERROR);
-    autonomyActive = false;
-    return;
-  }
-
-  StrategyRunLed();
 }
 
 // End sequence of strategy
@@ -69,6 +39,8 @@ void FinishStrategyAutonomous() {
 
   DetachSelectButton();
 
+  // TODO: Add unset autonomy bool in EEPROM once implemented
+  
   SystemDisable();
 
   DEBUG_PRINTLN(F("Strategy (Autonomous): Finished."));
@@ -79,8 +51,6 @@ void FinishStrategyAutonomous() {
 void SelectFunctionAutonomous() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
-    autonomyActive   = !autonomyActive;
-    autonomyStart    = true;
-    NavigationPreCheckReset();
+    AutonomyToggle();    
   }
 }

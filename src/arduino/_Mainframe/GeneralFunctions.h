@@ -39,3 +39,8 @@ unsigned long ToLong(bool b[]) {
   }
   return c;
 }
+
+double CoordLong2Double(long longValue) {
+  return ((double)longValue) * COORDINATE_DEGREE_SCALE;
+}
+

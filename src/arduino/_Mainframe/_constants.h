@@ -6,6 +6,8 @@
   2021
 */
 
+#pragma once
+
 // ------------------------------------------------------------ //
 //                            DEBUG                             //
 // ------------------------------------------------------------ //
@@ -159,6 +161,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define CMD_ROUTE              'R'
 #define CMD_ROUTE_SET          'S'
 #define CMD_ROUTE_PRINT        'P'
+#define CMD_ROUTE_STREAM       'B'
 
 // ------------------------------------------------------------ //
 //                       STRATEGY MODES                         //
@@ -180,154 +183,156 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
 // ------------------------------------------------------------ //
-#define HRTBEAT_FRQ_OUT                 12  // times per minute
-#define HRTBEAT_DT_OUT                  60000 / HRTBEAT_FRQ_OUT
+#define HRTBEAT_FRQ_OUT                   12  // times per minute
+#define HRTBEAT_DT_OUT                    60000 / HRTBEAT_FRQ_OUT
 
-#define HRTBEAT_TRESHOLD                60000  // Treshold for late heartbeat
+#define HRTBEAT_TRESHOLD                  60000  // Treshold for late heartbeat
 
-#define BACKUP_RST_DT                   HRTBEAT_TRESHOLD  // Time between each reset attempt
+#define BACKUP_RST_DT                     HRTBEAT_TRESHOLD  // Time between each reset attempt
 
-#define HRTBEAT_DT_LOG                  300000  // Time between system status log
+#define HRTBEAT_DT_LOG                    300000  // Time between system status log
 
 // ------------------------------------------------------------ //
 //                         NAVIGATION                           //
 // ------------------------------------------------------------ //
 
 // Orientation calculations
-#define MIN_DISTANCE_VALID_BEARING      1     // min valid distance to calculate bearing (meters)
-#define MAX_DISTANCE_VALID_WAYPOINT     1000  // max valid waypoint distance (meters)
+#define MAX_VALID_BEARING                 250000  // (deg * 10^-5) (2.5 degres)
 
-#define MIN_DISTANCE_WAYPOINT_ACCEPT    5  // max distance in to accept waypoint (meters)
+#define MAX_DISTANCE_VALID_WAYPOINT       1000  // max valid waypoint distance (meters)
 
-#define EARTH_RADIUS                    6371000  // (meters)
+#define MAX_DISTANCE_WAYPOINT_ACCEPT      10  // max distance to accept waypoint (meters)
 
-#define GNSS_QUERY_UPDATE_FREQUENCY     1000  // in milliseconds
+#define EARTH_RADIUS                      6371000  // (meters)
 
-#define NAVIGATION_CHECK_DT             3000
+#define GNSS_QUERY_UPDATE_FREQUENCY       1000  // in milliseconds
 
-#define MAX_LAT_VALUE                   900000000   // deg * 10^-7
-#define MAX_LON_VALUE                   1800000000  // deg * 10^-7
+#define AUTONOMY_PWR_CYCLE_DT             10000
+#define NAVIGATION_CYCLE_DT               1000
 
-#define MAX_ROUTE_LEN                   1
+#define MAX_LAT_VALUE                     900000000   // deg * 10^-7
+#define MAX_LON_VALUE                     1800000000  // deg * 10^-7
 
-#define MIN_ACCEL_TILT                  0.8f  // approx 35°
+#define MAX_ROUTE_LEN                     1
+
+#define MIN_ACCEL_TILT                    0.8f  // approx 35°
+
+#define MAX_AUTONOMOUS_SPEED              1.0f
+#define AUTONOMY_SPEED_SCALE              0.9f / 30000.0f  // linear scale, max speed after 5 minutes
+#define MAX_AUTONOMOUS_TURN               0.5f
+
+#define COORDINATE_DEGREE_SCALE           1.0d / 10000000.0d
 
 // ------------------------------------------------------------ //
 //                       REMOTE CONTROL                         //
 // ------------------------------------------------------------ //
-#define REMOTE_CHANNEL_THROTTLE         0
-#define REMOTE_CHANNEL_STEER            1
-#define REMOTE_CHANNEL_ENABLE           2
+#define REMOTE_CHANNEL_THROTTLE           0
+#define REMOTE_CHANNEL_STEER              1
+#define REMOTE_CHANNEL_ENABLE             2
 
-#define REMOTE_PROCESS_DT               100
+#define REMOTE_PROCESS_DT                 100
 
-#define REMOTE_SIGNAL_SCALE             100.0 / 87.0
+#define REMOTE_SIGNAL_SCALE               100.0 / 87.0
 
-#define REMOTE_CHANNEL_LOW              50
-#define REMOTE_CHANNEL_HIGH             200
-#define CONTROLLER_DEADZONE             10
-#define CONTROLLER_DEADZONE_FLOAT       0.05
+#define REMOTE_CHANNEL_LOW                50
+#define REMOTE_CHANNEL_HIGH               200
+#define CONTROLLER_DEADZONE               10
+#define CONTROLLER_DEADZONE_FLOAT         0.05
 
 // ------------------------------------------------------------ //
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
-#define MOTOR_STARTUP_TIMEOUT           5000
+#define MOTOR_STARTUP_TIMEOUT             5000
 
 // CAN BUS
-#define CANBUS_TX_MOTOR_LEFT            0x12
-#define CANBUS_RX_MOTOR_LEFT            0x64
-#define CANBUS_TX_MOTOR_RIGHT           0x22
-#define CANBUS_RX_MOTOR_RIGHT           0x74
+#define CANBUS_TX_MOTOR_LEFT              0x12
+#define CANBUS_RX_MOTOR_LEFT              0x64
+#define CANBUS_TX_MOTOR_RIGHT             0x22
+#define CANBUS_RX_MOTOR_RIGHT             0x74
 
 // ------------------------------------------------------------ //
 //                           HEATING                            //
 // ------------------------------------------------------------ //
-#define TEMP_SYSTEM_MIN                 10  // ~28 V
-#define HEATING_DURATION                20000
-#define HEATING_TIMEOUT                 40000
+#define TEMP_SYSTEM_MIN                   10  // ~28 V
+#define HEATING_DURATION                  20000
+#define HEATING_TIMEOUT                   40000
 
 // ------------------------------------------------------------ //
 //                         SYS TESTS                            //
 // ------------------------------------------------------------ //
-#define SYS_TEST_DURATION               10000
-#define SYS_TEST_DURATION_LONG          30000
-#define SYS_PRINT_PERIOD_LONG           500
-#define SYS_PRINT_PERIOD                250
-#define SYS_PRINT_PERIOD_SHORT          100
+#define SYS_TEST_DURATION                 10000
+#define SYS_TEST_DURATION_LONG            30000
+#define SYS_PRINT_PERIOD_LONG             500
+#define SYS_PRINT_PERIOD                  250
+#define SYS_PRINT_PERIOD_SHORT            100
 
-#define MOTOR_RAMP_TIME                 20
+#define MOTOR_RAMP_TIME                   20
 
 // ------------------------------------------------------------ //
 //                        COMMUNICATION                         //
 // ------------------------------------------------------------ //
 
 // Buttons
-#define BTN_DEBOUNCE_TIME               500
-#define ESTOP_DEBOUNCE_TIME             1000
+#define BTN_DEBOUNCE_TIME                 500
+#define ESTOP_DEBOUNCE_TIME               1000
 
 // DEBUG
-#define DEBUG_BAUDRATE                  115200
+#define DEBUG_BAUDRATE                    115200
 
 // Iridium
-#define IRID_BAUDRATE                   19200
-#define IRID_START_TIMEOUT              2       // default value = 240 sec
-#define IRID_ATT_TIMEOUT                2       // default value = 20 sec
-#define IRID_PROCESS_PERIOD             900000  // 15 min
+#define IRID_BAUDRATE                     19200
+#define IRID_START_TIMEOUT                2       // default value = 240 sec
+#define IRID_ATT_TIMEOUT                  2       // default value = 20 sec
+#define IRID_PROCESS_PERIOD               900000  // 15 min
 
 // SBUS
-#define SBUS_TIMEOUT                    2000
+#define SBUS_TIMEOUT                      2000
 
-#define CANBUS_DATA_LENGTH              8
+#define CANBUS_DATA_LENGTH                8
 
-#define CANBBUS_SPEED                   CAN_125KBPS
-#define COM_TEST_PERIOD                 5000
+#define CANBBUS_SPEED                     CAN_125KBPS
+#define COM_TEST_PERIOD                   5000
 
 // ------------------------------------------------------------ //
 //                        BATTERY LEVEL                         //
 // ------------------------------------------------------------ //
-#define BATTERY_MIN_LEVEL               20
+#define BATTERY_MIN_LEVEL                 15  // unused
+#define BATTERY_STD_CHARGE                20
+#define BATTERY_STD_RECHARGE              80
 
 // ------------------------------------------------------------ //
 //                           EEPROM                             //
 // ------------------------------------------------------------ //
-#define EEPROM_READ_INT(addr)           (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr + 1) << 8) & 0xFF00))
+#define EEPROM_READ_INT(addr)             (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr + 1) << 8) & 0xFF00))
 
 // #define EEPROM_READ_FLOAT(addr, flt) (float)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00) + ((EEPROM.read(addr+2) << 16) & 0xFF0000) + ((EEPROM.read(addr+3) << 24) & 0xFF000000))
 
 // Modes
-#define MEMADDR_LASTMODE                0
+#define MEMADDR_LASTMODE                  0
 
 // Navigation
-#define MEMADDR_HOME_START              1
-#define MEMADDR_HOME_END                MEMADDR_HOME_START + 8
+#define MEMADDR_HOME_START                1
+#define MEMADDR_HOME_END                  MEMADDR_HOME_START + 8
 
-#define MEMADDR_ROUTEIDX_START          MEMADDR_HOME_END
-#define MEMADDR_ROUTEIDX_END            MEMADDR_ROUTEIDX_START + 2
+#define MEMADDR_ROUTEIDX_START            MEMADDR_HOME_END
+#define MEMADDR_ROUTEIDX_END              MEMADDR_ROUTEIDX_START + 2
 
-#define MEMADDR_ROUTELEN_START          MEMADDR_ROUTEIDX_END
-#define MEMADDR_ROUTELEN_END            MEMADDR_ROUTELEN_START + 2
+#define MEMADDR_ROUTELEN_START            MEMADDR_ROUTEIDX_END
+#define MEMADDR_ROUTELEN_END              MEMADDR_ROUTELEN_START + 2
 
-#define MEMADDR_ROUTE_START             MEMADDR_ROUTELEN_END
+#define MEMADDR_WAYPOINTIDX_START         MEMADDR_ROUTELEN_END
+#define MEMADDR_WAYPOINTIDX_END           MEMADDR_WAYPOINTIDX_START + 2
+
+#define MEMADDR_ROUTE_START               MEMADDR_WAYPOINTIDX_END
 
 // Read write
-#define EEPROM_READ_LAT(index, latInt)  EEPROM.get(MEMADDR_ROUTE_START + index * 8, latInt)
-#define EEPROM_READ_LON(index, lonInt)  EEPROM.get(MEMADDR_ROUTE_START + 4 + index * 8, lonInt)
+#define EEPROM_READ_LAT(index, latLong)   EEPROM.get(MEMADDR_ROUTE_START + index * 8, latLong)
+#define EEPROM_READ_LON(index, lonLong)   EEPROM.get(MEMADDR_ROUTE_START + 4 + index * 8, lonLong)
 
-#define EEPROM_WRITE_LAT(index, latInt) EEPROM.put(MEMADDR_ROUTE_START + index * 8, latInt)
-#define EEPROM_WRITE_LON(index, lonInt) EEPROM.put(MEMADDR_ROUTE_START + 4 + index * 8, lonInt)
+#define EEPROM_WRITE_LAT(index, latLong)  EEPROM.put(MEMADDR_ROUTE_START + index * 8, latLong)
+#define EEPROM_WRITE_LON(index, lonLong)  EEPROM.put(MEMADDR_ROUTE_START + 4 + index * 8, lonLong)
 
-// motor calibration cache
-
-#define MEMADDR_MOTORCACHE_START        1
-#define MEMADDR_MOTORCACHE_END          MEMADDR_MOTORCACHE_START + 160
-
-// analog IR cache
-#define MEMADDR_IRCACHE_START           MEMADDR_MOTORCACHE_END
-#define MEMADDR_IRCACHE_END             MEMADDR_IRCACHE_START + 32
-
-// compass and accelerometer cache
-#define MEMADDR_FREEIMU_START           MEMADDR_IRCACHE_END                 //! important - this constant is also in Freeimu.cpp
-#define MEMADDR_FREEIMU_END             MEMADDR_FREEIMU_START + 36 + 1 + 3  // 36 bytes for values , 1 for signature, 3 empty space
+#define EEPROM_WRITE_INDEX(waypointIndex) EEPROM.put(MEMADDR_WAYPOINTIDX_START, waypointIndex)
 
 // ------------------------------------------------------------ //
 //                          FUNCTIONS                           //

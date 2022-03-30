@@ -12,6 +12,8 @@
   2021
 */
 
+#pragma once
+
 // External Inputs
 #define PI_BUTTON_MODE       19
 #define PI_BUTTON_SELECT     18
