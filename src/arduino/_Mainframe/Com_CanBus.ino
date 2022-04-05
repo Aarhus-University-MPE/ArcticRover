@@ -38,8 +38,7 @@ bool InitializeCanBus() {
   motorRight.ResetCanStatus();
   motorLeft.SetCanTxStatus();
 
-  bool status = mcp2515.checkReceive();
-  status      = true;
+  bool status = true;
 
   return status;
 }
@@ -80,9 +79,9 @@ bool CanBusProcess() {
   }
 
   if (motorLeft.GetCanTxStatus()) {
-    if(mcp2515.sendMessage(motorLeft.GetCanMsg()) != MCP2515::ERROR_OK) return false;
+    if (mcp2515.sendMessage(motorLeft.GetCanMsg()) != MCP2515::ERROR_OK) return false;
   } else if (motorRight.GetCanTxStatus()) {
-    if(mcp2515.sendMessage(motorRight.GetCanMsg()) != MCP2515::ERROR_OK) return false;
+    if (mcp2515.sendMessage(motorRight.GetCanMsg()) != MCP2515::ERROR_OK) return false;
   }
 
   if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {

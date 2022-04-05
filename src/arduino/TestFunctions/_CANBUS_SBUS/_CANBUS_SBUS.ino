@@ -25,9 +25,6 @@ void setup() {
   pinMode(PO_MOTOR_EN, OUTPUT);
   digitalWrite(PO_MOTOR_EN, true);
 
-  pinMode(PO_POWER_12V, OUTPUT);
-  digitalWrite(PO_POWER_12V, true);
-
   pinMode(PO_POWER_MOTOR, OUTPUT);
   digitalWrite(PO_POWER_MOTOR, LOW);
   pinMode(PO_POWER_RF, OUTPUT);

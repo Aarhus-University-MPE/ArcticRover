@@ -10,7 +10,6 @@ void StartStrategyRemote() {
   DEBUG_PRINTLN(F("Strategy (Remote): Starting"));
   SystemDisable();
 
-
   remoteActive = false;
   remoteStart  = false;
 
@@ -32,35 +31,31 @@ void RunStrategyRemote() {
 
   if (remoteStart) {
     remoteStart = false;
+    DEBUG_PRINTLINE();
     SystemEnableMode();
   }
 
   if (!SystemCheckMode(MODE_REMOTECONTROL)) {
-    remoteActive = false;
-    SystemDisable(MODULE_MOTORS);
-    LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_LONG);
+    RemoteHalt();
     return;
   }
 
   // StrategyRunLed(MODE_AUTONOMOUS);
 
   // Read RF signal
-  sbus.process();
-  if (!SBusProcess()) {
-    remoteActive = false;
-    SystemDisable();
-    StatusHaltLed(SIGNAL_ERROR);
-    return;
-  }
+  SBusProcess();
+  // if (!SBusProcess()) {
+  //   RemoteHalt();
+  //   return;
+  // }
   SBusPrint();
 
   // Transmit via CAN
-  if (!CanBusProcess()) {
-    remoteActive = false;
-    SystemDisable();
-    StatusHaltLed(SIGNAL_ERROR);
-    return;
-  }
+  CanBusProcess();
+  // if (!CanBusProcess()) {
+  //   RemoteHalt();
+  //   return;
+  // }
   CanBusPrint();
 }
 
@@ -84,4 +79,10 @@ void SelectFunctionRemote() {
     remoteActive     = !remoteActive;
     remoteStart      = true;
   }
+}
+
+void RemoteHalt() {
+  remoteActive = false;
+  SystemDisable();
+  StatusHaltLed(SIGNAL_ERROR);
 }

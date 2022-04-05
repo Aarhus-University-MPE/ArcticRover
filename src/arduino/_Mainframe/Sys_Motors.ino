@@ -9,15 +9,16 @@ unsigned long millisLastMotorStep;
 
 // Initialize motor power
 bool InitializeMotors() {
-  if (!GetStatus(MODULE_PWR_MOTOR)) {
-    return false;
-  }
+  // if (!GetStatus(MODULE_PWR_MOTOR)) {
+  //   return false;
+  // }
 
   digitalWrite(PO_MOTOR_EN, true);
 
-  if (!MotorCycle()) return false;
+  // if (!MotorCycle()) return false;
 
-  return MotorStatus();
+  // return MotorStatus();
+  return true;
 }
 
 // Disable Motor HW Enable
@@ -133,7 +134,8 @@ bool MotorState() {
 
 // Motors operational?
 bool MotorStatus() {
-  bool status = (MotorStatusLeft() && MotorStatusRight());
+  // bool status = (MotorStatusLeft() && MotorStatusRight());
+  bool status = GetStatus(MODULE_MOTORS);
 
   return status;
 }

@@ -18,12 +18,12 @@ void setup() {
   InitAllPins();
   InitButtons();
   InitStatusLed();
-
-  SetStatus(false);
-
+  
   // Debug
   DBG_ONLY(initializeDebugComm());
   
+  SetStatus(false);
+
   SystemEnablePrimary();
 
   // Strategy initialization
@@ -44,5 +44,5 @@ void loop() {
   // IridiumProcess();
 
   DBG_ONLY(recvWithStartEndMarkers());
-   DBG_ONLY(PerformCommand());
+  DBG_ONLY(PerformCommand());
 }

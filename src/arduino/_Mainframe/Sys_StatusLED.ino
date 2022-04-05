@@ -22,8 +22,6 @@ void LedSet(byte color) {
   if (color == currentLedStatus)
     return;
 
-  SystemEnable(MODULE_PWR_12V);  // TODO: Remove temporary due to 12VDCDC missing
-
   digitalWrite(PO_LED_STATUS_GRN, (BINARY_CODE_LED_GRN & color) > 0);
   digitalWrite(PO_LED_STATUS_YEL, (BINARY_CODE_LED_YEL & color) > 0);
   digitalWrite(PO_LED_STATUS_RED, (BINARY_CODE_LED_RED & color) > 0);

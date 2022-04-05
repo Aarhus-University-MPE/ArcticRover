@@ -109,6 +109,8 @@ float getChannelFloatFull(int channel) {
 
 // Read RF signal and update motors accordingly
 bool SBusProcess() {
+  sbus.process();
+  
   if (millis() - millisLastSBusUpdate < REMOTE_PROCESS_DT) {
     return sBusStatus;
   }
