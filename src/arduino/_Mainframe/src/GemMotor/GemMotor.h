@@ -174,8 +174,8 @@ class GemMotor {
 
   bool motorError, swEnable;
   bool canTxStatus, canRxStatus, canRxTimeout;
-  bool motorStatus = true;
-  bool validStatus = true;
+  bool motorStatus = false;
+  bool validStatus = false;
 
   bool warning[64];
   bool error[64];
@@ -239,8 +239,11 @@ class GemMotor {
   // Returns CanMsg ptr and sets RxStatus (indicate awaiting response)
   struct can_frame* GetCanMsg();
 
-  // Returns status of motor (Error)
+  // Updates motor status and returns current motor status (Error)
   bool Status();
+
+  // Returns can status of motor (valid CAN data)
+  bool CanStatus();
 
   // Resets status of motor
   void ResetMotorStatus();

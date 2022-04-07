@@ -32,7 +32,15 @@ void RunStrategyRemote() {
   if (remoteStart) {
     remoteStart = false;
     DEBUG_PRINTLINE();
-    SystemEnableMode();
+    DEBUG_PRINTLN(F("Starting Remote Control"));
+    DEBUG_PRINTLINE();
+    if(!SystemEnableMode()){
+      DEBUG_PRINTLINE();
+      DEBUG_PRINTLN(F("Module Start Error"));
+      DEBUG_PRINTLINE();
+      RemoteHalt();
+      return;
+    }
   }
 
   if (!SystemCheckMode(MODE_REMOTECONTROL)) {
@@ -40,22 +48,22 @@ void RunStrategyRemote() {
     return;
   }
 
-  // StrategyRunLed(MODE_AUTONOMOUS);
+  StrategyRunLed(MODE_AUTONOMOUS);
 
   // Read RF signal
   SBusProcess();
-  // if (!SBusProcess()) {
-  //   RemoteHalt();
-  //   return;
-  // }
+  if (!SBusProcess()) {
+    RemoteHalt();
+    return;
+  }
   SBusPrint();
 
   // Transmit via CAN
   CanBusProcess();
-  // if (!CanBusProcess()) {
-  //   RemoteHalt();
-  //   return;
-  // }
+  if (!CanBusProcess()) {
+    RemoteHalt();
+    return;
+  }
   CanBusPrint();
 }
 
@@ -84,5 +92,5 @@ void SelectFunctionRemote() {
 void RemoteHalt() {
   remoteActive = false;
   SystemDisable();
-  StatusHaltLed(SIGNAL_ERROR);
+  StatusHaltLed(LED_SIGNAL_ERROR);
 }

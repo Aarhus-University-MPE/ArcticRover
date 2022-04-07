@@ -1,4 +1,3 @@
-
 // Set pointers for strategies methods
 void InitStrategyMethods() {
   strategyMethods[0][MODE_EMERGENCY] = StartStrategyEmergency;
@@ -38,8 +37,10 @@ void InitMode() {
   if (!digitalRead(PI_BUTTON_ESTOP)) {
     mode = MODE_EMERGENCY;
   }
+  if (mode == MODE_MODELIBRARY) mode = MODE_IDLE;
+
   SetMode(mode);
-  modeCycle = mode;
+
   strategyMethods[0][mode]();
 }
 
@@ -48,7 +49,7 @@ void ModeUpdater() {
   if (!isModeUpdated) {
     return;
   }
-  
+
   isModeUpdated = false;
   // Skip finish operation when going to emergency
   if (mode != MODE_EMERGENCY) {
@@ -79,8 +80,8 @@ void DetachSelectButton() {
 boolean SetMode(byte newMode) {
   if (newMode < MODES_MAX) {
     prevMode      = mode;
-    modeCycle     = mode;
     mode          = newMode;
+    IncrementModeCycle();
     isModeUpdated = true;
     EEPROM.write(MEMADDR_LASTMODE, mode);
     DEBUG_PRINT(F("Mode Set: "));
@@ -88,4 +89,17 @@ boolean SetMode(byte newMode) {
     return true;
   }
   return false;
+}
+
+// Cycle Mode
+void IncrementModeCycle() {
+  if(mode == MODE_MODELIBRARY){
+    return;
+  }
+  modeCycle = mode;
+  if (modeCycle + 1 < MODES_MIN_BROWSABLE || modeCycle + 1 >= MODES_MAX) {
+    modeCycle = MODES_MIN_BROWSABLE;
+  } else {
+    modeCycle = modeCycle + 1;
+  }
 }

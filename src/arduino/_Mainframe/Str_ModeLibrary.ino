@@ -33,8 +33,11 @@ void FinishStrategyModeLibrary() {
   DEBUG_PRINTLN(F("Strategy (Mode Library): Ending"));
   DEBUG_PRINTLN(F("Strategy (Mode Library): Finished"));
 
+  DetachModeButton();
+  DetachSelectButton();
+
   // Assign mode button interrupt
-  attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
+  AttachModeButton();
 }
 
 // Select button function
@@ -65,6 +68,7 @@ void ModeFunctionModeLibrary() {
       return;
     }
 
+
     // Cycle Mode
     if (modeCycle + 1 < MODES_MIN_BROWSABLE || modeCycle + 1 >= MODES_MAX) {
       modeCycle = MODES_MIN_BROWSABLE;
@@ -74,5 +78,7 @@ void ModeFunctionModeLibrary() {
 
     DEBUG_PRINT(F("Mode Cycle: "));
     DEBUG_PRINTLN(ModeToString(modeCycle));
+    
+    ResetLed();
   }
 }

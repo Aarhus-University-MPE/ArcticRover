@@ -15,7 +15,7 @@ bool InitializeMotors() {
 
   digitalWrite(PO_MOTOR_EN, true);
 
-  // if (!MotorCycle()) return false;
+  if (!MotorCycle()) return false;
 
   // return MotorStatus();
   return true;
@@ -117,14 +117,18 @@ bool MotorCycle() {
   }
 
   MotorUpdate(0, 0);
-  long millisMotorStart = millis();
+  unsigned long millisMotorStart = millis();
 
-  // Run canbus for a while to get motor states and test data conection
-  while ((!MotorStatus()) && (millis() - millisMotorStart < MOTOR_STARTUP_TIMEOUT)) {
-    if (!CanBusProcess()) return false;
+  // (!motorLeft.CanStatus() || !motorRight.CanStatus()) && 1
+  
+  // Run canbus for a while to get motor states and test data connection
+  while ((!motorLeft.CanStatus() || !motorRight.CanStatus()) && (millis() - millisMotorStart) < MOTOR_STARTUP_TIMEOUT) {
+    if (!CanBusProcess()) {
+      return false;
+    }
   }
 
-  return MotorStatus();
+  return MotorCanStatus();
 }
 
 // Returns true if both motors are operational
@@ -140,6 +144,10 @@ bool MotorStatus() {
   return status;
 }
 
+// Returns true if both motors have a valid can signal
+bool MotorCanStatus(){
+  return motorLeft.CanStatus() && motorRight.CanStatus();
+}
 // Left motor status
 bool MotorStatusLeft() {
   return motorLeft.Status();

@@ -29,19 +29,19 @@ void LedSet(byte color) {
   currentLedStatus = color;
 }
 
-void LedSetSignal(SIGNAL signal){
+void LedSetSignal(LED_SIGNAL signal){
   switch (signal)
   {
-  case SIGNAL_OK:
+  case LED_SIGNAL_OK:
     LedSet(BINARY_CODE_LED_GRN);
     break;
-  case SIGNAL_IDLE:
+  case LED_SIGNAL_IDLE:
     LedSet(BINARY_CODE_LED_YEL);
     break;
-  case SIGNAL_LOADING:
+  case LED_SIGNAL_LOADING:
     LedSet(BINARY_CODE_LED_YEL);
     break;
-  case SIGNAL_ERROR:
+  case LED_SIGNAL_ERROR:
     LedSet(BINARY_CODE_LED_RED);
     break;
   default:
@@ -66,7 +66,7 @@ bool LedBlink(byte color, unsigned int onDuration, unsigned int offDuration) {
     lastMillisLed = millis();
     cycleDone     = true;
   }
-  if (currentLedStatus == 0 && millisSinceLast > offDuration) {
+  else if (currentLedStatus == 0 && millisSinceLast > offDuration) {
     LedSet(color);
     lastMillisLed = millis();
   }
@@ -77,15 +77,22 @@ int LedColor = 0;
 void LedBlink(byte colorOne, byte colorTwo, unsigned int onDuration, unsigned int offDuration) {
   switch (LedColor) {
     case 0:
-      if (LedBlink(colorOne, onDuration, offDuration)) LedColor++;
+      if (LedBlink(colorOne, onDuration/2, offDuration)) LedColor++;
       break;
     case 1:
-      if (LedBlink(colorTwo, onDuration, LED_BLINK_SHORT)) LedColor++;
+      if (LedBlink(colorTwo, onDuration/2, 0)) LedColor++;
       break;
     default:
       LedColor = 0;
       break;
   }
+}
+
+// Resets current flashing LED and resets timers
+void ResetLed(){
+  lastMillisLed = 0;
+  LedColor = 0;
+  LedSet(0);
 }
 
 // Flash LED in specified color while halting system for specified duration
@@ -163,19 +170,19 @@ void StrategyStartLed() {
 void StrategyRunLed(byte mode) {
   switch (mode) {
     case MODE_EMERGENCY:
-      LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_RED, LED_BLINK_LONG, LED_BLINK_LONG);
       break;
     case MODE_IDLE:
-      LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_LONG);
       break;
     case MODE_SYSTEMTEST:
-      LedBlink(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_RED, BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_LONG);
       break;
     case MODE_REMOTECONTROL:
-      LedBlink(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_GRN, BINARY_CODE_LED_YEL, LED_BLINK_LONG, LED_BLINK_LONG);
       break;
     case MODE_AUTONOMOUS:
-      LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_VERY_LONG);
+      LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_LONG, LED_BLINK_LONG);
       break;
     default:
       break;
@@ -188,18 +195,18 @@ void StrategyRunLed() {
 }
 
 // Blink light with specific signal (Non-blocking)
-void StatusRunLed(SIGNAL signal) {
-  switch (mode) {
-    case SIGNAL_OK:
+void StatusRunLed(LED_SIGNAL signal) {
+  switch (signal) {
+    case LED_SIGNAL_OK:
       LedBlink(BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;
-    case SIGNAL_ERROR:
+    case LED_SIGNAL_ERROR:
       LedBlink(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;
-    case SIGNAL_IDLE:
+    case LED_SIGNAL_IDLE:
       LedBlink(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;
-    case SIGNAL_LOADING:
+    case LED_SIGNAL_LOADING:
       LedBlink(BINARY_CODE_LED_YEL, BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_VERY_LONG);
       break;
     default:
@@ -207,31 +214,31 @@ void StatusRunLed(SIGNAL signal) {
   }
 }
 
-// Blink light with specific signal (Non-blocking)
-void StatusHaltLed(SIGNAL signal) {
-  switch (mode) {
-    case SIGNAL_OK:
+// Blink light with specific signal (Blocking)
+void StatusHaltLed(LED_SIGNAL signal) {
+  switch (signal) {
+    case LED_SIGNAL_OK:
       LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_NORMAL);
       break;
-    case SIGNAL_OK_SHORT:
+    case LED_SIGNAL_OK_SHORT:
       LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT);
       break;
-    case SIGNAL_OK_SHORT_HALT:
+    case LED_SIGNAL_OK_SHORT_HALT:
       LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
       break;
-    case SIGNAL_ERROR:
+    case LED_SIGNAL_ERROR:
       LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_NORMAL);
       break;
-    case SIGNAL_ERROR_SHORT:
+    case LED_SIGNAL_ERROR_SHORT:
       LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_SHORT);
       break;
-    case SIGNAL_ERROR_SHORT_HALT:
+    case LED_SIGNAL_ERROR_SHORT_HALT:
       LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
       break;
-    case SIGNAL_IDLE:
+    case LED_SIGNAL_IDLE:
       LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT);
       break;
-    case SIGNAL_LOADING:
+    case LED_SIGNAL_LOADING:
       LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT, LED_BLINK_SHORT);
       LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_SHORT);
       break;

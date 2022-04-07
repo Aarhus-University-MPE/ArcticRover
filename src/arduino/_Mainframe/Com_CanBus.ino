@@ -78,10 +78,21 @@ bool CanBusProcess() {
     return true;
   }
 
+  int err;
   if (motorLeft.GetCanTxStatus()) {
-    if (mcp2515.sendMessage(motorLeft.GetCanMsg()) != MCP2515::ERROR_OK) return false;
+    err = mcp2515.sendMessage(motorLeft.GetCanMsg());
+    if (err != MCP2515::ERROR_OK) {
+      DEBUG_PRINT(F("Can Error Left: "));
+      DEBUG_PRINTLN(err);
+      return false;
+    }
   } else if (motorRight.GetCanTxStatus()) {
-    if (mcp2515.sendMessage(motorRight.GetCanMsg()) != MCP2515::ERROR_OK) return false;
+    err = mcp2515.sendMessage(motorRight.GetCanMsg());
+    if (err != MCP2515::ERROR_OK) {
+      DEBUG_PRINT(F("Can Error Right: "));
+      DEBUG_PRINTLN(err);
+      return false;
+    }
   }
 
   if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {

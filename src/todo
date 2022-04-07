@@ -22,7 +22,9 @@
 
     - Handle 360° to 0° transition, steering @done
         - Take smallest angle difference @done
-
+- Blackbox
+    - Unknown Blackbox error halts program.
+    
 - GNSS
     - Coordinate Bearing + Distance (Long to Radians) @done
     - Test Pathing

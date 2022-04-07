@@ -83,7 +83,7 @@ bool NavigationPreCheck() {
     return navigationPreCheck;
   }
 
-  LedSetSignal(SIGNAL_IDLE);
+  LedSetSignal(LED_SIGNAL_IDLE);
 
   millisLastNavCheck = millis();
   navigationPreCheck = true;
@@ -104,9 +104,9 @@ bool NavigationPreCheck() {
 void PreCheckStatus(bool status) {
   if (!status) {
     navigationPreCheck = false;
-    StatusHaltLed(SIGNAL_ERROR_SHORT_HALT);
+    StatusHaltLed(LED_SIGNAL_ERROR_SHORT_HALT);
   } else {
-    StatusHaltLed(SIGNAL_OK_SHORT_HALT);
+    StatusHaltLed(LED_SIGNAL_OK_SHORT_HALT);
   }
 }
 

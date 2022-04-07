@@ -102,64 +102,66 @@ void SystemEnablePrimary() {
   SystemEnable(MODULE_IRIDIUM);
 }
 
+// Enables module then flash LED indicating success or error
 bool SystemSignalEnable(byte module) {
   bool status = SystemEnable(module);
   if (status) {
-    StatusHaltLed(SIGNAL_OK_SHORT_HALT);
+    StatusHaltLed(LED_SIGNAL_OK_SHORT_HALT);
   } else {
-    StatusHaltLed(SIGNAL_ERROR_SHORT_HALT);
+    StatusHaltLed(LED_SIGNAL_ERROR_SHORT_HALT);
   }
   return status;
 }
 
 // Enable systems for current mode
 bool SystemEnableMode() {
+  int modules = 0;
   bool status = true;
   bool enableStatus[10];
   switch (mode) {
     case MODE_REMOTECONTROL:
-      enableStatus[0] = SystemEnable(MODULE_PWR_12V);  // TODO: Remove, Temporary due to 12V DCDC replacement
-      enableStatus[1] = SystemEnable(MODULE_PWR);
-      enableStatus[2] = SystemEnable(MODULE_CANBUS);
-      enableStatus[3] = SystemEnable(MODULE_PWR_MOTOR);
-      enableStatus[4] = SystemEnable(MODULE_MOTORS);
-      enableStatus[5] = SystemEnable(MODULE_RF);
-
-      for (int i = 0; i < 6; i++) {
-        if (!SystemEnableStatus(enableStatus[i])) status = false;
-      }
-
+      enableStatus[0] = SystemEnable(MODULE_PWR);
+      enableStatus[1] = SystemEnable(MODULE_CANBUS);
+      enableStatus[2] = SystemEnable(MODULE_PWR_MOTOR);
+      enableStatus[3] = SystemEnable(MODULE_MOTORS);
+      enableStatus[4] = SystemEnable(MODULE_RF);
+      modules         = 5;
       break;
+
     case MODE_AUTONOMOUS:
-      enableStatus[0] = SystemEnable(MODULE_PWR_12V);  // TODO: Remove, Temporary due to 12V DCDC replacement
-      enableStatus[1] = SystemEnable(MODULE_PWR);
-      enableStatus[2] = SystemEnable(MODULE_CANBUS);
-      enableStatus[3] = SystemEnable(MODULE_PWR_MOTOR);
-      enableStatus[4] = SystemEnable(MODULE_MOTORS);
-      enableStatus[5] = SystemEnable(MODULE_ACCEL);
-      enableStatus[6] = SystemEnable(MODULE_RF);
-
-      for (int i = 0; i < 7; i++) {
-        if (!SystemEnableStatus(enableStatus[i])) status = false;
-      }
+      enableStatus[0] = SystemEnable(MODULE_PWR);
+      enableStatus[1] = SystemEnable(MODULE_CANBUS);
+      enableStatus[2] = SystemEnable(MODULE_PWR_MOTOR);
+      enableStatus[3] = SystemEnable(MODULE_MOTORS);
+      enableStatus[4] = SystemEnable(MODULE_ACCEL);
+      enableStatus[5] = SystemEnable(MODULE_RF);
+      modules         = 6;
       break;
+
     default:
       status = false;
       break;
+  }
+
+  for (int i = 0; i < modules; i++) {
+    if (!SystemEnableStatus(enableStatus[i])) {
+      status = false;
+    }
   }
   return status;
 }
 
 // Sets navigationPreCheck flag to false and signals
 bool SystemEnableStatus(bool status) {
-  if (!status) {
-    StatusHaltLed(SIGNAL_ERROR_SHORT_HALT);
+  if (status) {
+    StatusHaltLed(LED_SIGNAL_OK_SHORT_HALT);
   } else {
-    StatusHaltLed(SIGNAL_OK_SHORT_HALT);
+    StatusHaltLed(LED_SIGNAL_ERROR_SHORT_HALT);
   }
   return status;
 }
 
+// Disables specified module
 void SystemDisable(int module) {
   if (!GetStatus(module)) return;
   bool status = false;
@@ -414,6 +416,7 @@ bool SystemTest() {
   return testDone;
 }
 
+// Runs module test
 bool SystemTestModule(byte module) {
   SystemEnable(module);
   bool status   = false;
@@ -529,6 +532,7 @@ void SystemCheck() {
   SetStatus(MODULE_RESERVED, true);
 }
 
+// Runs module check
 bool SystemCheckModule(byte module) {
   bool status = false;
 

@@ -131,12 +131,12 @@ bool RouteSDValid(){
     return false;
   }
 
-  DEBUG_PRINTLN(F("Validating Waypoint file"));
+  // DEBUG_PRINTLN(F("Validating Waypoint file"));
 
   File waypoints = SD.open("Waypoints.csv", FILE_READ);
 
   if (!waypoints) {
-    DEBUG_PRINTLN(F("Error opening waypoints file"));
+    // DEBUG_PRINTLN(F("Error opening waypoints file"));
     return false;
   }
 

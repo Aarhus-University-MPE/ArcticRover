@@ -30,7 +30,7 @@ bool AutonomyPreRun() {
 
   // System ready to start, waiting idle
   if (!autonomyActive) {
-    StatusRunLed(SIGNAL_LOADING);
+    StatusRunLed(LED_SIGNAL_LOADING);
     return false;
   }
 
@@ -75,7 +75,7 @@ bool AutonomyPreCheck() {
   // Enables primary and secondary systems
   if (!SystemEnableMode()) {
     autonomyActive = false;
-    StatusHaltLed(SIGNAL_ERROR);
+    StatusHaltLed(LED_SIGNAL_ERROR);
     return false;
   }
 

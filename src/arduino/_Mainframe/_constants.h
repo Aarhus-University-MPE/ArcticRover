@@ -56,9 +56,9 @@
 #define BINARY_CODE_LED_RED    B100  // 100
 
 // LED blink durations (ms)
-#define LED_BLINK_VERY_LONG    2000
-#define LED_BLINK_LONG         1000
-#define LED_BLINK_NORMAL       500
+#define LED_BLINK_VERY_LONG    2500
+#define LED_BLINK_LONG         1500
+#define LED_BLINK_NORMAL       750
 #define LED_BLINK_SHORT        250
 #define LED_BLINK_VERY_SHORT   100
 

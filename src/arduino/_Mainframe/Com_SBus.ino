@@ -121,6 +121,21 @@ bool SBusProcess() {
     return sBusStatus;
   }
 
+  SBusController();
+
+  // First timeout error returns true (catches large first read getLastTime)
+  if (millis() - (unsigned long)sbus.getLastTime() < SBUS_TIMEOUT && sBusStatus) {
+    sBusStatus = false;
+    return true;
+  } else {
+    sBusStatus = true;
+  }
+
+  return sBusStatus;
+}
+
+// Reads controller input and navigates motors
+void SBusController(){
   float throttle1 = getChannelFloatFull(1);  // Left stick Vertical
   float dir       = getChannelFloat(2);      // Right stick Horisontal
   float throttle2 = getChannelFloat(3);      // Right stick Vertical
@@ -152,16 +167,6 @@ bool SBusProcess() {
   } else {
     MotorUpdate(0, 0);
   }
-
-  // First timeout error returns true (catches large first read getLastTime)
-  if (millis() - (unsigned long)sbus.getLastTime() < SBUS_TIMEOUT && sBusStatus) {
-    sBusStatus = false;
-    return true;
-  } else {
-    sBusStatus = true;
-  }
-
-  return sBusStatus;
 }
 
 void SBusPrint() {

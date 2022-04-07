@@ -185,10 +185,15 @@ void GemMotor::BuildCanMsg() {
       GemMotor::controlMode | (GemMotor::mode) << 2 | (GemMotor::swEnable) << 5;
 }
 
-// Updates motor status and returns current motor status
+// Updates motor status and returns current motor status (Error)
 bool GemMotor::Status() {
   MotorStatusUpdate();
   return GemMotor::motorStatus;
+}
+
+// Returns can status of motor (valid Can data)
+bool GemMotor::CanStatus(){
+  return GemMotor::validStatus;
 }
 
 // Updates current motor status, if error reported for more than timeout duration (5000 ms) unsets motor status
