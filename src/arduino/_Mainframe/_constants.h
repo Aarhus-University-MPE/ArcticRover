@@ -209,6 +209,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define AUTONOMY_PWR_CYCLE_DT             10000
 #define NAVIGATION_CYCLE_DT               1000
+#define NAVIGATION_RUNCHECK_DT            300000
 
 #define MAX_LAT_VALUE                     900000000   // deg * 10^-7
 #define MAX_LON_VALUE                     1800000000  // deg * 10^-7

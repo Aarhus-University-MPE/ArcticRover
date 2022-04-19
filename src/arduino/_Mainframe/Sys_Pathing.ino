@@ -126,7 +126,7 @@ bool CompareEepromSdRoute() {
   return validity;
 }
 
-bool RouteSDValid(){
+bool RouteSDValid() {
   if (!SDRoute) {
     return false;
   }
@@ -170,6 +170,7 @@ bool RouteCheck() {
   return RouteSDValid() && CompareEepromSdRoute();
 }
 
+// Update current position and heading and check distance to current waypoint, if below threshold, set next target
 bool PathingProcess() {
   GnssUpdate();
 
@@ -195,9 +196,9 @@ void BearingUpdate() {
   headingError = targetHeading - heading;
 
   // Check headingError > 180 degree to take smallest rotation (190 degrees to avoid rotation overlap)
-  if(headingError > 190){
+  if (headingError > 190) {
     headingError -= 360;
-  } else if (headingError < -190){
+  } else if (headingError < -190) {
     headingError += 360;
   }
 
@@ -208,7 +209,6 @@ void BearingUpdate() {
   } else {
     navigationDir = -MAX_AUTONOMOUS_TURN;
   }
-
 }
 
 // Returns latest navigation direction

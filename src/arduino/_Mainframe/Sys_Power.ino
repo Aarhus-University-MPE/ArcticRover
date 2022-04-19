@@ -59,7 +59,11 @@ float BatteryVoltage() {
   return voltageBattery;
 }
 
-// Sets charge flag based on current battery level, once charge started will charge until BATTERY_STD_RECHARGE before resuming
+/*
+  Power Cycle Algorithm:
+    if current power level (CPL) < min Level -> Set standby (start charging)
+    if currently on charging and CPL > BATTERY_STD_RECHARGE, awake from standby
+*/
 bool PowerCycle() {
   int batteryLevel = BatteryLevel();
 
@@ -82,7 +86,6 @@ bool PowerCycle() {
   return charge;
 }
 
-
-void ResetPowerCycle(){
+void ResetPowerCycle() {
   charge = true;
 }

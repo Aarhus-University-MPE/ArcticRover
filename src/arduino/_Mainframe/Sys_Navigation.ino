@@ -29,44 +29,43 @@
 #include "Math.h"
 
 bool navigationPreCheck = false;
-long millisLastNavCheck;
+unsigned long millisLastNavUpdate;
 float maxSpeedScale;
 
+// Autonomous Navigation, update current position and heading, update target waypoint and update motor controls
 bool Navigate() {
-  if (millis() - millisLastNavCheck < NAVIGATION_CYCLE_DT) {
-    return false;
+  if (millis() - millisLastNavUpdate < NAVIGATION_CYCLE_DT) {
+    return true;
   }
+  millisLastNavUpdate = millis();
 
-  millisLastNavCheck = millis();
-
-  if (!NavigationRunCheck()) {
-    MotorUpdate(0, 0);
-    return false;
-  }
-
+  // Update pos, heading and target waypoint
   PathingProcess();
 
+  // Set motor controls based on current target waypoint
   NavigationMotorUpdate();
+
+  return true;
 }
 
-// Autonomous Motor Controller, updates motor targets based on 
-void NavigationMotorUpdate(){
+// Autonomous Motor Controller, maximum autonomous speed time dependent (increases )
+void NavigationMotorUpdate() {
   AutonomousTopSpeedUpdate();
 
   MotorUpdate(BearingDirection(), MAX_AUTONOMOUS_SPEED * maxSpeedScale);
 }
 
 // Increases top speed based on time since autonomy start to avoid high speed start up
-void AutonomousTopSpeedUpdate(){
+void AutonomousTopSpeedUpdate() {
   float timeScaledSpeed = millisAutonomyStart * AUTONOMY_SPEED_SCALE;
-  maxSpeedScale = min(1.0f,  timeScaledSpeed);
+  maxSpeedScale         = min(1.0f, timeScaledSpeed);
 }
 
 void NavigationPreCheckReset() {
   navigationPreCheck = false;
   ResetRouteStatus();
 
-  millisLastNavCheck = millis() - NAVIGATION_CYCLE_DT;
+  millisLastNavUpdate = millis() - NAVIGATION_CYCLE_DT;
 }
 
 // Resets current waypoint index and restarts route
@@ -79,14 +78,14 @@ void ResetNavigation() {
 bool NavigationPreCheck() {
   if (navigationPreCheck) return true;
 
-  if (millis() - millisLastNavCheck < NAVIGATION_CYCLE_DT) {
+  if (millis() - millisLastNavUpdate < NAVIGATION_CYCLE_DT) {
     return navigationPreCheck;
   }
 
   LedSetSignal(LED_SIGNAL_IDLE);
 
-  millisLastNavCheck = millis();
-  navigationPreCheck = true;
+  millisLastNavUpdate = millis();
+  navigationPreCheck  = true;
 
   bool routeValid = RouteTest();
   bool gnssValid  = GnssSignal();
@@ -108,10 +107,4 @@ void PreCheckStatus(bool status) {
   } else {
     StatusHaltLed(LED_SIGNAL_OK_SHORT_HALT);
   }
-}
-
-// Check system status while navigation is running.
-// GNSS status, Accelerometer output (tilt?), Battery Status
-bool NavigationRunCheck() {
-  return SystemCheckMode(MODE_AUTONOMOUS);
 }

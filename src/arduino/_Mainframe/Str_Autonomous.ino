@@ -3,7 +3,6 @@
     Primary Strategy for Autonomous Navigation
 */
 
-
 // Start sequence of strategy
 void StartStrategyAutonomous() {
   DEBUG_PRINTLINE();
@@ -13,7 +12,7 @@ void StartStrategyAutonomous() {
 
   // TODO: Will reset autonomy upon reboot
   // - Add bool in EEPROM autonomous active, if true skip reset. Unset bool upon in FinishStrategyAutonomous
-  AutonomyReset(); 
+  AutonomyReset();
 
   AttachSelectButton();
 
@@ -25,11 +24,9 @@ void StartStrategyAutonomous() {
 
 // Main sequence of strategy
 void RunStrategyAutonomous() {
-
   AutonomousProcess();
 
-  StrategyRunLed(); 
-
+  StrategyRunLed();
 }
 
 // End sequence of strategy
@@ -40,7 +37,7 @@ void FinishStrategyAutonomous() {
   DetachSelectButton();
 
   // TODO: Add unset autonomy bool in EEPROM once implemented
-  
+
   SystemDisable();
 
   DEBUG_PRINTLN(F("Strategy (Autonomous): Finished."));
@@ -51,6 +48,6 @@ void FinishStrategyAutonomous() {
 void SelectFunctionAutonomous() {
   if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
     lastMillisSelect = millis();
-    AutonomyToggle();    
+    AutonomyToggle();
   }
 }

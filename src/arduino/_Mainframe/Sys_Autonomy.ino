@@ -7,19 +7,27 @@
 */
 
 bool autonomyStart, autonomyRestart, autonomyActive, standbyMode;
-unsigned long millisLastAutonomyCycle;
+unsigned long millisLastAutonomyCycle, millisLastRunCheck;
 
 // Primary Autonomous Algorithm
 void AutonomousProcess() {
+  // Autonomy not active -> Check Current Power Levels, Communication and Navigation
   if (!AutonomyPreRun()) return;
 
+  // Autonomy active -> Check Power Levels, standby if below min, resume if above std recharge level
   if (!AutonomyPowerCycle()) return;
 
+  // Reboot systems if waking up from standby, await PreChecks before continuing
   if (!StandbyRestart()) return;
 
-  if (!CanBusProcess()) return;  // TODO: Handle CAN Error
+  // Runtime system check GNSS status, IMU tilt
+  if (!AutonomyRunCheck()) return;
 
-  if (!Navigate()) return;  // TODO: Handle run-check Error
+  // Autonomous Navigation towards waypoints based on current GNSS position and heading
+  if (!Navigate()) return;
+
+  // Transmit motor controls based on Navigation alogrithm
+  if (!CanBusProcess()) return;  // TODO: Handle CAN Error
 }
 
 // Runs necessary autonomy pre-runs (Power, Communication, Navigation)
@@ -46,7 +54,11 @@ bool AutonomyPreRun() {
   return true;
 }
 
-// Run power cycle, check if levels below thresholds or restart autonomy.
+/*
+  Power Cycle Algorithm:
+    if current power level (CPL) < min Level -> Set standby (start charging)
+    if currently on charging and CPL > BATTERY_STD_RECHARGE, awake from standby
+*/
 bool AutonomyPowerCycle() {
   if (millis() - millisLastAutonomyCycle < AUTONOMY_PWR_CYCLE_DT) return standbyMode;
 
@@ -86,6 +98,17 @@ bool AutonomyPreCheck() {
   return true;
 }
 
+// Check system status while navigation is running.
+// GNSS status, Accelerometer output (tilt?), Battery Status
+bool AutonomyRunCheck() {
+  if (millis() - millisLastRunCheck < NAVIGATION_RUNCHECK_DT) {
+    return true;
+  }
+
+  millisLastRunCheck = millis();
+
+  return SystemCheckMode(MODE_AUTONOMOUS);
+}
 
 // Inverts current autonomy state
 void AutonomyToggle() {
@@ -124,4 +147,3 @@ bool StandbyRestart() {
   }
   return true;
 }
-
