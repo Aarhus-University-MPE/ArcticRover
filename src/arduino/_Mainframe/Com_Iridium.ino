@@ -12,7 +12,10 @@
 
 IridiumSBD modem(COM_SERIAL_IRID);
 
-uint8_t buffer[200];
+uint8_t sendBuffer[200];
+uint8_t receiveBuffer[200];
+
+size_t bufferSize = 200;
 int signalQuality = -1;
 bool iridiumTxStatus;
 unsigned long millisLastIridiumProcess;
@@ -21,13 +24,16 @@ bool InitializeIridium() {
   bool status = true;
   COM_SERIAL_IRID.begin(IRID_BAUDRATE);
 
+  digitalWrite(PO_POWER_IRIDIUM, HIGH);
+
   // modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
 
-  //bool status = (modem.begin() == ISBD_SUCCESS);
+  // status = (modem.begin() == ISBD_SUCCESS);
   return status;
 }
 
 void TerminateIridium() {
+  digitalWrite(PO_POWER_IRIDIUM, LOW);
   COM_SERIAL_IRID.end();
 }
 
@@ -60,18 +66,17 @@ void IridiumReceive() {
   }
 
   int err;
-  size_t bufferSize = sizeof(buffer);
 
-  err = modem.sendReceiveSBDText(NULL, buffer, bufferSize);
+  err = modem.sendReceiveSBDText(NULL, receiveBuffer, bufferSize);
   if (err != ISBD_SUCCESS) {
     DEBUG_PRINT(F("Receive msg failed, error: "));
     DEBUG_PRINTLN(err);
   } else {
     for (int i = 0; i < bufferSize; i++) {
-      Serial.print(buffer[i], HEX);
-      if (isprint(buffer[i])) {
+      Serial.print(receiveBuffer[i], HEX);
+      if (isprint(receiveBuffer[i])) {
         Serial.print(F("("));
-        Serial.write(buffer[i]);
+        Serial.write(receiveBuffer[i]);
         Serial.print(F(")"));
       }
       Serial.print(F(" "));
@@ -89,6 +94,9 @@ void IridiumReceive() {
 
 // Send iridium message awaiting to be sent
 void IridiumSend() {
+  // if (messageAwaiting) {
+  // modem.sendReceiveSBDBinary(sendBuffer,bufferSize,receiveBuffer,bufferSize);
+  // }
 }
 
 // Full Iridium Test
