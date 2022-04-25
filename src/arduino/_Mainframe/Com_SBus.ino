@@ -31,7 +31,7 @@ void TerminateSBUS() {
 }
 
 bool SBusStatus() {
-  return GetStatus(MODULE_RF);
+  return GetStatus(MODULE_RF) && sBusStatus;
 }
 
 bool SBusTest() {
@@ -110,32 +110,37 @@ float getChannelFloatFull(int channel) {
 // Read RF signal and update motors accordingly
 bool SBusProcess() {
   sbus.process();
-  
+
   if (millis() - millisLastSBusUpdate < REMOTE_PROCESS_DT) {
-    return sBusStatus;
+    return true;
   }
+
   millisLastSBusUpdate = millis();
 
-  if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
-    MotorUpdate(0, 0);
-    return sBusStatus;
+  // First timeout error returns true (catches large first read getLastTime)
+  if (millis() - (unsigned long)sbus.getLastTime() > SBUS_TIMEOUT) {
+    if (sBusStatus) {
+      sBusStatus = false;
+      return true;
+    } else {
+      DEBUG_PRINTLN("SBUS TIMEOUT");
+      MotorUpdate(0, 0);
+      return sBusStatus;
+    }
   }
 
-  SBusController();
-
-  // First timeout error returns true (catches large first read getLastTime)
-  if (millis() - (unsigned long)sbus.getLastTime() < SBUS_TIMEOUT && sBusStatus) {
-    sBusStatus = false;
-    return true;
+  sBusStatus = true;
+  if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
+    MotorUpdate(0, 0);
   } else {
-    sBusStatus = true;
+    SBusController();
   }
 
   return sBusStatus;
 }
 
 // Reads controller input and navigates motors
-void SBusController(){
+void SBusController() {
   float throttle1 = getChannelFloatFull(1);  // Left stick Vertical
   float dir       = getChannelFloat(2);      // Right stick Horisontal
   float throttle2 = getChannelFloat(3);      // Right stick Vertical
@@ -175,7 +180,7 @@ void SBusPrint() {
   }
   millisLastSbusPrint = millis();
   printChannels();
-  Serial.println(F("-------------------------------"));
+  DEBUG_PRINTLINE();
 }
 
 void printChannels() {
@@ -188,15 +193,15 @@ void printChannels() {
   // }
   // Serial.println();
 
-  Serial.print("Good frames: ");
-  Serial.print(sbus.getGoodFrames());
+  DEBUG_PRINT("Good frames: ");
+  DEBUG_PRINT(sbus.getGoodFrames());
 
-  Serial.print(" \tData loss on connection: ");
-  Serial.print(sbus.getFrameLoss());
-  Serial.print("% \t");
+  DEBUG_PRINT(" \tData loss on connection: ");
+  DEBUG_PRINT(sbus.getFrameLoss());
+  DEBUG_PRINT("% \t");
 
-  Serial.print("Time diff: ");
-  Serial.println(millis() - (unsigned long)sbus.getLastTime());
+  DEBUG_PRINT("Time diff: ");
+  DEBUG_PRINTLN(millis() - (unsigned long)sbus.getLastTime());
 }
 
 // Timer2 triggers ever 1ms and processes the incoming SBUS datastream

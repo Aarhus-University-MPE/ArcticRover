@@ -25,12 +25,12 @@
 
 // Heartbeat
 #define PI_BACKUP_HRTBEAT    3
-#define PO_BACKUP_HRTBEAT    7 
+#define PO_BACKUP_HRTBEAT    8  // TODO: Revert back to 7, temporary used on relay
 #define PI_INT_HRTBEAT       digitalPinToInterrupt(PI_BACKUP_HRTBEAT)
 
 // Reset pin
 #define PI_BACKUP_RST        RESET
-#define PO_BACKUP_RST        6    // Backup CPU reset pin
+#define PO_BACKUP_RST        6  // Backup CPU reset pin
 
 // Status LED/Sound
 #define PO_LED_STATUS_RED    28
@@ -38,10 +38,10 @@
 #define PO_LED_STATUS_GRN    32
 
 // Power control (Relays)
-#define PO_POWER_MOTOR       36   // Relay to motor battery power
-#define PO_POWER_24V         38   // External 24V power 
-#define PO_POWER_12V         40   // External 12V power 
-#define PO_POWER_5V          42   // External 5V power 
+#define PO_POWER_MOTOR       36  // Relay to motor battery power
+#define PO_POWER_24V         38  // External 24V power
+#define PO_POWER_12V         40  // External 12V power
+#define PO_POWER_5V          42  // External 5V power
 #define PO_POWER_RF          44
 #define PO_POWER_IRIDIUM     46
 #define PO_POWER_HEATING     48
@@ -53,7 +53,8 @@
 #define PA_SENSOR_TEMP3      PIN_A3
 
 // Motor Control
-#define PO_MOTOR_EN          34   // Enables CAN power, Motor HW Enable and Motor Driver Power
+#define PO_MOTOR_EN          34  // Enables CAN power, Motor HW Enable and Motor Driver Power
+#define PO_MOTOR_EN_PWR      7   // Activates 12V Relay
 
 // Communication
 #define PO_SPISS_SDCARD      24  // 50 (MISO), 51 (MOSI), 52 (SCK)

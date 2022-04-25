@@ -13,31 +13,61 @@
 // ------------------------------------------------------------ //
 
 // Debug configuration flag - Comment out to unset
-#define DEBUG
+// #define DEBUG_BLACKBOX_AND_PRINT
+// #define DEBUG_BLACKBOX
+#define DEBUG_SERIAL
+// #define DEBUG_NONE
 
 // Executes if DEBUG flag is set.
-#if defined(DEBUG)
+#if defined(DEBUG_BLACKBOX_AND_PRINT)
 #define DBG_ONLY(x) x
 #define DEBUG_PRINT(x) \
   BlackBoxAppend(x);   \
   Serial.print(x)
+#define DEBUG_PRINT2(x, y) \
+  BlackBoxAppend(x, y);    \
+  Serial.print(x, y)
 #define DEBUG_PRINTLN(x) \
   BlackBoxAppendln(x);   \
   Serial.println(x)
 #define DEBUG_PRINTLN2(x, y) \
   BlackBoxAppendln(x, y);    \
   Serial.println(x, y)
-#define DEBUG_PRINTLINE()                                      \
-  BlackBoxAppendln(F("------------------------------------")); \
+#define DEBUG_PRINTLINE() \
   Serial.println(F("------------------------------------"))
 #define DEBUG_WRITE(x) Serial.write(x)
 #define RECEIVE_CMDS() recvWithStartEndMarkers()
-#else
+#endif
+
+#if defined(DEBUG_BLACKBOX)
 #define DBG_ONLY(x)
 #define DEBUG_PRINT(x)       BlackBoxAppend(x)
+#define DEBUG_PRINT2(x, y)   BlackBoxAppend(x, y)
 #define DEBUG_PRINTLN(x)     BlackBoxAppendln(x)
 #define DEBUG_PRINTLN2(x, y) BlackBoxAppendln(x, y)
-#define DEBUG_PRINTLINE()    BlackBoxAppendln(F("------------------------------------"))
+#define DEBUG_PRINTLINE()
+#define DEBUG_WRITE(x)
+#define RECEIVE_CMDS()
+#endif
+
+#if defined(DEBUG_SERIAL)
+#define DBG_ONLY(x)          x
+#define DEBUG_PRINT(x)       Serial.print(x)
+#define DEBUG_PRINT2(x, y)   Serial.print(x, y)
+#define DEBUG_PRINTLN(x)     Serial.println(x)
+#define DEBUG_PRINTLN2(x, y) Serial.println(x, y)
+#define DEBUG_PRINTLINE()    Serial.println(F("------------------------------------"))
+#define DEBUG_WRITE(x)       Serial.write(x)
+#define RECEIVE_CMDS()       recvWithStartEndMarkers()
+#endif
+
+#if defined(DEBUG_NONE)
+#define DBG_ONLY(x)
+#define DEBUG_PRINT(x)
+#define DEBUG_PRINT2(x, y)
+#define DEBUG_PRINTLN(x)
+#define DEBUG_PRINTLN2(x, y)
+#define DEBUG_PRINTLINE()
 #define DEBUG_WRITE(x)
 #define RECEIVE_CMDS()
 #endif
@@ -48,7 +78,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion          "0.91.126"
+#define SystemVersion          "0.97.037"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN    B001  // 001
@@ -66,14 +96,13 @@
 #define BUTTON_DBOUNCE_TIME    200
 #define BTN_DEBOUNCE_TIME_LONG 2500
 
-// Relay
-#define RELAY_SWITCHING_TIME   10
+#define MAX_BLACKBOX_ROW_PRINT 100
 
 // Sensor and Module status
 #define SYSTEM_CHECK_DT        30000
 #define SYSTEM_REBOOT_DT       5000
 
-#define MODULE_COUNT           24
+#define MODULE_COUNT           25
 
 #define MODULE_PWR             0
 #define MODULE_PWR_5V          1
@@ -98,10 +127,11 @@
 #define MODULE_TEMP            20
 #define MODULE_BACKUPCPU       21
 #define MODULE_ESTOP           22
-#define MODULE_RESERVED        23
+#define MODULE_DEBUG           23
+#define MODULE_RESERVED        24
 
 #define ModuleToString(m) \
-  ((m) == 0 ? "Primary Power" : ((m) == 1 ? "Secondary Power (5V)" : ((m) == 2 ? "Secondary Power (12V)" : ((m) == 3 ? "Secondary Power (24V)" : ((m) == 4 ? "Secondary Power (Motors)" : ((m) == 5 ? "Motors" : ((m) == 6 ? "Motor Left" : ((m) == 7 ? "Motor Right" : ((m) == 8 ? "Motor Active" : ((m) == 9 ? "CAN-bus" : ((m) == 10 ? "Short Range Communication (RF)" : ((m) == 11 ? "Long Range Communication (Iridium)" : ((m) == 12 ? "Global Navigation Satellite System" : ((m) == 13 ? "Accelerometer" : ((m) == 14 ? "Local Storage" : ((m) == 15 ? "Blackbox" : ((m) == 16 ? "Waypoint Route" : ((m) == 17 ? "Debug Comm." : ((m) == 18 ? "System LED" : ((m) == 19 ? "Heating" : ((m) == 20 ? "Temperature" : ((m) == 21 ? "Backup CPU" : ((m) == 22 ? "Emergency Stop" : ((m) == 23 ? "Reserved" : ("Unknown")))))))))))))))))))))))))
+  ((m) == 0 ? "Primary Power" : ((m) == 1 ? "Secondary Power (5V)" : ((m) == 2 ? "Secondary Power (12V)" : ((m) == 3 ? "Secondary Power (24V)" : ((m) == 4 ? "Secondary Power (Motors)" : ((m) == 5 ? "Motors" : ((m) == 6 ? "Motor Left" : ((m) == 7 ? "Motor Right" : ((m) == 8 ? "Motor Active" : ((m) == 9 ? "CAN-bus" : ((m) == 10 ? "Short Range Communication (RF)" : ((m) == 11 ? "Long Range Communication (Iridium)" : ((m) == 12 ? "Global Navigation Satellite System" : ((m) == 13 ? "Accelerometer" : ((m) == 14 ? "Local Storage" : ((m) == 15 ? "Blackbox" : ((m) == 16 ? "Waypoint Route" : ((m) == 17 ? "Debug Comm." : ((m) == 18 ? "System LED" : ((m) == 19 ? "Heating" : ((m) == 20 ? "Temperature" : ((m) == 21 ? "Backup CPU" : ((m) == 22 ? "Emergency Stop" : ((m) == 23 ? "Debug" : ((m) == 24 ? "Reserved" : ("Unknown"))))))))))))))))))))))))))
 
 const unsigned long SYSREQ_REMOTE_CONTROL =
     (1L << MODULE_PWR) +
@@ -134,9 +164,12 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define CMD_FILES_LIST         'L'
 #define CMD_FILES_SIZE         'S'
 #define CMD_FILES_DOWNLOAD     'D'
-#define CMD_FILES_DELETE       'R'
+#define CMD_FILES_CREATE       'C'
+#define CMD_FILES_REMOVE       'R'
+#define CMD_FILES_WRITE        'W'
+#define CMD_FILES_QUIT         'Q'
 #define CMD_FILES_BLCKBOX      'B'
-#define CMD_FILES_BLCKBOXCLEAR 'C'
+#define CMD_FILES_BLCKBOXEMPTY 'E'
 
 #define CMD_STRATEGY           'S'
 #define CMD_STRATEGY_SET       'S'
@@ -238,12 +271,12 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define REMOTE_CHANNEL_LOW                50
 #define REMOTE_CHANNEL_HIGH               200
 #define CONTROLLER_DEADZONE               10
-#define CONTROLLER_DEADZONE_FLOAT         0.05
+#define CONTROLLER_DEADZONE_FLOAT         0.01
 
 // ------------------------------------------------------------ //
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
-#define MOTOR_STARTUP_TIMEOUT             5000
+#define MOTOR_STARTUP_TIMEOUT             30000
 
 // CAN BUS
 #define CANBUS_TX_MOTOR_LEFT              0x12
@@ -259,7 +292,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define HEATING_TIMEOUT                   40000
 
 // ------------------------------------------------------------ //
-//                         SYS TESTS                            //
+//                       SYSTEM TESTS                           //
 // ------------------------------------------------------------ //
 #define SYS_TEST_DURATION                 10000
 #define SYS_TEST_DURATION_LONG            30000

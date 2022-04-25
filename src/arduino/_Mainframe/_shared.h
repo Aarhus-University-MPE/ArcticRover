@@ -113,10 +113,10 @@ byte modeCycle;
 byte prevMode;
 
 // Navigation
-long latCurrent   = 0;
-long lonCurrent   = 0;
+long latCurrent = 0;
+long lonCurrent = 0;
 
-int waypointIndex   = 0;
+int waypointIndex = 0;
 
 boolean isModeUpdated = false;
 
@@ -166,6 +166,21 @@ void BlackBoxAppend(unsigned long blackBoxInput);
 void BlackBoxAppendln(unsigned long blackBoxInput);
 
 double CoordLong2Double(long longValue);
+
+bool DebugInitialize();
+void DebugTerminate();
+
+bool SDWriteStream(char fileNameOrData[]);
+void SDQuit();
+
+bool remoteActive, remoteStart;
+
+void RemoteControlStatusLed();
+void RemoteControlProcess();
+void RemoteControlInitialize();
+
+bool SelectButtonDebounce();
+bool ModeButtonDebounce();
 
 enum LED_SIGNAL {
   LED_SIGNAL_OK = 0,

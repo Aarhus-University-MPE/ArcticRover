@@ -29,23 +29,33 @@ bool InitBlackBox() {
   return BlackBoxStatus;
 }
 
+/*
+  Prints Contents of BlackBox File
+  TODO: Limit to only print X lines
+*/
 void BlackBoxPrint() {
   if (SDReaderStatus()) {
     DEBUG_PRINTLN(F("Printing Blackbox: "));
     File file = SD.open("Blackbox.csv");
     if (file) {
-      while (file.available()) {
+      int idx;
+      while (file.available() && idx < MAX_BLACKBOX_ROW_PRINT) {
         DEBUG_WRITE(file.read());
+        idx++;
       }
       file.close();
-      DEBUG_PRINTLN(F("End of File"));
+      if (idx < MAX_BLACKBOX_ROW_PRINT) {
+        DEBUG_PRINTLN(F("End of File"));
+      } else {
+        DEBUG_PRINTLN(F("Printed 100 Rows"));
+      }
     } else {
       DEBUG_PRINTLN(F("File not found!"));
     }
   }
 }
 
-void BlackBoxClear() {
+void BlackBoxEmpty() {
   if (SD.exists("Blackbox.csv")) {
     DEBUG_PRINTLN(F("BLACKBOX CLEARED"));
     SD.remove("Blackbox.csv");

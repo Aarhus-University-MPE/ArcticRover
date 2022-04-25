@@ -7,6 +7,9 @@
 */
 #include <SD.h>
 
+File activeWriteFile;
+bool activeWrite;
+
 // Initialize SD card reader module.
 bool InitializeSDReader() {
   bool status = false;
@@ -124,4 +127,43 @@ void SDCreate(char fileName[]) {
       file.close();
     }
   }
+}
+
+/*
+  Initializes file write stream
+  First run opens file with name, consecutive runs appends data to opened file
+  When complete run SDQuit() to close write stream
+*/
+bool SDWriteStream(char fileNameOrData[]) {
+  if (!activeWrite) {
+    return SDOpenWriteStream(fileNameOrData);
+  }
+
+  activeWriteFile.print(fileNameOrData);
+  return true;
+}
+
+bool SDOpenWriteStream(char fileNameOrData[]) {
+  if (!SD.exists(fileNameOrData)) {
+    DEBUG_PRINT(F("Creating file: "));
+    DEBUG_PRINTLN(fileNameOrData);
+  } else {
+    DEBUG_PRINT(F("Opening file: "));
+    DEBUG_PRINTLN(fileNameOrData);
+  }
+  activeWriteFile = SD.open(fileNameOrData, FILE_WRITE);
+
+  if (!activeWriteFile) {
+    DEBUG_PRINTLN(F("Error!"));
+    return false;
+  }
+
+  DEBUG_PRINTLN(F("Success"));
+  return true;
+}
+
+// Closes current active file write stream
+void SDQuit() {
+  activeWriteFile.close();
+  activeWrite = false;
 }

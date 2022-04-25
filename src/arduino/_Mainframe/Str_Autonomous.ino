@@ -46,8 +46,9 @@ void FinishStrategyAutonomous() {
 
 // Select button function, starts autonomous driving
 void SelectFunctionAutonomous() {
-  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
-    lastMillisSelect = millis();
-    AutonomyToggle();
+  if (!SelectButtonDebounce()) {
+    return;
   }
+
+  AutonomyToggle();
 }

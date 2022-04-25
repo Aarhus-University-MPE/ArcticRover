@@ -25,16 +25,9 @@ void StartStrategyEmergency() {
 
 // Main sequence of strategy
 void RunStrategyEmergency() {
-  StrategyRunLed(MODE_EMERGENCY);
+  EmergencyExitCheck();
 
-  // Exit strategy, if emergency not set -> Idle strategy
-  if (EmergencyStopStatus()) {
-    LedBlink(BINARY_CODE_LED_GRN, ESTOP_DEBOUNCE_TIME / 2, ESTOP_DEBOUNCE_TIME / 2);
-    if (EmergencyStopStatus()) {
-      LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
-      SetMode(MODE_IDLE);
-    }
-  }
+  StrategyRunLed(MODE_EMERGENCY);
 }
 
 // End sequence of strategy
@@ -42,7 +35,7 @@ void FinishStrategyEmergency() {
   DEBUG_PRINTLINE();
   DEBUG_PRINTLN(F("Strategy (Emergency): Ending"));
 
-  lastMillisMode = millis();
+  lastMillisMode  = millis();
   lastMillisEstop = millis();
 
   // Enable input buttons
@@ -57,7 +50,23 @@ void FinishStrategyEmergency() {
   // Disable light
 }
 
+// Emergency Strategy Select Function
 void SelectFunctionEmergency() {
+  // Select button serves no purpose while in Emergency Mode
+}
+
+// Exit strategy, if emergency not set -> Idle strategy
+void EmergencyExitCheck() {
+  if (!EmergencyStopStatus()) {  // Emergency Button still pressed?
+    return;
+  }
+
+  LedBlink(BINARY_CODE_LED_GRN, ESTOP_DEBOUNCE_TIME / 2, ESTOP_DEBOUNCE_TIME / 2);
+
+  if (EmergencyStopStatus()) {
+    LedBlinkDoubleShort(BINARY_CODE_LED_GRN);
+    SetMode(MODE_IDLE);
+  }
 }
 
 // Returns TRUE if Emergency Button is NOT pressed

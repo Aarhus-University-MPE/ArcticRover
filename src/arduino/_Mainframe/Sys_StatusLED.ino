@@ -1,3 +1,11 @@
+/*
+  GeoRover Status LED Control
+
+  Mads Rosenhøj Jeppesen
+  Aarhus University
+  2021
+*/
+
 byte currentLedStatus = B000;
 unsigned long lastMillisLed;
 unsigned long millisSinceLast;
@@ -29,28 +37,27 @@ void LedSet(byte color) {
   currentLedStatus = color;
 }
 
-void LedSetSignal(LED_SIGNAL signal){
-  switch (signal)
-  {
-  case LED_SIGNAL_OK:
-    LedSet(BINARY_CODE_LED_GRN);
-    break;
-  case LED_SIGNAL_IDLE:
-    LedSet(BINARY_CODE_LED_YEL);
-    break;
-  case LED_SIGNAL_LOADING:
-    LedSet(BINARY_CODE_LED_YEL);
-    break;
-  case LED_SIGNAL_ERROR:
-    LedSet(BINARY_CODE_LED_RED);
-    break;
-  default:
-    LedSet(0);
-    break;
+void LedSetSignal(LED_SIGNAL signal) {
+  switch (signal) {
+    case LED_SIGNAL_OK:
+      LedSet(BINARY_CODE_LED_GRN);
+      break;
+    case LED_SIGNAL_IDLE:
+      LedSet(BINARY_CODE_LED_YEL);
+      break;
+    case LED_SIGNAL_LOADING:
+      LedSet(BINARY_CODE_LED_YEL);
+      break;
+    case LED_SIGNAL_ERROR:
+      LedSet(BINARY_CODE_LED_RED);
+      break;
+    default:
+      LedSet(0);
+      break;
   }
 }
 
-void LedSetSignal(){
+void LedSetSignal() {
   LedSet(0);
 }
 
@@ -65,8 +72,7 @@ bool LedBlink(byte color, unsigned int onDuration, unsigned int offDuration) {
     LedSet(0);
     lastMillisLed = millis();
     cycleDone     = true;
-  }
-  else if (currentLedStatus == 0 && millisSinceLast > offDuration) {
+  } else if (currentLedStatus == 0 && millisSinceLast > offDuration) {
     LedSet(color);
     lastMillisLed = millis();
   }
@@ -77,10 +83,10 @@ int LedColor = 0;
 void LedBlink(byte colorOne, byte colorTwo, unsigned int onDuration, unsigned int offDuration) {
   switch (LedColor) {
     case 0:
-      if (LedBlink(colorOne, onDuration/2, offDuration)) LedColor++;
+      if (LedBlink(colorOne, onDuration / 2, offDuration)) LedColor++;
       break;
     case 1:
-      if (LedBlink(colorTwo, onDuration/2, 0)) LedColor++;
+      if (LedBlink(colorTwo, onDuration / 2, 0)) LedColor++;
       break;
     default:
       LedColor = 0;
@@ -89,9 +95,9 @@ void LedBlink(byte colorOne, byte colorTwo, unsigned int onDuration, unsigned in
 }
 
 // Resets current flashing LED and resets timers
-void ResetLed(){
+void ResetLed() {
   lastMillisLed = 0;
-  LedColor = 0;
+  LedColor      = 0;
   LedSet(0);
 }
 
@@ -189,6 +195,20 @@ void StrategyRunLed(byte mode) {
   }
 }
 
+// Flash LED indicating current status of Remote Control
+void RemoteControlStatusLed() {
+  if (!remoteActive) {
+    StrategyRunLed(MODE_REMOTECONTROL);
+    return;
+  }
+
+  if (MotorStatusLeft() && MotorStatusRight() && SBusStatus()) {
+    StrategyRunLed(MODE_AUTONOMOUS);
+  } else {
+    StrategyRunLed(MODE_EMERGENCY);
+  }
+}
+
 // Blink light of current mode (Non-blocking)
 void StrategyRunLed() {
   StrategyRunLed(mode);
@@ -221,19 +241,19 @@ void StatusHaltLed(LED_SIGNAL signal) {
       LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_NORMAL);
       break;
     case LED_SIGNAL_OK_SHORT:
-      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT);
+      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_SHORT);
       break;
     case LED_SIGNAL_OK_SHORT_HALT:
-      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+      LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_SHORT, LED_BLINK_SHORT);
       break;
     case LED_SIGNAL_ERROR:
       LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_NORMAL);
       break;
     case LED_SIGNAL_ERROR_SHORT:
-      LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_SHORT);
+      LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_SHORT);
       break;
     case LED_SIGNAL_ERROR_SHORT_HALT:
-      LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_SHORT, LED_BLINK_VERY_SHORT);
+      LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_SHORT, LED_BLINK_SHORT);
       break;
     case LED_SIGNAL_IDLE:
       LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_SHORT);
@@ -257,11 +277,11 @@ void ModuleStopLed(int module) {
 }
 
 void LedTest() {
-  Serial.println("Red");
+  DEBUG_PRINTLN("Red");
   LedBlinkHalt(BINARY_CODE_LED_RED, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
-  Serial.println("Yellow");
+  DEBUG_PRINTLN("Yellow");
   LedBlinkHalt(BINARY_CODE_LED_YEL, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
-  Serial.println("Green");
+  DEBUG_PRINTLN("Green");
   LedBlinkHalt(BINARY_CODE_LED_GRN, LED_BLINK_VERY_LONG, LED_BLINK_LONG);
 
   // LedBlinkDoubleShort(BINARY_CODE_LED_RED,BINARY_CODE_LED_RED);

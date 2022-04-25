@@ -19,10 +19,9 @@ void StartStrategyExample() {
 
 // Main sequence of strategy
 void RunStrategyExample() {
-  StrategyRunLed(); // Non-blocking LED blink
-  
-  // Add code which runs every loop for current strategy
+  StrategyRunLed();  // Non-blocking LED blink for current strategy
 
+  // Add code which runs every loop for current strategy
 }
 
 // End sequence of strategy
@@ -39,9 +38,9 @@ void FinishStrategyExample() {
 
 // Select button function for current strategy
 void SelectFunctionExample() {
-  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
-    lastMillisSelect = millis();
-    // Add functionality here
+  if (!SelectButtonDebounce()) {
+    return;
   }
-}
 
+  // <-- Add select button functionality here
+}

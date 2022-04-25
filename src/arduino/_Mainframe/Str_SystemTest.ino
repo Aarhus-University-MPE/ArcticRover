@@ -38,14 +38,13 @@ void FinishStrategySystemTest() {
   DEBUG_PRINTLN(F("Strategy (System Test): Finished"));
 }
 
-
 // Selecet button function
 void SelectFunctionSystemTest() {
-  if (millis() - lastMillisSelect > BTN_DEBOUNCE_TIME) {
-    systemTestState = 0;
-    lastMillisSelect = millis();
-    runTest = true;
-    DetachSelectButton();
+  if (!SelectButtonDebounce()) {
+    return;
   }
-}
 
+  systemTestState = 0;
+  runTest         = true;
+  DetachSelectButton();
+}

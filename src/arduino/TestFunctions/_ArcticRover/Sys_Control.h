@@ -18,7 +18,7 @@ void SetStatus(bool status) {
   for (int i = 0; i < MODULE_COUNT; i++) {
     SystemStatus[i] = status;
   }
-  SystemStatus[MODULE_ESTOP] = true;
+  SystemStatus[MODULE_ESTOP]    = true;
   SystemStatus[MODULE_RESERVED] = true;
 }
 
@@ -91,6 +91,9 @@ void SystemEnable(int module) {
       break;
     case MODULE_LED:
       status = true;
+      break;
+    case MODULE_DEBUG:
+      status = DebugInitialize();
       break;
     default:
       DEBUG_PRINT("- UNKNOWN Case");
@@ -212,6 +215,9 @@ void SystemDisable(int module) {
     case MODULE_ESTOP:
       status = EmergencyStopStatus();
       break;
+    case MODULE_DEBUG:
+      status = DebugTerminate();
+      break;
     case MODULE_RESERVED:
       status = true;
       break;
@@ -251,8 +257,8 @@ bool SystemCheck(int mode) {
   switch (mode) {
     case MODE_REMOTECONTROL:
       status = ((((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
-                 SYSREQ_REMOTE_CONTROL) |
-                (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
+                  SYSREQ_REMOTE_CONTROL) |
+                 (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
         DEBUG_PRINT("ERROR Code: ");
         DEBUG_PRINTLN(String(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
@@ -263,7 +269,7 @@ bool SystemCheck(int mode) {
     case MODE_AUTONOMOUS:
       status =
           ((((ToLong(SystemStatus) ^ SYSREQ_AUTONOMOUS) & SYSREQ_AUTONOMOUS) |
-           (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
+            (1L << MODULE_RESERVED)) == (1L << MODULE_RESERVED));
       if (!status) {
         DEBUG_PRINT("ERROR Code: ");
         DEBUG_PRINTLN(((ToLong(SystemStatus) ^ SYSREQ_REMOTE_CONTROL) &
@@ -367,13 +373,13 @@ bool SystemTest() {
       DEBUG_PRINT("  Results: ");
       DEBUG_PRINTLN(String(testResults));
       DEBUG_PRINTLINE();
-      testDone = true;
+      testDone        = true;
       systemTestState = 0;
       break;
     default:
       DEBUG_PRINTLN("System Test Error: Stopping");
       systemTestState = 0;
-      testDone = true;
+      testDone        = true;
       break;
   }
 
@@ -382,7 +388,7 @@ bool SystemTest() {
 
 bool SystemTestModule(byte module) {
   SystemEnable(module);
-  bool status = false;
+  bool status   = false;
   bool testDone = true;
 
   if (GetStatus(module)) {
@@ -404,7 +410,7 @@ bool SystemTestModule(byte module) {
         break;
       case MODULE_MOTORS:
         testDone = MotorTest();
-        status = MotorStatus();
+        status   = MotorStatus();
         break;
       case MODULE_MOTOR_L:
         status = MotorStatusLeft();
@@ -417,22 +423,22 @@ bool SystemTestModule(byte module) {
         break;
       case MODULE_CANBUS:
         testDone = CanBusTest();
-        status = CanBusStatus();
+        status   = CanBusStatus();
         break;
       case MODULE_RF:
         testDone = SBusTest();
-        status = SBusStatus();
+        status   = SBusStatus();
         break;
       case MODULE_IRIDIUM:
         status = IridiumTest();
         break;
       case MODULE_GNSS:
         testDone = GnssTest();
-        status = GnssStatus();
+        status   = GnssStatus();
         break;
       case MODULE_ACCEL:
         testDone = AccelTest();
-        status = AccelStatus();
+        status   = AccelStatus();
         break;
       case MODULE_SD:
         status = SDReaderStatus();
@@ -457,11 +463,14 @@ bool SystemTestModule(byte module) {
         status = true;
         break;
       case MODULE_TEMP:
-        status = TemperatureStatus();
+        status   = TemperatureStatus();
         testDone = TemperatureTest();
         break;
       case MODULE_ESTOP:
         status = EmergencyStopStatus();
+        break;
+      case MODULE_DEBUG:
+        status = true;
         break;
       case MODULE_RESERVED:
         status = true;
@@ -480,10 +489,10 @@ bool SystemTestModule(byte module) {
 
 // System check
 void SystemCheck() {
-  for (int i = 0; i < MODULE_COUNT - 2; i++) {
+  for (int i = 0; i < MODULE_COUNT - 3; i++) {
     SystemCheckModule(i);
   }
-  
+
   SetStatus(MODULE_ESTOP, EmergencyStopStatus());
   SetStatus(MODULE_RESERVED, true);
 }

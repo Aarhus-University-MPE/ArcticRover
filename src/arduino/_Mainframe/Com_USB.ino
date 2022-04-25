@@ -123,14 +123,23 @@ void parseCommandFiles() {
     case CMD_FILES_DOWNLOAD:
       SDDownload(fileName);
       break;
-    case CMD_FILES_DELETE:
+    case CMD_FILES_CREATE:
+      SDCreate(fileName);
+      break;
+    case CMD_FILES_REMOVE:
       SDDelete(fileName);
+      break;
+    case CMD_FILES_WRITE:
+      SDWriteStream(fileName);
+      break;
+    case CMD_FILES_QUIT:
+      SDQuit();
       break;
     case CMD_FILES_BLCKBOX:
       BlackBoxPrint();
       break;
-    case CMD_FILES_BLCKBOXCLEAR:
-      BlackBoxClear();
+    case CMD_FILES_BLCKBOXEMPTY:
+      BlackBoxEmpty();
       break;
     case '\0':
       break;
@@ -279,9 +288,9 @@ void parseCommandRoute() {
 
   strtokIndx = strtok(tempChars, ",");
   strtokIndx = strtok(NULL, ",");
-  latLong     = atol(strtokIndx);
+  latLong    = atol(strtokIndx);
   strtokIndx = strtok(NULL, ",");
-  lonLong     = atol(strtokIndx);
+  lonLong    = atol(strtokIndx);
 
   switch (receivedCMD[1]) {
     case CMD_ROUTE_SET:

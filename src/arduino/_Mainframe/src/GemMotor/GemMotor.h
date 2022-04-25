@@ -12,7 +12,7 @@
 
 #define DIAGNOSTICS              false
 
-#define MIN_VELOCITY             1.0f   // kmh
+#define MIN_VELOCITY             0.25f  // kmh
 #define MOTOR_MAX_SPEED_FWD      10.0f  // kmh
 #define MOTOR_MAX_SPEED_BWD      5.0f   // kmh
 
@@ -32,8 +32,9 @@
 #define TORQUE_CONTROL_SCALE     100.0f / 1.0f  // Conversion from torque to control
 #define MAX_CONTROL_VALUE_TORQUE 100
 
-#define CAN_TIMEOUT_DURATION     50
-#define CANBUS_TX_PERIOD         10
+#define CAN_TIMEOUT_DURATION     1000
+#define CANBUS_TX_PERIOD         50
+#define CANBUS_PRINT_PERIOD      1000
 #define MOTOR_ERROR_TIMEOUT      5000  // Time before
 
 #define MAX_INPUT_STEP           0.1f  // maximum increase from current state
@@ -226,6 +227,8 @@ class GemMotor {
 
   // Unsets TX and RX flag
   void ResetCanStatus();
+
+  bool MotorError();
 
   // Updates controlvalues based on input velocity
   void Update(float velocity);

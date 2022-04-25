@@ -14,8 +14,9 @@ bool InitializeMotors() {
   // }
 
   digitalWrite(PO_MOTOR_EN, true);
+  digitalWrite(PO_MOTOR_EN_PWR, true);  // TODO: Remove, temporary 12V relay power
 
-  if (!MotorCycle()) return false;
+  delay(50);
 
   // return MotorStatus();
   return true;
@@ -23,7 +24,10 @@ bool InitializeMotors() {
 
 // Disable Motor HW Enable
 void TerminateMotors() {
+  SystemDisable(MODULE_PWR_12V);  // TODO: Remove, temporary 12V relay power
+
   digitalWrite(PO_MOTOR_EN, false);
+  digitalWrite(PO_MOTOR_EN_PWR, false);  // TODO: Remove, temporary 12V relay power
 }
 
 // Moves motors based on direction and speed input within the range of [-1 and 1]
@@ -32,6 +36,10 @@ void TerminateMotors() {
 void MotorUpdate(float dir, float speed) {
   float velocityLeft;
   float velocityRight;
+
+  // Clamp inputs
+  dir   = max(-1.0f, min(1.0f, dir));
+  speed = max(-1.0f, min(1.0f, speed));
 
   SpeedCalculation(dir, speed, velocityLeft, velocityRight);
 
@@ -47,6 +55,10 @@ void MotorUpdateTorque(float dir, float speed) {
   float torqueLeft;
   float torqueRight;
 
+  // Clamp inputs
+  dir   = max(-1.0f, min(1.0f, dir));
+  speed = max(-1.0f, min(1.0f, speed));
+
   TorqueCalculation(dir, speed, torqueLeft, torqueRight);
 
   // Update CAN messages
@@ -54,6 +66,7 @@ void MotorUpdateTorque(float dir, float speed) {
   motorRight.UpdateTorque(torqueRight);
 }
 
+// Calculates skid steering based on direction and speed
 void TorqueCalculation(float dir, float speed, float &torqueLeft, float &torqueRight) {
   float steerFactorLeft  = 1.0f;
   float steerFactorRight = 1.0f;
@@ -109,7 +122,10 @@ void SpeedCalculation(float dir, float speed, float &velocityLeft, float &veloci
 
 // Run CAN cycle until both motors report NO ERROR or times out
 bool MotorCycle() {
-  if (!GetStatus(MODULE_CANBUS)) {
+  // if (!GetStatus(MODULE_CANBUS)) {
+  //   return false;
+  // }
+  if (!GetStatus(MODULE_MOTORS)) {
     return false;
   }
   if (!GetStatus(MODULE_PWR_MOTOR)) {
@@ -120,7 +136,7 @@ bool MotorCycle() {
   unsigned long millisMotorStart = millis();
 
   // (!motorLeft.CanStatus() || !motorRight.CanStatus()) && 1
-  
+
   // Run canbus for a while to get motor states and test data connection
   while ((!motorLeft.CanStatus() || !motorRight.CanStatus()) && (millis() - millisMotorStart) < MOTOR_STARTUP_TIMEOUT) {
     if (!CanBusProcess()) {
@@ -145,7 +161,7 @@ bool MotorStatus() {
 }
 
 // Returns true if both motors have a valid can signal
-bool MotorCanStatus(){
+bool MotorCanStatus() {
   return motorLeft.CanStatus() && motorRight.CanStatus();
 }
 // Left motor status
@@ -158,20 +174,9 @@ bool MotorStatusRight() {
   return motorRight.Status();
 }
 
-// Calculates steering factor from 2nd order function (-2x^2 + 1), used in skid steering
+// Calculates steering factor from 2nd order function (-1x^2 + 1), used in skid steering
 float SteerFactor(float dir) {
-  float scale;
-
-  if (dir >= 1.0f)
-    scale = -1.0f;
-
-  else if (dir <= -1.0f)
-    scale = -1.0f;
-
-  else
-    scale = -2.0f * (dir * dir) + 1.0f;
-
-  return scale;
+  return -1.0f * (dir * dir) + 1.0f;  // <-- Steer formula
 }
 
 // Full motor test

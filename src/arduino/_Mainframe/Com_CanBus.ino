@@ -23,8 +23,8 @@ MCP2515 mcp2515(PO_SPISS_CANBUS);
 bool InitializeCanBus() {
   int err;
 
-  digitalWrite(PO_MOTOR_EN, true);
-  delay(5);
+  // digitalWrite(PO_MOTOR_EN, true);
+  // delay(5);
 
   SPI.begin();  // Begins SPI communication
   mcp2515.reset();
@@ -38,9 +38,12 @@ bool InitializeCanBus() {
   motorRight.ResetCanStatus();
   motorLeft.SetCanTxStatus();
 
-  bool status = true;
+  if (!MotorCycle()) {
+    SystemDisable(MODULE_MOTORS);
+    return false;
+  }
 
-  return status;
+  return true;
 }
 
 void TerminateCanBus() {
@@ -58,7 +61,7 @@ void TerminateCanBus() {
 */
 
 void CanBusPrint() {
-  if (millis() - millisLastCanPrint < 1000) {
+  if (millis() - millisLastCanPrint < CANBUS_PRINT_PERIOD) {
     return;
   }
   millisLastCanPrint = millis();
@@ -69,7 +72,7 @@ void CanBusPrint() {
   // status = motorLeftStatus || motorRightStatus;
 
   // printChannels();
-  Serial.println(F("-------------------------------"));
+  // Serial.println(F("-------------------------------"));
 }
 
 // Process CANbus commands, returns false if MCP2515 throws error
@@ -78,9 +81,16 @@ bool CanBusProcess() {
     return true;
   }
 
+  // Check motor status
+  if (!MotorStatusLeft() && MotorStatusRight() && SBusStatus()) {
+    MotorUpdate(0, 0);  // Avoid running single motor if other motor reports error
+    // return false;
+  }
+
   int err;
   if (motorLeft.GetCanTxStatus()) {
     err = mcp2515.sendMessage(motorLeft.GetCanMsg());
+    // DEBUG_PRINTLN(F("Send - Left"));
     if (err != MCP2515::ERROR_OK) {
       DEBUG_PRINT(F("Can Error Left: "));
       DEBUG_PRINTLN(err);
@@ -88,6 +98,7 @@ bool CanBusProcess() {
     }
   } else if (motorRight.GetCanTxStatus()) {
     err = mcp2515.sendMessage(motorRight.GetCanMsg());
+    // DEBUG_PRINTLN(F("Send - Right"));
     if (err != MCP2515::ERROR_OK) {
       DEBUG_PRINT(F("Can Error Right: "));
       DEBUG_PRINTLN(err);
@@ -96,9 +107,14 @@ bool CanBusProcess() {
   }
 
   if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
-    if (motorLeft.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) motorRight.SetCanTxStatus();
-    if (motorRight.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) motorLeft.SetCanTxStatus();
-
+    if (motorLeft.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
+      motorRight.SetCanTxStatus();
+      DEBUG_PRINTLN(F("Timeout - Left"));
+    }
+    if (motorRight.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
+      motorLeft.SetCanTxStatus();
+      DEBUG_PRINTLN(F("Timeout - Right"));
+    }
     if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
       ParseData();
     }
@@ -116,12 +132,14 @@ bool ParseData() {
 
   // Check ID against left motor
   if (canMsg.can_id == CANBUS_RX_MOTOR_LEFT || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 1 || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_LEFT + 3) {
+    // DEBUG_PRINTLN(F("Read - Left"));
     status = motorLeft.ParseCanMsg(canMsg);
     motorRight.SetCanTxStatus();  // Indicate motor Right to send next msg
   }
 
   // Check ID against right motor
   else if (canMsg.can_id == CANBUS_RX_MOTOR_RIGHT || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 1 || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 2 || canMsg.can_id == CANBUS_RX_MOTOR_RIGHT + 3) {
+    // DEBUG_PRINTLN(F("Read - Right"));
     status = motorRight.ParseCanMsg(canMsg);
     motorLeft.SetCanTxStatus();  // Indicate motor Left to send next msg
   }
@@ -175,87 +193,87 @@ bool CanBusTest() {
 
 // Stream all data in raw HEX
 void StreamData() {
-  Serial.print(canMsg.can_id, HEX);  // print ID
-  Serial.print(F(" "));
-  Serial.print(canMsg.can_dlc, HEX);  // print DLC
-  Serial.print(F(" "));
+  DEBUG_PRINT2(canMsg.can_id, HEX);  // print ID
+  DEBUG_PRINT(F(" "));
+  DEBUG_PRINT2(canMsg.can_dlc, HEX);  // print DLC
+  DEBUG_PRINT(F(" "));
 
   for (int i = 0; i < canMsg.can_dlc; i++) {  // print the data
-    Serial.print(canMsg.data[i], HEX);
-    Serial.print(F(" "));
+    DEBUG_PRINT2(canMsg.data[i], HEX);
+    DEBUG_PRINT(F(" "));
   }
 
-  Serial.println();
+  DEBUG_PRINTLN();
 }
 
-void ParseCanMsg(bool motor) {
-  if (canMsg.can_id == 0x64) {
-    int control_value = (int)((canMsg.data[1] << 8) | canMsg.data[0]);
-    int motor_state   = (int)(canMsg.data[3] >> 6);
-    int rpm           = (int)((canMsg.data[6] << 8) | canMsg.data[5]) / 10.0f;
-    int temperature   = (int)canMsg.data[7];
+// void ParseCanMsg(bool motor) {
+//   if (canMsg.can_id == 0x64) {
+//     int control_value = (int)((canMsg.data[1] << 8) | canMsg.data[0]);
+//     int motor_state   = (int)(canMsg.data[3] >> 6);
+//     int rpm           = (int)((canMsg.data[6] << 8) | canMsg.data[5]) / 10.0f;
+//     int temperature   = (int)canMsg.data[7];
 
-    Serial.print(F("Control value: "));
-    Serial.print(control_value);
-    Serial.print(F("\t Motor State: "));
-    Serial.print(motor_state);
-    Serial.print(F("\t rpm: "));
-    Serial.print(rpm);
-    Serial.print(F("\t Temperature: "));
-    Serial.println(temperature);
-  }
+//     Serial.print(F("Control value: "));
+//     Serial.print(control_value);
+//     Serial.print(F("\t Motor State: "));
+//     Serial.print(motor_state);
+//     Serial.print(F("\t rpm: "));
+//     Serial.print(rpm);
+//     Serial.print(F("\t Temperature: "));
+//     Serial.println(temperature);
+//   }
 
-  if (canMsg.can_id == 0x65) {
-    // inv peak current
-    // Motor power
-  }
+//   if (canMsg.can_id == 0x65) {
+//     // inv peak current
+//     // Motor power
+//   }
 
-  // Warning
-  if (canMsg.can_id == 0x66) {
-    bool warning[64];
+//   // Warning
+//   if (canMsg.can_id == 0x66) {
+//     bool warning[64];
 
-    for (size_t i = 0; i < 8; i++) {
-      for (size_t j = 0; j < 8; j++) {
-        warning[i * 8 + j] = canMsg.data[i] >> j & 1;
-      }
-    }
-    Serial.print(F("Warning: "));
-    for (size_t i = 0; i < 64; i++) {
-      if (warning[i] == 1) {
-        Serial.print(i);
-        Serial.print(F("\t"));
-      }
-    }
+//     for (size_t i = 0; i < 8; i++) {
+//       for (size_t j = 0; j < 8; j++) {
+//         warning[i * 8 + j] = canMsg.data[i] >> j & 1;
+//       }
+//     }
+//     Serial.print(F("Warning: "));
+//     for (size_t i = 0; i < 64; i++) {
+//       if (warning[i] == 1) {
+//         Serial.print(i);
+//         Serial.print(F("\t"));
+//       }
+//     }
 
-    // for (int i = 0; i<canMsg.can_dlc; i++)  {  // print the data
-    //   Serial.print(canMsg.data[i],HEX);
-    //   Serial.print(" ");
-    // }
-    Serial.println();
-  }
+//     // for (int i = 0; i<canMsg.can_dlc; i++)  {  // print the data
+//     //   Serial.print(canMsg.data[i],HEX);
+//     //   Serial.print(" ");
+//     // }
+//     Serial.println();
+//   }
 
-  // Error
-  if (canMsg.can_id == 0x67) {
-    bool error[64];
+//   // Error
+//   if (canMsg.can_id == 0x67) {
+//     bool error[64];
 
-    for (size_t i = 0; i < 8; i++) {
-      for (size_t j = 0; j < 8; j++) {
-        error[i * 8 + j] = canMsg.data[i] >> j & 1;
-      }
-    }
-    Serial.print(F("Error: "));
-    for (size_t i = 0; i < 64; i++) {
-      if (error[i] == 1) {
-        Serial.print(i);
-        Serial.print(F("\t"));
-      }
-    }
+//     for (size_t i = 0; i < 8; i++) {
+//       for (size_t j = 0; j < 8; j++) {
+//         error[i * 8 + j] = canMsg.data[i] >> j & 1;
+//       }
+//     }
+//     Serial.print(F("Error: "));
+//     for (size_t i = 0; i < 64; i++) {
+//       if (error[i] == 1) {
+//         Serial.print(i);
+//         Serial.print(F("\t"));
+//       }
+//     }
 
-    // for (int i = 0; i<canMsg.can_dlc; i++)  {  // print the data
-    //   Serial.print(canMsg.data[i],HEX);
-    //   Serial.print(" ");
-    // }
+//     // for (int i = 0; i<canMsg.can_dlc; i++)  {  // print the data
+//     //   Serial.print(canMsg.data[i],HEX);
+//     //   Serial.print(" ");
+//     // }
 
-    Serial.println();
-  }
-}
+//     Serial.println();
+//   }
+// }

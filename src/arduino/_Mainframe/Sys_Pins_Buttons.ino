@@ -50,7 +50,10 @@ void InitAllPins() {
 
   // Motor Control
   pinMode(PO_MOTOR_EN, OUTPUT);
-  digitalWrite(PO_MOTOR_EN, false);
+  pinMode(PO_MOTOR_EN_PWR, OUTPUT);
+
+  digitalWrite(PO_MOTOR_EN, LOW);
+  digitalWrite(PO_MOTOR_EN_PWR, LOW);
 }
 
 // Initialization of the interrupts assigned to buttons
@@ -71,13 +74,54 @@ void EstopButtonInterruptHandler() {
 
 // Mode Library activated by mode button interrupt
 void ModeButtonInterruptHandler() {
-  if (millis() - lastMillisMode > BTN_DEBOUNCE_TIME_LONG) {
-    if (GetStatus(MODULE_ESTOP)) {
-      DEBUG_PRINTLN(F("Mode button press, changing mode to Mode Library"));
-      lastMillisMode = millis();
-      SetMode(MODE_MODELIBRARY);
-    } else {
-      DEBUG_PRINTLN(F("Emergency Mode, Input Blocked!"));
-    }
+  if (!ModeButtonDebounce()) {
+    return;
   }
+
+  // If currently in emergency mode skip input
+  if (!GetStatus(MODULE_ESTOP)) {
+    DEBUG_PRINTLN(F("Emergency Mode, Input Blocked!"));
+    return;
+  }
+
+  DEBUG_PRINTLN(F("Mode button press, changing mode to Mode Library"));
+  SetMode(MODE_MODELIBRARY);
+}
+
+// Check for Select Button noise, returns true if valid button press
+bool SelectButtonDebounce() {
+  if (millis() - lastMillisSelect < BTN_DEBOUNCE_TIME) {
+    return false;
+  }
+
+  // Small time delay to filter voltage spikes
+  delay(50);
+
+  // Check if button is still pressed
+  if (digitalRead(PI_BUTTON_SELECT)) {
+    return false;
+  }
+
+  // Set timestamp for button debouncing
+  lastMillisSelect = millis();
+  return true;
+}
+
+// Check for Select Button noise, returns true if valid button press
+bool ModeButtonDebounce() {
+  if (millis() - lastMillisMode < BTN_DEBOUNCE_TIME) {
+    return false;
+  }
+
+  // Small time delay to filter voltage spikes
+  delay(50);
+
+  // Check if button is still pressed
+  if (digitalRead(PI_BUTTON_MODE)) {
+    return false;
+  }
+
+  // Set timestamp for button debouncing
+  lastMillisMode = millis();
+  return true;
 }

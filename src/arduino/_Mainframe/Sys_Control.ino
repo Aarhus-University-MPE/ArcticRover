@@ -78,6 +78,9 @@ bool SystemEnable(int module) {
     case MODULE_LED:
       status = true;
       break;
+    case MODULE_DEBUG:
+      status = DebugInitialize();
+      break;
     default:
       DEBUG_PRINT(F("- UNKNOWN Case"));
       break;
@@ -120,22 +123,26 @@ bool SystemEnableMode() {
   bool enableStatus[10];
   switch (mode) {
     case MODE_REMOTECONTROL:
+      modules = 4;
+
       enableStatus[0] = SystemEnable(MODULE_PWR);
-      enableStatus[1] = SystemEnable(MODULE_CANBUS);
-      enableStatus[2] = SystemEnable(MODULE_PWR_MOTOR);
-      enableStatus[3] = SystemEnable(MODULE_MOTORS);
-      enableStatus[4] = SystemEnable(MODULE_RF);
-      modules         = 5;
+      SystemEnable(MODULE_PWR_MOTOR);
+      enableStatus[1] = SystemEnable(MODULE_MOTORS);
+      enableStatus[2] = SystemEnable(MODULE_CANBUS);
+      enableStatus[3] = SystemEnable(MODULE_RF);
+
       break;
 
     case MODE_AUTONOMOUS:
+      modules = 5;
+
       enableStatus[0] = SystemEnable(MODULE_PWR);
-      enableStatus[1] = SystemEnable(MODULE_CANBUS);
-      enableStatus[2] = SystemEnable(MODULE_PWR_MOTOR);
-      enableStatus[3] = SystemEnable(MODULE_MOTORS);
-      enableStatus[4] = SystemEnable(MODULE_ACCEL);
-      enableStatus[5] = SystemEnable(MODULE_RF);
-      modules         = 6;
+      SystemEnable(MODULE_PWR_MOTOR);
+      enableStatus[1] = SystemEnable(MODULE_MOTORS);
+      enableStatus[2] = SystemEnable(MODULE_CANBUS);
+      enableStatus[3] = SystemEnable(MODULE_ACCEL);
+      enableStatus[4] = SystemEnable(MODULE_RF);  // TODO: Temporary Remote Control Override for testing safety
+
       break;
 
     default:
@@ -236,6 +243,9 @@ void SystemDisable(int module) {
       break;
     case MODULE_ESTOP:
       status = EmergencyStopStatus();
+      break;
+    case MODULE_DEBUG:
+      DebugTerminate();
       break;
     case MODULE_RESERVED:
       status = true;
@@ -524,7 +534,7 @@ void SystemCheck() {
   DEBUG_PRINTLN(F("Running full system check"));
   BatteryStatus(true);
   DEBUG_PRINTLINE();
-  for (int i = 0; i < MODULE_COUNT - 2; i++) {
+  for (int i = 0; i < MODULE_COUNT - 3; i++) {
     SystemCheckModule(i);
   }
 

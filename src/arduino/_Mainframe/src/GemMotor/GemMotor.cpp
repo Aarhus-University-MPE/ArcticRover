@@ -144,17 +144,21 @@ void GemMotor::UpdateTorque(float torque) {
 
 // Prints current motor parameters returns error if no motor messages received
 GemMotor::ERROR GemMotor::PrintStatus() {
+  // Serial.print(F("Motor Status "));
+  // Serial.print(GemMotor::TX_id, HEX);
   if (!GemMotor::validStatus) {
-    Serial.print(F("Motor Status "));
-    Serial.print(GemMotor::TX_id, HEX);
     Serial.println(F(": Invalid"));
     return ERROR_INVALID_STATUS;
   }
 
-  GemMotor::PrintControl(true);
+  // GemMotor::PrintControl(true);
   // GemMotor::PrintInverterState(true);
-  GemMotor::PrintError(false);
-  GemMotor::PrintWarning(true);
+  if (!GemMotor::MotorError()) {
+    GemMotor::PrintError(true);
+  } else {
+    // Serial.println(F(": OK"));
+  }
+  // GemMotor::PrintWarning(true);
 
   return ERROR_OK;
 }
@@ -192,7 +196,7 @@ bool GemMotor::Status() {
 }
 
 // Returns can status of motor (valid Can data)
-bool GemMotor::CanStatus(){
+bool GemMotor::CanStatus() {
   return GemMotor::validStatus;
 }
 
@@ -200,14 +204,23 @@ bool GemMotor::CanStatus(){
 // Timeout implemented due to motor capacitor taking time to charge up
 void GemMotor::MotorStatusUpdate() {
   // Check latest motor state for error
-  if (GemMotor::motorState != MOTOR_ERROR && GemMotor::validStatus) {
-    GemMotor::ResetMotorStatus();
-    return;
+  if (GemMotor::motorState != MOTOR_ERROR && GemMotor::validStatus && GemMotor::MotorError()) {
+    GemMotor::motorStatus = true;
+    // GemMotor::ResetMotorStatus();
+    // return;
+  } else {
+    // GemMotor::ErrorTimeout();
+    GemMotor::motorStatus = false;
   }
-
-  // GemMotor::ErrorTimeout();
-  
-  GemMotor::motorStatus = false;
+}
+// returns false if motors report error
+bool GemMotor::MotorError() {
+  for (size_t i = 0; i < 64; i++) {
+    if (GemMotor::error[i] == 1) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // Timeout error model - Currently unused
@@ -262,7 +275,7 @@ bool GemMotor::ParseCanMsg(struct can_frame _canMsg) {
 // Parse incoming canMsg to Primary control values (Motor RX+0)
 void GemMotor::ParseCanControl(struct can_frame _canMsg) {
   GemMotor::controlValueRx = (int)((_canMsg.data[1] << 8) | _canMsg.data[0]);
-  GemMotor::motorState     = (byte)(_canMsg.data[3] >> 6);
+  GemMotor::motorState     = (int)(_canMsg.data[3] >> 6);
   GemMotor::rpm            = (int)((_canMsg.data[6] << 8) | _canMsg.data[5]) / 10.0f;
   GemMotor::temperature    = (int)_canMsg.data[7];
 
@@ -334,7 +347,9 @@ void GemMotor::PrintWarning(bool endline) {
 
 // Print latest Motor Errors
 void GemMotor::PrintError(bool endline) {
-  Serial.print(F("Error: "));
+  // Serial.print(F("Motor Error "));
+  // Serial.print(GemMotor::TX_id, HEX);
+  Serial.print(F(" - Error: "));
   for (size_t i = 0; i < 64; i++) {
     if (GemMotor::error[i] == 1) {
       Serial.print(i);

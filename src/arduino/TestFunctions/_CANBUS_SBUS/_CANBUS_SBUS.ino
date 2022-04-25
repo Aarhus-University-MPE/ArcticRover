@@ -23,7 +23,9 @@ GemMotor motorRight = GemMotor(CANBUS_TX_MOTOR_RIGHT, CANBUS_RX_MOTOR_RIGHT);
 
 void setup() {
   pinMode(PO_MOTOR_EN, OUTPUT);
+  pinMode(PO_MOTOR_EN_POWER, OUTPUT);
   digitalWrite(PO_MOTOR_EN, true);
+  digitalWrite(PO_MOTOR_EN_POWER, true);
 
   pinMode(PO_POWER_MOTOR, OUTPUT);
   digitalWrite(PO_POWER_MOTOR, LOW);
