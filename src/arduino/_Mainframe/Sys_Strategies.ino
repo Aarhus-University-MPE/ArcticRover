@@ -1,3 +1,11 @@
+/*
+  GeoRover Strategy Control functions
+
+  Mads Rosenhøj Jeppesen
+  Aarhus University
+  2021
+*/
+
 // Set pointers for strategies methods
 void InitStrategyMethods() {
   strategyMethods[0][MODE_EMERGENCY] = StartStrategyEmergency;
@@ -59,28 +67,32 @@ void ModeUpdater() {
   strategyMethods[0][mode]();  // init new strategy according to the new mode value
 }
 
+// Attach current mode's Select Button function to the Interrupt of the Select Button Input Pin
 void AttachSelectButton() {
   lastMillisSelect = millis();
   attachInterrupt(PI_INT_BUTTON_SELECT, strategyMethods[3][mode], FALLING);
 }
 
+// Attach Default Mode function to the Interrupt of the Mode Button Input Pin
 void AttachModeButton() {
   attachInterrupt(PI_INT_BUTTON_MODE, ModeButtonInterruptHandler, FALLING);
 }
 
-void DetachModeButton() {
-  detachInterrupt(PI_INT_BUTTON_MODE);
-}
-
+// Detach current Select Button's function
 void DetachSelectButton() {
   detachInterrupt(PI_INT_BUTTON_SELECT);
+}
+
+// Detach current Mode Button's function
+void DetachModeButton() {
+  detachInterrupt(PI_INT_BUTTON_MODE);
 }
 
 // Tries set the mode and isModeUpdated flag
 boolean SetMode(byte newMode) {
   if (newMode < MODES_MAX) {
-    prevMode      = mode;
-    mode          = newMode;
+    prevMode = mode;
+    mode     = newMode;
     IncrementModeCycle();
     isModeUpdated = true;
     EEPROM.write(MEMADDR_LASTMODE, mode);
@@ -93,7 +105,7 @@ boolean SetMode(byte newMode) {
 
 // Cycle Mode
 void IncrementModeCycle() {
-  if(mode == MODE_MODELIBRARY){
+  if (mode == MODE_MODELIBRARY) {
     return;
   }
   modeCycle = mode;
