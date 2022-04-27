@@ -40,7 +40,7 @@ void BlackBoxPrint() {
     if (file) {
       int idx;
       while (file.available() && idx < MAX_BLACKBOX_ROW_PRINT) {
-        DEBUG_WRITE(file.read());
+        Serial.write(file.read());
         idx++;
       }
       file.close();

@@ -532,14 +532,18 @@ bool SystemTestModule(byte module) {
 void SystemCheck() {
   DEBUG_PRINTLINE();
   DEBUG_PRINTLN(F("Running full system check"));
-  BatteryStatus(true);
   DEBUG_PRINTLINE();
+  BatteryStatus(true);
   for (int i = 0; i < MODULE_COUNT - 3; i++) {
     SystemCheckModule(i);
   }
 
   SetStatus(MODULE_ESTOP, EmergencyStopStatus());
   SetStatus(MODULE_RESERVED, true);
+
+  DEBUG_PRINT(F("System Status: "));
+  DEBUG_PRINTLN(String(ToLong(SystemStatus)));
+  DEBUG_PRINTLINE();
 }
 
 // Runs module check

@@ -38,6 +38,7 @@
 #define MOTOR_ERROR_TIMEOUT      5000  // Time before
 
 #define MAX_INPUT_STEP           0.1f  // maximum increase from current state
+#define MAX_VEL_CHANGE           1.5f  // Maximum change in velocity from current velocity
 
 class GemMotor {
   enum CONTROL_MODE {

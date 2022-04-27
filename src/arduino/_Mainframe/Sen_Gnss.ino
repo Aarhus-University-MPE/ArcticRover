@@ -35,7 +35,7 @@ bool GnssStatus() {
 }
 
 // Updates current position and Gnss status
-bool GnssUpdate(){
+bool GnssUpdate() {
   latCurrent = GnssGetLat();
   lonCurrent = GnssGetLong();
 }
@@ -117,7 +117,7 @@ long GnssGetLong() {
 }
 
 // Returns heading in degrees * 10^-5
-long GnssGetHeading(){
+long GnssGetHeading() {
   return gnss.getHeading();
 }
 
@@ -144,15 +144,21 @@ void QueryGnss() {
     long accuracy = gnss.getPositionAccuracy();
     DEBUG_PRINT(F("\t3D Positional Accuracy: "));
     DEBUG_PRINT(accuracy);
-    DEBUG_PRINTLN(F(" (mm)"));
+    DEBUG_PRINT(F(" (mm)"));
+
+    long heading = GnssGetHeading();
+    DEBUG_PRINT(F("\tCurrent Heading: "));
+    DEBUG_PRINT(heading);
+    DEBUG_PRINTLN(F(" (deg)"));
+
   } else {
     DEBUG_PRINTLN("ERROR");
   }
 }
 
 // Returns current signal status
-bool GnssSignal(){
-  if(!GetStatus(MODULE_GNSS)){
+bool GnssSignal() {
+  if (!GetStatus(MODULE_GNSS)) {
     return false;
   }
 
@@ -202,11 +208,11 @@ double CourseTo(double lat1, double long1, double lat2, double long2) {
 }
 
 // Returns Distance between two sets of coordinates
-double DistanceBetweenLong(long lat1, long long1, long lat2, long long2){
-  return DistanceBetween(CoordLong2Double(lat1),CoordLong2Double(long1),CoordLong2Double(lat2),CoordLong2Double(long2));
+double DistanceBetweenLong(long lat1, long long1, long lat2, long long2) {
+  return DistanceBetween(CoordLong2Double(lat1), CoordLong2Double(long1), CoordLong2Double(lat2), CoordLong2Double(long2));
 }
 
 // Returns Distance between two sets of coordinates
-double CourseToLong(long lat1, long long1, long lat2, long long2){
-  return CourseTo(CoordLong2Double(lat1),CoordLong2Double(long1),CoordLong2Double(lat2),CoordLong2Double(long2));
+double CourseToLong(long lat1, long long1, long lat2, long long2) {
+  return CourseTo(CoordLong2Double(lat1), CoordLong2Double(long1), CoordLong2Double(lat2), CoordLong2Double(long2));
 }

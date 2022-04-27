@@ -167,6 +167,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define CMD_FILES_CREATE       'C'
 #define CMD_FILES_REMOVE       'R'
 #define CMD_FILES_WRITE        'W'
+#define CMD_FILES_WRITENEWLINE 'N'
 #define CMD_FILES_QUIT         'Q'
 #define CMD_FILES_BLCKBOX      'B'
 #define CMD_FILES_BLCKBOXEMPTY 'E'
@@ -338,6 +339,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 //                           EEPROM                             //
 // ------------------------------------------------------------ //
 #define EEPROM_READ_INT(addr)             (int)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr + 1) << 8) & 0xFF00))
+#define EEPROM_WRITE_INT(addr, intValue)  EEPROM.put(addr, intValue)
 
 // #define EEPROM_READ_FLOAT(addr, flt) (float)(((EEPROM.read(addr) << 0) & 0xFF) + ((EEPROM.read(addr+1) << 8) & 0xFF00) + ((EEPROM.read(addr+2) << 16) & 0xFF0000) + ((EEPROM.read(addr+3) << 24) & 0xFF000000))
 

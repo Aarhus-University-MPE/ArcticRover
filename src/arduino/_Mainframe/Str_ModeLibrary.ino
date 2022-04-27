@@ -56,7 +56,6 @@ void ModeFunctionModeLibrary() {
   if (!ModeButtonDebounce()) {
     return;
   }
-  lastMillistModeBlink = 0;
 
   // Cycle Mode
   if (modeCycle + 1 < MODES_MIN_BROWSABLE || modeCycle + 1 >= MODES_MAX) {

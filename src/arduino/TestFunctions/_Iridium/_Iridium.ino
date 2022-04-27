@@ -3,13 +3,13 @@
   using: https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library
 
   Mads Rosenhøj Jeppesen
-  
+
   Aarhus University
   2021
 */
 
 #include <IridiumSBD.h>
-#define DIAGNOSTICS        false  // Change this to see diagnostics
+#define DIAGNOSTICS        true  // Change this to see diagnostics
 #define PO_POWER_IRIDIUM   46
 #define COM_SERIAL_IRID    Serial2
 #define IRID_ATT_TIMEOUT   2
@@ -23,8 +23,8 @@ int signalQuality = -1;
 
 void setup() {
   Serial.begin(115200);
-  pinMode(PO_POWER_IRIDIUM, OUTPUT);
-  digitalWrite(PO_POWER_IRIDIUM, HIGH);
+  // pinMode(PO_POWER_IRIDIUM, OUTPUT);
+  // digitalWrite(PO_POWER_IRIDIUM, HIGH);
 
   InitializeIridium();
 }
@@ -35,7 +35,7 @@ void loop() {
 void InitializeIridium() {
   int signalQuality = -1;
   int err;
-  
+
   // Start the serial port connected to the satellite modem
   COM_SERIAL_IRID.begin(IRID_BAUDRATE);
 

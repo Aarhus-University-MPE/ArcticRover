@@ -45,7 +45,7 @@ void HeartBeatTimeout() {
   if (millis() - lastMillisHeartbeatIn < HRTBEAT_TRESHOLD) {
     return;
   }
-  
+
   // Reset backup CPU
   if (GetStatus(MODULE_BACKUPCPU)) {
     lastMillisResetBackup = millis();
@@ -107,8 +107,5 @@ void HeartbeatBlackBox() {
     DEBUG_PRINTLINE();
     DEBUG_PRINTLN(F("Heartbeat System Check: "));
     SystemCheck();
-    DEBUG_PRINT(F("System Status: "));
-    DEBUG_PRINTLN(String(ToLong(SystemStatus)));
-    DEBUG_PRINTLINE();
   }
 }

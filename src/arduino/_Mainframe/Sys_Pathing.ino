@@ -26,7 +26,7 @@ long headingError = 0;  // deg * 10^-5
 
 // returns true if waypoint file exists
 bool SDRoute() {
-  return SD.exists("Waypoints.csv");
+  return SD.exists("WAYPOINT.csv");
 }
 
 // Clears current route data
@@ -41,7 +41,7 @@ void ClearRoute() {
 
 // Loads Waypoint file data and first waypoint into buffer
 bool LoadRoute() {
-  DEBUG_PRINTLN(F("Loading Waypoint file"));
+  // DEBUG_PRINTLN(F("Loading Waypoint file"));
 
   ClearRoute();
 
@@ -50,7 +50,7 @@ bool LoadRoute() {
     return false;
   }
 
-  DEBUG_PRINTLN(F("Done Loading"));
+  // DEBUG_PRINTLN(F("Done Loading"));
   return true;
 }
 
@@ -60,7 +60,7 @@ bool RouteTest() {
 
   routeTestRun = true;  // Avoid several route tests being run
 
-  DEBUG_PRINTLN(F("Running full route test"));
+  // DEBUG_PRINTLN(F("Running full route test"));
 
   routeStatus = false;
   if (!LoadRoute()) {
@@ -91,16 +91,16 @@ bool CompareEepromSdRoute() {
   int routeIndexEeprom  = EEPROM_READ_INT(MEMADDR_ROUTEIDX_START);
   int routeLengthEeprom = EEPROM_READ_INT(MEMADDR_ROUTELEN_START);
 
-  DEBUG_PRINTLINE();
-  DEBUG_PRINT(F("EEPROM route Index: "));
-  DEBUG_PRINT(routeIndexEeprom);
-  DEBUG_PRINT(F("\t EEPROM route Length: "));
+  // DEBUG_PRINTLINE();
+  // DEBUG_PRINT(F("EEPROM route Index: "));
+  // DEBUG_PRINT(routeIndexEeprom);
+  // DEBUG_PRINT(F("\t EEPROM route Length: "));
 
-  DEBUG_PRINT(F("Waypoint.csv route Index: "));
-  DEBUG_PRINTLN(indexRoute);
-  DEBUG_PRINT(F("\t Waypoint.csv route Length: "));
-  DEBUG_PRINTLN(lengthRoute);
-  DEBUG_PRINTLINE();
+  // DEBUG_PRINT(F("Waypoint.csv route Index: "));
+  // DEBUG_PRINTLN(indexRoute);
+  // DEBUG_PRINT(F("\t Waypoint.csv route Length: "));
+  // DEBUG_PRINTLN(lengthRoute);
+  // DEBUG_PRINTLINE();
 
   if (indexRoute != routeIndexEeprom) return false;
   if (lengthRoute != routeLengthEeprom) return false;
@@ -110,16 +110,16 @@ bool CompareEepromSdRoute() {
   if (!RouteEe(latEE, lonEE, 0)) return false;
   RouteEe(latEE, lonEE, 0);
 
-  DEBUG_PRINT(routeLengthEeprom);
-  DEBUG_PRINT(F("\t - EEPROM 1st waypoint: Lat: "));
-  DEBUG_PRINT(latEE);
-  DEBUG_PRINT(F("\t lon: "));
-  DEBUG_PRINTLN(lonEE);
+  // DEBUG_PRINT(routeLengthEeprom);
+  // DEBUG_PRINT(F("\t - EEPROM 1st waypoint: Lat: "));
+  // DEBUG_PRINT(latEE);
+  // DEBUG_PRINT(F("\t lon: "));
+  // DEBUG_PRINTLN(lonEE);
 
-  DEBUG_PRINT(F("\t - Waypoint.csv 1st waypoint: Lat: "));
-  DEBUG_PRINT(latRoute);
-  DEBUG_PRINT(F("\t lon: "));
-  DEBUG_PRINTLN(lonRoute);
+  // DEBUG_PRINT(F("\t - Waypoint.csv 1st waypoint: Lat: "));
+  // DEBUG_PRINT(latRoute);
+  // DEBUG_PRINT(F("\t lon: "));
+  // DEBUG_PRINTLN(lonRoute);
 
   if ((latRoute != latEE) && (lonRoute != lonEE)) return false;
 
@@ -133,7 +133,7 @@ bool RouteSDValid() {
 
   // DEBUG_PRINTLN(F("Validating Waypoint file"));
 
-  File waypoints = SD.open("Waypoints.csv", FILE_READ);
+  File waypoints = SD.open("WAYPOINT.csv", FILE_READ);
 
   if (!waypoints) {
     // DEBUG_PRINTLN(F("Error opening waypoints file"));
@@ -245,18 +245,17 @@ bool RouteSD(long &lat, long &lon, int index) {
     return false;
   }
 
-  File waypoints = SD.open("Waypoints.csv", FILE_READ);
+  File waypoints = SD.open("waypoint.csv");
 
   if (!waypoints) {
     DEBUG_PRINTLN(F("Error opening waypoints file"));
     return false;
   }
 
+  int idx = 0;
   // Read waypoint file until index
-  int idx;
   while (waypoints.available() && idx < index + 3) {
-    waypoints.readStringUntil('\n');
-    idx++;
+    if (waypoints.read() == '\n') idx++;
   }
 
   if (idx != index + 3) {
@@ -298,12 +297,15 @@ bool FlashRouteEeprom() {
 
   DEBUG_PRINTLN(F("Flashing Waypoint file to EEPROM"));
 
-  File waypoints = SD.open("Waypoints.csv", FILE_READ);
+  File waypoints = SD.open("WAYPOINT.csv");
 
   if (!waypoints) {
     DEBUG_PRINTLN(F("Error opening waypoints file"));
     return false;
   }
+
+  EEPROMWriteRouteIndex(indexRoute);
+  EEPROMWriteRouteLength(lengthRoute);
 
   // Read waypoint file
   for (int i = 0; i < lengthRoute + 3; i++) {
@@ -340,10 +342,10 @@ bool PopulateLatLon(String waypoint, long &lat, long &lon) {
   lonRoute   = atol(strtokIndx);
   lon        = lonRoute;
 
-  DEBUG_PRINT(F("Latitude: "));
-  DEBUG_PRINT(lat);
-  DEBUG_PRINT(F("\t Longitude: "));
-  DEBUG_PRINTLN(lon);
+  // DEBUG_PRINT(F("Latitude: "));
+  // DEBUG_PRINT(lat);
+  // DEBUG_PRINT(F("\t Longitude: "));
+  // DEBUG_PRINTLN(lon);
 
   if (!CoordinateValidityFormat(lat, lon)) {
     return false;
@@ -374,12 +376,12 @@ void PopulateWaypointData(String waypoint) {
   strtokIndx = strtok(NULL, ",");
   strcpy(operatorName, strtokIndx);
 
-  DEBUG_PRINT(F("Route Index: "));
-  DEBUG_PRINT(indexRoute);
-  DEBUG_PRINT(F("\t Route Length: "));
-  DEBUG_PRINT(lengthRoute);
-  DEBUG_PRINT(F("\t Operator: "));
-  DEBUG_PRINTLN(operatorName);
+  // DEBUG_PRINT(F("Route Index: "));
+  // DEBUG_PRINT(indexRoute);
+  // DEBUG_PRINT(F("\t Route Length: "));
+  // DEBUG_PRINT(lengthRoute);
+  // DEBUG_PRINT(F("\t Operator: "));
+  // DEBUG_PRINTLN(operatorName);
 }
 
 // Parse waypoint string
@@ -412,6 +414,24 @@ void EEPROMWriteLatLon(int index) {
   EEPROM_WRITE_LON(index, lonRoute);
 }
 
+void EEPROMWriteRouteIndex(int routeIndex) {
+  DEBUG_PRINT(F("Writing routeIndex: "));
+  DEBUG_PRINTLN(routeIndex);
+  EEPROM_WRITE_INT(MEMADDR_ROUTEIDX_START, routeIndex);
+  int EEPROMrouteIndex = EEPROM_READ_INT(MEMADDR_ROUTELEN_START);
+  DEBUG_PRINT(F("Read routeIndex: "));
+  DEBUG_PRINTLN(EEPROMrouteIndex);
+}
+
+void EEPROMWriteRouteLength(int routeLength) {
+  DEBUG_PRINT(F("Writing routeLength: "));
+  DEBUG_PRINTLN(routeLength);
+  EEPROM_WRITE_INT(MEMADDR_ROUTELEN_START, routeLength);
+  int EEPROMrouteLength = EEPROM_READ_INT(MEMADDR_ROUTELEN_START);
+  DEBUG_PRINT(F("Read routeLength: "));
+  DEBUG_PRINTLN(EEPROMrouteLength);
+}
+
 // Populate buffer latitude longitude from EEPROM
 void EEPROMReadLatLon(int index) {
   EEPROM_READ_LAT(index, latRoute);
@@ -420,7 +440,7 @@ void EEPROMReadLatLon(int index) {
 
 // Checks validity of coordinate format (-90 <= lat <= 90 && -180 <= lon <= 180)
 bool CoordinateValidityFormat(long lat, long lon) {
-  DEBUG_PRINT("Checking format of coordinates... lat: " + String(lat, DEC) + ", lon: " + String(lon, DEC) + " ... ");
+  // DEBUG_PRINT("Checking format of coordinates... lat: " + String(lat, DEC) + ", lon: " + String(lon, DEC) + " ... ");
   bool validity = true;
   if (lat == 0 || lon == 0) {
     validity = false;
@@ -438,7 +458,7 @@ bool CoordinateValidityFormat(long lat, long lon) {
   }
 
   if (validity) {
-    DEBUG_PRINTLN(F("Coordinates format valid!"));
+    // DEBUG_PRINTLN(F("Coordinates format valid!"));
   } else {
     DEBUG_PRINTLN(F("Coordinates format NOT valid!"));
   }
@@ -448,21 +468,21 @@ bool CoordinateValidityFormat(long lat, long lon) {
 
 // Checks distance between two coordinate sets and returns true if within MAX_DISTANCE_VALID_WAYPOINT
 bool CoordinateValidityRange(long lat1, long lon1, long lat2, long lon2) {
-  DEBUG_PRINT(F("Checking range between"));
-  DEBUG_PRINT(F(" lat: "));
-  DEBUG_PRINT(lat1);
-  DEBUG_PRINT(F(" lon: "));
-  DEBUG_PRINT(lon1);
-  DEBUG_PRINT(F("\t and \t"));
-  DEBUG_PRINT(F(" lat: "));
-  DEBUG_PRINT(lat2);
-  DEBUG_PRINT(F(" lon: "));
-  DEBUG_PRINTLN(lon2);
+  // DEBUG_PRINT(F("Checking range between"));
+  // DEBUG_PRINT(F(" lat: "));
+  // DEBUG_PRINT(lat1);
+  // DEBUG_PRINT(F(" lon: "));
+  // DEBUG_PRINT(lon1);
+  // DEBUG_PRINT(F("\t and \t"));
+  // DEBUG_PRINT(F(" lat: "));
+  // DEBUG_PRINT(lat2);
+  // DEBUG_PRINT(F(" lon: "));
+  // DEBUG_PRINTLN(lon2);
 
   long distance = DistanceBetweenLong(lat1, lon1, lat2, lon2);
 
-  DEBUG_PRINT(F("Distance: "));
-  DEBUG_PRINTLN(distance);
+  // DEBUG_PRINT(F("Distance: "));
+  // DEBUG_PRINTLN(distance);
 
-  return distance <= MAX_DISTANCE_VALID_WAYPOINT;
+  return distance <= ((long)MAX_DISTANCE_VALID_WAYPOINT * (long)MAX_DISTANCE_VALID_WAYPOINT);
 }

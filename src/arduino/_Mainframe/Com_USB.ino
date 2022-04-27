@@ -132,6 +132,9 @@ void parseCommandFiles() {
     case CMD_FILES_WRITE:
       SDWriteStream(fileName);
       break;
+    case CMD_FILES_WRITENEWLINE:
+      SDWriteStreamNewLine();
+      break;
     case CMD_FILES_QUIT:
       SDQuit();
       break;

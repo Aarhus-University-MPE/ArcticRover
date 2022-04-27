@@ -202,7 +202,7 @@ void RemoteControlStatusLed() {
     return;
   }
 
-  if (MotorStatusLeft() && MotorStatusRight() && SBusStatus()) {
+  if (MotorStatusLeft() && MotorStatusRight() && SBusTimeoutStatus()) {
     StrategyRunLed(MODE_AUTONOMOUS);
   } else {
     StrategyRunLed(MODE_EMERGENCY);

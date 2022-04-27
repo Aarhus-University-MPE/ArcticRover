@@ -24,6 +24,8 @@
         - Take smallest angle difference @done
 - Blackbox
     - Unknown Blackbox error halts program.
+    - Backup every X lines, to reduce filesizes
+        - Remove files older than X...
     
 - GNSS
     - Coordinate Bearing + Distance (Long to Radians) @done

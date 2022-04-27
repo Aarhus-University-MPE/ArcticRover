@@ -100,7 +100,6 @@ void InitBluetooth(unsigned long baudRate = 115200);
 unsigned long lastMillisSelect      = 0;
 unsigned long lastMillisMode        = 0;
 unsigned long lastMillisEstop       = 0;
-unsigned long lastMillistModeBlink  = 0;
 unsigned long lastSystemReboot      = 9999999;
 unsigned long lastMillistHeatingOff = 0;
 unsigned long lastMillistHeatingOn  = 0;

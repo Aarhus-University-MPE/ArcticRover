@@ -83,7 +83,7 @@ bool CanBusProcess() {
 
   // Check motor status
   if (!MotorStatusLeft() && MotorStatusRight() && SBusStatus()) {
-    MotorUpdate(0, 0);  // Avoid running single motor if other motor reports error
+    // MotorUpdate(0, 0);  // Avoid running single motor if other motor reports error
     // return false;
   }
 
@@ -109,11 +109,11 @@ bool CanBusProcess() {
   if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
     if (motorLeft.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
       motorRight.SetCanTxStatus();
-      DEBUG_PRINTLN(F("Timeout - Left"));
+      // DEBUG_PRINTLN(F("Timeout - Left"));
     }
     if (motorRight.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
       motorLeft.SetCanTxStatus();
-      DEBUG_PRINTLN(F("Timeout - Right"));
+      // DEBUG_PRINTLN(F("Timeout - Right"));
     }
     if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
       ParseData();
@@ -183,7 +183,7 @@ bool CanBusTest() {
     case 2:
       canTestState = 0;
       testDone     = true;
-      SetStatus(MODULE_CANBUS, CanBusStatus());  //<---- Update to reflect Motor CAN Errors
+      SetStatus(MODULE_CANBUS, CanBusStatus());  // TODO: Update to reflect Motor CAN Errors
     default:
       break;
   }

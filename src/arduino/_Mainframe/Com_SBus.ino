@@ -31,7 +31,11 @@ void TerminateSBUS() {
 }
 
 bool SBusStatus() {
-  return GetStatus(MODULE_RF) && sBusStatus;
+  return GetStatus(MODULE_RF);  // && sBusStatus; TODO: handle sbus timeout
+}
+
+bool SBusTimeoutStatus() {
+  return sBusStatus;
 }
 
 bool SBusTest() {
@@ -123,7 +127,12 @@ bool SBusProcess() {
       sBusStatus = false;
       return true;
     } else {
-      DEBUG_PRINTLN("SBUS TIMEOUT");
+      if (millis() - millisLastSbusPrint > CANBUS_PRINT_PERIOD) {
+        millisLastSbusPrint = millis();
+        DEBUG_PRINTLN("SBUS Timeout");
+        SystemDisable(MODULE_RF);
+        SystemEnable(MODULE_RF);
+      }
       MotorUpdate(0, 0);
       return sBusStatus;
     }
@@ -149,8 +158,12 @@ void SBusController() {
   int forwardDir;
   float speed;
 
+  sbus.process();
+
   // Primary input (Left Stick)
   if (throttle1 > CONTROLLER_DEADZONE_FLOAT) {
+    sbus.process();
+
     if (gear < REMOTE_CHANNEL_LOW) {
       speed = throttle1 * -1.0f;
     } else if (gear > REMOTE_CHANNEL_HIGH) {
@@ -162,6 +175,8 @@ void SBusController() {
   }
   // Secondary input (Right Stick)
   else if (abs(throttle2) > CONTROLLER_DEADZONE_FLOAT && gear < REMOTE_CHANNEL_HIGH && gear > REMOTE_CHANNEL_LOW) {
+    sbus.process();
+
     if (throttle2 > 0) {
       speed = throttle2 / 2.0f;
     } else {

@@ -91,8 +91,26 @@ void GemMotor::ResetCanStatus() {
   GemMotor::canRxStatus = false;
 }
 
+unsigned long lastMillisPrintCalc;
 // Update controlvalue based on target velocity, if below min disables motor
 void GemMotor::Update(float velocity) {
+  // float currentVelocity = GemMotor::GetRpm() * 1 / VEL_RPM_SCALE;
+  // float velocityChange  = targetVelocity - currentVelocity;
+  // velocityChange        = max(-MAX_VEL_CHANGE, min(MAX_VEL_CHANGE, velocityChange));
+  // float velocity        = currentVelocity + velocityChange;
+
+  // if (millis() - lastMillisPrintCalc > 1000) {
+  //   lastMillisPrintCalc = millis();
+  //   Serial.print("targetVel: ");
+  //   Serial.print(targetVelocity);
+  //   Serial.print("\tcurrent Velocity: ");
+  //   Serial.print(currentVelocity);
+  //   Serial.print("\ttargetVel: ");
+  //   Serial.print(targetVelocity);
+  //   Serial.print("\tCommand Velocity: ");
+  //   Serial.println(velocity);
+  // }
+
   if (abs(velocity) < MIN_VELOCITY) {
     GemMotor::swEnable     = SW_DISABLE;
     GemMotor::controlValue = 0;
@@ -347,8 +365,8 @@ void GemMotor::PrintWarning(bool endline) {
 
 // Print latest Motor Errors
 void GemMotor::PrintError(bool endline) {
-  // Serial.print(F("Motor Error "));
-  // Serial.print(GemMotor::TX_id, HEX);
+  Serial.print(F("Motor Error "));
+  Serial.print(GemMotor::TX_id, HEX);
   Serial.print(F(" - Error: "));
   for (size_t i = 0; i < 64; i++) {
     if (GemMotor::error[i] == 1) {

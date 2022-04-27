@@ -7,8 +7,10 @@
 
 // Code in this function is executed by sending <ME23>
 bool DebugInitialize() {
-  digitalWrite(PO_MOTOR_EN_PWR, true);  // TODO: Remove, temporary 12V relay power
-  return true;
+  SD.remove("WAYPOINT");
+  SD.remove("HELLO");
+
+  return false;
 }
 
 // Code in this function is executed by sending <MD23>
