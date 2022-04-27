@@ -3,7 +3,7 @@
   (SparkFun Triple Axis Accelerometer Breakout - MMA8452Q https://www.sparkfun.com/products/12756)
 
   Primary library used:
-    https://github.com/sparkfun/SparkFun_MMA8452Q_Arduino_Library/tree/V_1.1.0
+    https://github.com/sparkfun/SparkFun_MMA8452Q_Arduino_Library
 
   Mads Rosenhøj Jeppesen
   Aarhus University
@@ -14,7 +14,7 @@
 
 MMA8452Q accel;
 
-int accTestState = 0;
+int accTestState        = 0;
 long millisAccTestStart = 0;
 long millisLastAccPrint = 0;
 
@@ -43,8 +43,8 @@ void ReadAccel() {
 }
 
 bool AccelStatus() {
-  if(!GetStatus(MODULE_ACCEL)) return false;
-  
+  if (!GetStatus(MODULE_ACCEL)) return false;
+
   return accel.cz > MIN_ACCEL_TILT;
 }
 
@@ -78,7 +78,7 @@ bool AccelTest() {
       if (millis() - millisAccTestStart > SYS_TEST_DURATION) accTestState++;
       break;
     case 2:
-      testDone = true;
+      testDone     = true;
       accTestState = 0;
       DEBUG_PRINTLINE();
     default:
