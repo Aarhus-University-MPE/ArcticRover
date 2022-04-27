@@ -26,6 +26,7 @@
 #define RPM_VEL                  1000.0f / 60.0f                // Conversion from km/h to rpm
 #define WHEEL_CIRCUMFERENCE      1.570f                         // m
 #define VEL_RPM_SCALE            RPM_VEL / WHEEL_CIRCUMFERENCE  // Scale from linear velocity (kmh) to RPM
+#define RPM_VEL_SCALE            1.0f / VEL_RPM_SCALE           // Scale from RPM to linear velocity (kmh)
 #define RPM_CONTROL_SCALE        10
 #define MAX_CONTROL_VALUE        MAX_RPM* RPM_CONTROL_SCALE
 
@@ -38,7 +39,7 @@
 #define MOTOR_ERROR_TIMEOUT      5000  // Time before
 
 #define MAX_INPUT_STEP           0.1f  // maximum increase from current state
-#define MAX_VEL_CHANGE           1.5f  // Maximum change in velocity from current velocity
+#define MAX_VEL_CHANGE           1.5f  // Maximum change in velocity from current velocity (Form of Acceleration)
 
 class GemMotor {
   enum CONTROL_MODE {

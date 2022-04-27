@@ -31,22 +31,26 @@ bool InitBlackBox() {
 
 /*
   Prints Contents of BlackBox File
-  TODO: Limit to only print X lines
+  TODO: print newest lines only, currently prints first lines
 */
 void BlackBoxPrint() {
   if (SDReaderStatus()) {
     DEBUG_PRINTLN(F("Printing Blackbox: "));
     File file = SD.open("Blackbox.csv");
     if (file) {
-      int idx;
+      int idx = 0;
+      char c;
       while (file.available() && idx < MAX_BLACKBOX_ROW_PRINT) {
-        Serial.write(file.read());
-        idx++;
+        c = file.read();
+        Serial.write(c);
+        if (c == '\n') idx++;
       }
       file.close();
       if (idx < MAX_BLACKBOX_ROW_PRINT) {
+        DEBUG_PRINTLINE();
         DEBUG_PRINTLN(F("End of File"));
       } else {
+        DEBUG_PRINTLINE();
         DEBUG_PRINTLN(F("Printed 100 Rows"));
       }
     } else {

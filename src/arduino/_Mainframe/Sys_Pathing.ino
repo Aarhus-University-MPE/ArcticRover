@@ -95,9 +95,10 @@ bool CompareEepromSdRoute() {
   // DEBUG_PRINT(F("EEPROM route Index: "));
   // DEBUG_PRINT(routeIndexEeprom);
   // DEBUG_PRINT(F("\t EEPROM route Length: "));
+  // DEBUG_PRINTLN(routeLengthEeprom);
 
   // DEBUG_PRINT(F("Waypoint.csv route Index: "));
-  // DEBUG_PRINTLN(indexRoute);
+  // DEBUG_PRINT(indexRoute);
   // DEBUG_PRINT(F("\t Waypoint.csv route Length: "));
   // DEBUG_PRINTLN(lengthRoute);
   // DEBUG_PRINTLINE();
@@ -107,19 +108,18 @@ bool CompareEepromSdRoute() {
 
   long latEE, lonEE;
 
-  if (!RouteEe(latEE, lonEE, 0)) return false;
-  RouteEe(latEE, lonEE, 0);
+  // if (!RouteEe(latEE, lonEE, 0)) return false;
+  RouteEe(latEE, lonEE, lengthRoute - 1);
 
-  // DEBUG_PRINT(routeLengthEeprom);
-  // DEBUG_PRINT(F("\t - EEPROM 1st waypoint: Lat: "));
-  // DEBUG_PRINT(latEE);
-  // DEBUG_PRINT(F("\t lon: "));
-  // DEBUG_PRINTLN(lonEE);
+  DEBUG_PRINT(F("EEPROM Last waypoint: Lat: "));
+  DEBUG_PRINT(latEE);
+  DEBUG_PRINT(F("\t lon: "));
+  DEBUG_PRINTLN(lonEE);
 
-  // DEBUG_PRINT(F("\t - Waypoint.csv 1st waypoint: Lat: "));
-  // DEBUG_PRINT(latRoute);
-  // DEBUG_PRINT(F("\t lon: "));
-  // DEBUG_PRINTLN(lonRoute);
+  DEBUG_PRINT(F("Waypoint.csv Last waypoint: Lat: "));
+  DEBUG_PRINT(latRoute);
+  DEBUG_PRINT(F("\t lon: "));
+  DEBUG_PRINTLN(lonRoute);
 
   if ((latRoute != latEE) && (lonRoute != lonEE)) return false;
 
@@ -183,7 +183,7 @@ bool PathingProcess() {
 
 // Updates waypoint based on distance to target
 void WaypointUpdate() {
-  if (WaypointWithinRange) {
+  if (WaypointWithinRange()) {
     IncrementWaypoint();
   }
 }
@@ -209,6 +209,19 @@ void BearingUpdate() {
   } else {
     navigationDir = -MAX_AUTONOMOUS_TURN;
   }
+
+  DEBUG_PRINT(F("Target Bearing: "));
+  DEBUG_PRINT(targetHeading);
+  DEBUG_PRINT(F("\tCurrent Bearing: "));
+  DEBUG_PRINTLN(heading);
+  DEBUG_PRINT(F("\tNavigation Direction: "));
+  if (navigationDir == 0) {
+    DEBUG_PRINTLN(F("Straight Forward"));
+  } else if (navigationDir < 0) {
+    DEBUG_PRINTLN(F("Turn LEFT"));
+  } else {
+    DEBUG_PRINTLN(F("Turn RIGHT"));
+  }
 }
 
 // Returns latest navigation direction
@@ -219,10 +232,13 @@ float BearingDirection() {
 // Checks if distance from current position to target is < min
 bool WaypointWithinRange() {
   long distance = DistanceBetweenLong(latCurrent, lonCurrent, latTarget, lonTarget);
+  DEBUG_PRINT("Distance to waypoint: ");
+  DEBUG_PRINTLN(distance);
   return distance < MAX_DISTANCE_WAYPOINT_ACCEPT;
 }
 
 // Increments current waypoint returns to 0 if > total number of points
+// TODO: halt after last waypoint?
 void IncrementWaypoint() {
   if (waypointIndex == lengthRoute) {
     waypointIndex = 0;
@@ -235,6 +251,8 @@ void IncrementWaypoint() {
 
 // Reads EEPROM waypoint lat, lon from current waypointIndex
 void UpdateWaypoint() {
+  DEBUG_PRINT("Current Waypoint: ");
+  DEBUG_PRINTLN(waypointIndex);
   EEPROMReadLatLon(waypointIndex);
   EEPROM_WRITE_INDEX(waypointIndex);
 }
@@ -410,6 +428,13 @@ void ResetRouteStatus() {
 
 // Populate buffer latitude longitude into EEPROM
 void EEPROMWriteLatLon(int index) {
+  DEBUG_PRINT(F("Lat: "));
+  DEBUG_PRINT(latRoute);
+  DEBUG_PRINT(F("Lon: "));
+  DEBUG_PRINT(lonRoute);
+  DEBUG_PRINT(F("index: "));
+  DEBUG_PRINTLN(index);
+
   EEPROM_WRITE_LAT(index, latRoute);
   EEPROM_WRITE_LON(index, lonRoute);
 }

@@ -17,6 +17,8 @@
         - from Iridium
             - Stream full route
             - Acknowledge Confirm
+        - Only try to update SD Route -> EEPROM once
+        - EEPROM SD compare in reverse order
         - from SD @done
         - from USB @done
 
@@ -51,3 +53,4 @@
 
 - General Software
     - Rework folder structure (src/Communication/.., src/Sensor/.., src/Strategies/.., src/System/..)
+    - Rework function select command (DEBUG), debounce currently stops the command

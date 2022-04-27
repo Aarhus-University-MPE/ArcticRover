@@ -40,6 +40,7 @@ bool Navigate() {
   millisLastNavUpdate = millis();
 
   // Update pos, heading and target waypoint
+  DEBUG_PRINTLINE();
   PathingProcess();
 
   // Set motor controls based on current target waypoint
@@ -50,15 +51,23 @@ bool Navigate() {
 
 // Autonomous Motor Controller, maximum autonomous speed time dependent (increases )
 void NavigationMotorUpdate() {
-  AutonomousTopSpeedUpdate();
-
-  MotorUpdate(BearingDirection(), MAX_AUTONOMOUS_SPEED * maxSpeedScale);
+  DEBUG_PRINT("Bearing Direction: ");
+  DEBUG_PRINT(BearingDirection());
+  DEBUG_PRINT("\tAutonomy Speed: ");
+  DEBUG_PRINTLN(MAX_AUTONOMOUS_SPEED * AutonomySpeedScale());
+  // MotorUpdate(BearingDirection(), MAX_AUTONOMOUS_SPEED * AutonomySpeedScale());
 }
 
 // Increases top speed based on time since autonomy start to avoid high speed start up
-void AutonomousTopSpeedUpdate() {
-  float timeScaledSpeed = millisAutonomyStart * AUTONOMY_SPEED_SCALE;
-  maxSpeedScale         = min(1.0f, timeScaledSpeed);
+float AutonomySpeedScale() {
+  unsigned long timeSinceAutonomyStart = millis() - millisAutonomyStart;
+
+  if (timeSinceAutonomyStart > TIME_UNTIL_AUTONOMY_MAX_SPEED) {
+    return 1.0f;
+  }
+
+  float timeScaledSpeed = timeSinceAutonomyStart * (1.0f - MIN_AUTONOMOUS_SPEED) / TIME_UNTIL_AUTONOMY_MAX_SPEED;
+  return min(1.0f, timeScaledSpeed);
 }
 
 void NavigationPreCheckReset() {

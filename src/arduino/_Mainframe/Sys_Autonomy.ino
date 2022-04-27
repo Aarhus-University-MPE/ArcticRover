@@ -26,6 +26,8 @@ void AutonomousProcess() {
   // Autonomous Navigation towards waypoints based on current GNSS position and heading
   if (!Navigate()) return;
 
+  SBusProcess();  // TODO: Remove Manual Control
+
   // Transmit motor controls based on Navigation alogrithm
   if (!CanBusProcess()) return;  // TODO: Handle CAN Error
 }
@@ -39,6 +41,7 @@ bool AutonomyPreRun() {
   // System ready to start, waiting idle
   if (!autonomyActive) {
     StatusRunLed(LED_SIGNAL_LOADING);
+    // TODO: Print ready
     return false;
   }
 

@@ -24,11 +24,13 @@ bool InitializeIridium() {
   bool status = true;
   COM_SERIAL_IRID.begin(IRID_BAUDRATE);
 
+  modem.adjustATTimeout(IRID_ATT_TIMEOUT);
+  modem.adjustStartupTimeout(IRID_START_TIMEOUT);
   digitalWrite(PO_POWER_IRIDIUM, HIGH);
 
   // modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
 
-  // status = (modem.begin() == ISBD_SUCCESS);
+  status = (modem.begin() == ISBD_SUCCESS);
   return status;
 }
 

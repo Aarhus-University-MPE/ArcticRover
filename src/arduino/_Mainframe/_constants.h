@@ -252,8 +252,9 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define MIN_ACCEL_TILT                    0.8f  // approx 35°
 
-#define MAX_AUTONOMOUS_SPEED              1.0f
-#define AUTONOMY_SPEED_SCALE              0.9f / 30000.0f  // linear scale, max speed after 5 minutes
+#define MAX_AUTONOMOUS_SPEED              0.5f      // 0-1 (0-100%) of maxspeed
+#define MIN_AUTONOMOUS_SPEED              0.1f      // 0-1 (0-100%) of maxspeed
+#define TIME_UNTIL_AUTONOMY_MAX_SPEED     30000.0f  // ms until max autonomy speed (5 min)
 #define MAX_AUTONOMOUS_TURN               0.5f
 
 #define COORDINATE_DEGREE_SCALE           1.0d / 10000000.0d
@@ -316,8 +317,8 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 // Iridium
 #define IRID_BAUDRATE                     19200
-#define IRID_START_TIMEOUT                2       // default value = 240 sec
-#define IRID_ATT_TIMEOUT                  2       // default value = 20 sec
+#define IRID_START_TIMEOUT                6       // default value = 240 sec
+#define IRID_ATT_TIMEOUT                  3       // default value = 20 sec
 #define IRID_PROCESS_PERIOD               900000  // 15 min
 
 // SBUS

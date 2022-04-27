@@ -27,7 +27,13 @@ bool InitializeSBUS() {
 }
 
 void TerminateSBUS() {
+  // digitalWrite(PO_POWER_RF, LOW); // TODO: Power off?
   COM_SERIAL_RF.end();
+}
+
+bool ResetSBUS() {
+  TerminateSBUS;
+  return InitializeSBUS();
 }
 
 bool SBusStatus() {
@@ -132,6 +138,7 @@ bool SBusProcess() {
         DEBUG_PRINTLN("SBUS Timeout");
         SystemDisable(MODULE_RF);
         SystemEnable(MODULE_RF);
+        // ResetSBUS();
       }
       MotorUpdate(0, 0);
       return sBusStatus;

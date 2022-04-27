@@ -91,6 +91,7 @@ void SDDownload(char fileName[]) {
         DEBUG_WRITE(file.read());
       }
       file.close();
+      DEBUG_PRINTLINE();
       DEBUG_PRINTLN(F("End of File"));
     } else {
       DEBUG_PRINTLN(F("File not found!"));

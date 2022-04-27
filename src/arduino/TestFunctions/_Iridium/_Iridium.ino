@@ -23,8 +23,8 @@ int signalQuality = -1;
 
 void setup() {
   Serial.begin(115200);
-  // pinMode(PO_POWER_IRIDIUM, OUTPUT);
-  // digitalWrite(PO_POWER_IRIDIUM, HIGH);
+  pinMode(PO_POWER_IRIDIUM, OUTPUT);
+  digitalWrite(PO_POWER_IRIDIUM, HIGH);
 
   InitializeIridium();
 }
