@@ -100,17 +100,6 @@ void GemMotor::Update(float velocity) {
   velocityChange        = max(-MAX_VEL_CHANGE, min(MAX_VEL_CHANGE, velocityChange));
   float velocitytarget  = currentVelocity + velocityChange;
 
-  // TODO: Remove debug print
-  // if (millis() - lastMillisPrintCalc > 1000) {
-  //   lastMillisPrintCalc = millis();
-  //   Serial.print("targetVel: ");
-  //   Serial.print(velocity);
-  //   Serial.print("\tcurrentVel: ");
-  //   Serial.print(currentVelocity);
-  //   Serial.print("\tCommand Velocity: ");
-  //   Serial.print(velocitytarget);
-  //   Serial.println();
-  // }
   velocity = velocitytarget;
 
   if (abs(velocity) < MIN_VELOCITY) {

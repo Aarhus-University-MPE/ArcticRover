@@ -13,7 +13,6 @@ const int batteryLevelVoltage[] = {1022, 1004, 986, 956, 931, 920, 913, 898, 883
 const int batteryLevelPct[]     = {100, 98, 95, 90, 80, 60, 40, 25, 15, 5, 1};
 //                            33.6, 33.0, 32.4, 31.44, 30.6, 30.24, 30.0, 29.52, 29.04, 27.6, 24.0
 
-int batteryLevelOverride;
 bool charge;  // Battery Charge status
 
 // Checks voltage levels above critical values?
@@ -50,10 +49,6 @@ int BatteryLevel() {
   return batteryLevelPct[i];
 }
 
-int BatteryLevelDebug() {
-  return batteryLevelOverride;
-}
-
 float BatteryVoltage() {
   int voltageInt = analogRead(PA_SENSOR_BATT);
 
@@ -70,8 +65,7 @@ float BatteryVoltage() {
     if currently on charging and CPL > BATTERY_STD_RECHARGE, awake from standby
 */
 bool PowerCycle() {
-  // int batteryLevel = BatteryLevel();
-  int batteryLevel = BatteryLevelDebug();  // TODO: Remove DEBUG power level
+  int batteryLevel = BatteryLevel();
 
   if (!charge) {
     if (batteryLevel > BATTERY_STD_RECHARGE) {
@@ -94,12 +88,4 @@ bool PowerCycle() {
 
 void ResetPowerCycle() {
   charge = true;
-}
-
-void PowerSet(bool status) {
-  if (status) {
-    batteryLevelOverride = 90;
-  } else {
-    batteryLevelOverride = 15;
-  }
 }

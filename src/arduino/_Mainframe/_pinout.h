@@ -25,7 +25,7 @@
 
 // Heartbeat
 #define PI_BACKUP_HRTBEAT    3
-#define PO_BACKUP_HRTBEAT    8  // TODO: Revert back to 7, temporary used on relay
+#define PO_BACKUP_HRTBEAT    7
 #define PI_INT_HRTBEAT       digitalPinToInterrupt(PI_BACKUP_HRTBEAT)
 
 // Reset pin
@@ -54,7 +54,6 @@
 
 // Motor Control
 #define PO_MOTOR_EN          34  // Enables CAN power, Motor HW Enable and Motor Driver Power
-#define PO_MOTOR_EN_PWR      7   // Activates 12V Relay
 
 // Communication
 #define PO_SPISS_SDCARD      24  // 50 (MISO), 51 (MOSI), 52 (SCK)

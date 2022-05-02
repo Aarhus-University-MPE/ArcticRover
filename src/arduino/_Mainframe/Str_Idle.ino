@@ -21,6 +21,7 @@ void StartStrategyIdle() {
 // Main sequence of strategy
 void RunStrategyIdle() {
   StrategyRunLed();
+  // HeatingProcess();
 }
 
 // End sequence of strategy

@@ -7,12 +7,12 @@
 
 // Code in this function is executed by sending <ME23>
 bool DebugInitialize() {
-  PowerSet(HIGH);
+  // PowerSet(HIGH);
 
   return true;
 }
 
 // Code in this function is executed by sending <MD23>
 void DebugTerminate() {
-  PowerSet(LOW);
+  // PowerSet(LOW);
 }

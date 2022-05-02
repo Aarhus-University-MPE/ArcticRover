@@ -10,7 +10,7 @@ void StartStrategyAutonomous() {
 
   SystemDisable();
 
-  // TODO: Will reset autonomy upon reboot
+  // TODO: Will reset autonomy upon reboot and will not resume from last
   // - Add bool in EEPROM autonomous active, if true skip reset. Unset bool upon in FinishStrategyAutonomous
   AutonomyReset();
 

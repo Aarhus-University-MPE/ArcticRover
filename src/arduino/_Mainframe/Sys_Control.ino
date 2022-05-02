@@ -70,7 +70,7 @@ bool SystemEnable(int module) {
       status = HeatingStart();
       break;
     case MODULE_TEMP:
-      status = TemperatureStatus();
+      status = TemperatureStatus();  // Can't run temp test if below min temp
       break;
     case MODULE_BACKUPCPU:
       status = GetStatus(MODULE_BACKUPCPU);

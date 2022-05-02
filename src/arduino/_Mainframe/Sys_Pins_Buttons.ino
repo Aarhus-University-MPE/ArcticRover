@@ -50,10 +50,8 @@ void InitAllPins() {
 
   // Motor Control
   pinMode(PO_MOTOR_EN, OUTPUT);
-  pinMode(PO_MOTOR_EN_PWR, OUTPUT);
 
   digitalWrite(PO_MOTOR_EN, LOW);
-  digitalWrite(PO_MOTOR_EN_PWR, LOW);
 }
 
 // Initialization of the interrupts assigned to buttons

@@ -105,7 +105,6 @@ void InitializeIridium() {
   Serial.print(signalQuality);
   Serial.println(F("."));
 
-  // TODO: Add
   modem.adjustSendReceiveTimeout(1);
 
   sendBuffer[0] = 80;

@@ -14,7 +14,6 @@ bool InitializeMotors() {
   // }
 
   digitalWrite(PO_MOTOR_EN, true);
-  digitalWrite(PO_MOTOR_EN_PWR, true);  // TODO: Remove, temporary 12V relay power
 
   delay(50);
 
@@ -24,10 +23,7 @@ bool InitializeMotors() {
 
 // Disable Motor HW Enable
 void TerminateMotors() {
-  SystemDisable(MODULE_PWR_12V);  // TODO: Remove, temporary 12V relay power
-
   digitalWrite(PO_MOTOR_EN, false);
-  digitalWrite(PO_MOTOR_EN_PWR, false);  // TODO: Remove, temporary 12V relay power
 }
 
 // Moves motors based on direction and speed input within the range of [-1 and 1]

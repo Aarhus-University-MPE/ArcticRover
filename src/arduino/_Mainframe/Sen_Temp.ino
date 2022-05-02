@@ -7,47 +7,74 @@
   2021
 */
 
+#include "Math.h"
+
 int tempTestState        = 0;
 long millisTempTestStart = 0;
 long millisLastTempPrint = 0;
+long lastMillisTempCheck = 0;
+
+float B25_85 = 3988.0f;   // Kelvin
+float R25    = 10000.0f;  // thermistor resistance at 25 °C - 10 kOhm
+float R_K    = 20000.0f;  // Voltage divider resistor - 20 kOhm
 
 int MeanThermTemp() {
-  int tempCount, total;
+  int tempCount = 0, total = 0;
 
   for (int i = 0; i < 3; i++) {
     int therm = ThermTemp(i);
-    if (therm != 0) {
+    if (therm != -1000) {
       total += therm;
       tempCount++;
     }
   }
 
+  // No valid readings
+  if (tempCount == 0) {
+    return TEMP_SYSTEM_MIN + 1;  // Avoids running heating elements
+  }
   return total / tempCount;
 }
 
 int ThermTemp(int thermistor) {
-  int temp;
+  int tempValue;
   switch (thermistor) {
     case 0:
-      temp = analogRead(PA_SENSOR_TEMP1);
+      tempValue = analogRead(PA_SENSOR_TEMP1);
       break;
     case 1:
-      temp = analogRead(PA_SENSOR_TEMP2);
+      tempValue = analogRead(PA_SENSOR_TEMP2);
       break;
     case 2:
-      temp = analogRead(PA_SENSOR_TEMP3);
+      tempValue = analogRead(PA_SENSOR_TEMP3);
       break;
     default:
       break;
   }
+
+  int temp = ThermistorConversion(tempValue);
+
+  if (temp < MIN_VALID_THERM_VALUE || temp > MAX_VALID_THERM_VALUE) {
+    return -1000;  // Invalid Temp
+  }
   return temp;
+}
+
+/* Thermistor Equation
+  Temp(V_out) = B25_85 / (ln ((V_s * R_k / V_out)  - R_K ) / (R_25 * e^(-B25_85/T1))) - 273.15K
+*/
+const float aTherm = R25 * exp(-B25_85 / (25.0f + 273.15f));
+
+float ThermistorConversion(int tempValue) {
+  float voltage = tempValue * 5.0f / 1024.0f;
+
+  return B25_85 / (log(((5.0f * R_K) / voltage - R_K) / aTherm)) - 273.15f;
 }
 
 bool HeatingStart() {
   if (millis() - lastMillistHeatingOff < HEATING_TIMEOUT) {
     return false;
   }
-
   digitalWrite(PO_POWER_HEATING, HIGH);
   lastMillistHeatingOn = millis();
 
@@ -64,10 +91,11 @@ bool HeatingStatus() {
 }
 
 bool TemperatureStatus() {
-  bool status = MeanThermTemp() > TEMP_SYSTEM_MIN;
-
-  SetStatus(MODULE_TEMP, status);
-  return status;
+  if (!GetStatus(MODULE_HEATING)) {
+    return MeanThermTemp() > TEMP_SYSTEM_MIN;
+  } else {
+    return MeanThermTemp() > TEMP_SYSTEM_MIN + TEMP_SYSTEM_HYSTERESIS;
+  }
 }
 
 // Runs temperature test for a duration, returns true once test is complete
@@ -96,7 +124,7 @@ bool TemperatureTest() {
         DEBUG_PRINT(F("\tMean: "));
         DEBUG_PRINTLN(meanTemp);
 
-        SetStatus(MODULE_TEMP, meanTemp > TEMP_SYSTEM_MIN);
+        // SetStatus(MODULE_TEMP, meanTemp > TEMP_SYSTEM_MIN); // TODO: Readd?
       }
 
       if (millis() - millisTempTestStart > SYS_TEST_DURATION) tempTestState++;
@@ -114,6 +142,11 @@ bool TemperatureTest() {
 
 // If temp < minimum temp runs heating period
 void HeatingProcess() {
+  if (millis() - lastMillisTempCheck < TEMP_CHECK_PERIOD) {
+    return;
+  }
+  lastMillisTempCheck = millis();
+
   if (TemperatureStatus()) {
     SystemDisable(MODULE_HEATING);
     return;

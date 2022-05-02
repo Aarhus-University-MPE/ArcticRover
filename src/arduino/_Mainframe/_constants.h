@@ -289,10 +289,14 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                           HEATING                            //
 // ------------------------------------------------------------ //
-#define TEMP_SYSTEM_MIN                   10  // ~28 V
-#define HEATING_DURATION                  20000
-#define HEATING_TIMEOUT                   40000
+#define TEMP_SYSTEM_MIN                   25     // ~28 V
+#define TEMP_SYSTEM_HYSTERESIS            5      // K
+#define TEMP_CHECK_PERIOD                 5000   // 5 sec
+#define HEATING_DURATION                  20000  // ON Period (20 sec) to avoid running heating elements too hot
+#define HEATING_TIMEOUT                   40000  // OFF Period (40 sec) to avoid running heating elements too hot
 
+#define MIN_VALID_THERM_VALUE             -50
+#define MAX_VALID_THERM_VALUE             50
 // ------------------------------------------------------------ //
 //                       SYSTEM TESTS                           //
 // ------------------------------------------------------------ //

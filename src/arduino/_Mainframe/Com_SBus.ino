@@ -27,7 +27,7 @@ bool InitializeSBUS() {
 }
 
 void TerminateSBUS() {
-  // digitalWrite(PO_POWER_RF, LOW); // TODO: Power off?
+  digitalWrite(PO_POWER_RF, LOW);
   COM_SERIAL_RF.end();
 }
 
