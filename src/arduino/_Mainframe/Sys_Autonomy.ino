@@ -21,15 +21,19 @@ void AutonomousProcess() {
   if (!StandbyRestart()) return;
 
   // Runtime system check GNSS status, IMU tilt
-  if (!AutonomyRunCheck()) return;
+  // if (!AutonomyRunCheck()) return;
 
   // Autonomous Navigation towards waypoints based on current GNSS position and heading
-  if (!Navigate()) return;
+  Navigate();
 
-  SBusProcess();  // TODO: Remove Manual Control
+  NavigationPrint();
+
+  SBusAutonomyProcess();  // TODO: Remove Manual Control
 
   // Transmit motor controls based on Navigation alogrithm
-  if (!CanBusProcess()) return;  // TODO: Handle CAN Error
+  CanBusProcess();  // TODO: Handle CAN Error
+
+  CanBusPrint();
 }
 
 // Runs necessary autonomy pre-runs (Power, Communication, Navigation)
@@ -52,6 +56,7 @@ bool AutonomyPreRun() {
     DEBUG_PRINTLINE();
     DEBUG_PRINTLN(F("Starting Autonomous Driving"));
     DEBUG_PRINTLINE();
+    AutonomySpeedUpdate(0);
   }
 
   return true;
@@ -63,7 +68,7 @@ bool AutonomyPreRun() {
     if currently on charging and CPL > BATTERY_STD_RECHARGE, awake from standby
 */
 bool AutonomyPowerCycle() {
-  if (millis() - millisLastAutonomyCycle < AUTONOMY_PWR_CYCLE_DT) return standbyMode;
+  if (millis() - millisLastAutonomyCycle < AUTONOMY_PWR_CYCLE_DT) return !standbyMode;
 
   millisLastAutonomyCycle = millis();
 
@@ -133,6 +138,9 @@ void AutonomyReset() {
 void AutonomyStandby() {
   standbyMode     = true;
   autonomyRestart = true;
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN(F("Powering Down System"));
+  DEBUG_PRINTLINE();
   MotorUpdate(0, 0);
   MotorCycle();
   SystemDisable();
@@ -142,7 +150,11 @@ void AutonomyStandby() {
 bool StandbyRestart() {
   if (autonomyRestart) {
     autonomyRestart = false;
+    DEBUG_PRINTLINE();
+    DEBUG_PRINTLN(F("Restarting System from Power Down"));
+    DEBUG_PRINTLINE();
     NavigationPreCheckReset();
+    AutonomySpeedUpdate(0);
   }
 
   if (!AutonomyPreCheck()) {

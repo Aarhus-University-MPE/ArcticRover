@@ -1,9 +1,7 @@
 /*
-  GeoRover Accelerometer functionalities, utilizing the XXXX
-  (SparkFun Triple Axis Accelerometer Breakout - MMA8452Q https://www.sparkfun.com/products/12756)
-
-  Primary library used:
-    https://github.com/sparkfun/SparkFun_MMA8452Q_Arduino_Library
+  GeoRover Accelerometer functionalities
+  - Sensor: SparkFun Triple Axis Accelerometer Breakout - MMA8452Q https://www.sparkfun.com/products/12756)
+  - Library Dependency: https://github.com/sparkfun/SparkFun_MMA8452Q_Arduino_Library
 
   Mads Rosenhøj Jeppesen
   Aarhus University

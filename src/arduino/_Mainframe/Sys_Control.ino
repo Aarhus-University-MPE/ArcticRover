@@ -151,7 +151,8 @@ bool SystemEnableMode() {
   }
 
   for (int i = 0; i < modules; i++) {
-    if (!SystemEnableStatus(enableStatus[i])) {
+    // if (!SystemEnableStatus(enableStatus[i])) {
+    if (!enableStatus[i]) {
       status = false;
     }
   }
@@ -523,7 +524,7 @@ bool SystemTestModule(byte module) {
     }
   }
 
-  SetStatus(module, status);
+  // SetStatus(module, status);
 
   return testDone;
 }

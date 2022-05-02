@@ -202,17 +202,17 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 
 #define MODES_MAX              6  // Total number of modes
-#define MODES_MIN_BROWSABLE    2  // Minimum mode index, that could be set via mode button.
+#define MODES_MIN_BROWSABLE    3  // Minimum mode index, that could be set via mode button.
 
 #define MODE_EMERGENCY         0  // Emergency Stop Mode
 #define MODE_MODELIBRARY       1  // Mode Library
-#define MODE_IDLE              2  // Standby mode
-#define MODE_SYSTEMTEST        3  // Test main systems
+#define MODE_SYSTEMTEST        2  // Test main systems
+#define MODE_IDLE              3  // Standby mode
 #define MODE_REMOTECONTROL     4  // System remotely controllable
 #define MODE_AUTONOMOUS        5  // Autonomous driving mode
 
 #define ModeToString(m) \
-  ((m) == 0 ? "Emergency" : ((m) == 1 ? "Mode Library" : ((m) == 2 ? "Idle" : ((m) == 3 ? "System Test" : ((m) == 4 ? "Remote Control" : ((m) == 5 ? "Autonomous" : "Unknown"))))))
+  ((m) == 0 ? "Emergency" : ((m) == 1 ? "Mode Library" : ((m) == 2 ? "System Test" : ((m) == 3 ? "Idle" : ((m) == 4 ? "Remote Control" : ((m) == 5 ? "Autonomous" : "Unknown"))))))
 
 // ------------------------------------------------------------ //
 //                         HEARTBEAT                            //
@@ -231,18 +231,18 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 
 // Orientation calculations
-#define MAX_VALID_BEARING                 250000  // (deg * 10^-5) (2.5 degres)
+#define MAX_VALID_BEARING                 000000  // (deg * 10^-5) (2.0 degres)
 
-#define MAX_DISTANCE_VALID_WAYPOINT       1000  // max valid waypoint distance (meters)
+#define MAX_DISTANCE_VALID_WAYPOINT       300  // max valid waypoint distance between waypoints(meters)
 
-#define MAX_DISTANCE_WAYPOINT_ACCEPT      10  // max distance to accept waypoint (meters)
+#define MAX_DISTANCE_WAYPOINT_ACCEPT      5  // max distance to accept waypoint (meters)
 
 #define EARTH_RADIUS                      6371000  // (meters)
 
 #define GNSS_QUERY_UPDATE_FREQUENCY       1000  // in milliseconds
 
 #define AUTONOMY_PWR_CYCLE_DT             10000
-#define NAVIGATION_CYCLE_DT               1000
+#define NAVIGATION_CYCLE_DT               250
 #define NAVIGATION_RUNCHECK_DT            300000
 
 #define MAX_LAT_VALUE                     900000000   // deg * 10^-7
@@ -252,10 +252,10 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define MIN_ACCEL_TILT                    0.8f  // approx 35°
 
-#define MAX_AUTONOMOUS_SPEED              0.5f      // 0-1 (0-100%) of maxspeed
+#define MAX_AUTONOMOUS_SPEED              1.0f      // 0-1 (0-100%) of maxspeed
 #define MIN_AUTONOMOUS_SPEED              0.1f      // 0-1 (0-100%) of maxspeed
 #define TIME_UNTIL_AUTONOMY_MAX_SPEED     30000.0f  // ms until max autonomy speed (5 min)
-#define MAX_AUTONOMOUS_TURN               0.5f
+#define MAX_AUTONOMOUS_TURN               0.75f
 
 #define COORDINATE_DEGREE_SCALE           1.0d / 10000000.0d
 
@@ -266,7 +266,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define REMOTE_CHANNEL_STEER              1
 #define REMOTE_CHANNEL_ENABLE             2
 
-#define REMOTE_PROCESS_DT                 100
+#define REMOTE_PROCESS_DT                 200
 
 #define REMOTE_SIGNAL_SCALE               100.0 / 87.0
 

@@ -46,10 +46,10 @@ void setup() {
 void loop() {
   if (Serial.available()) {
     char rc = Serial.read();
-    if(rc == 'S') activeGnss = false;
-    if(rc == 'Q') activeGnss = true;
+    if (rc == 'S') activeGnss = false;
+    if (rc == 'Q') activeGnss = true;
   }
-  if(activeGnss){
+  if (activeGnss) {
     if (!GnssSignal()) {
       Serial.print(F("Signal Error - Time Valid: "));
       Serial.print(gnss.getTimeValid());
@@ -76,7 +76,7 @@ void loop() {
 
     Serial.print(F("Distance to target: "));
     Serial.print(DistanceBetweenLong(latCurrent, lonCurrent, lat2, lon2));
-    Serial.print(F("\tBearing to target: "));
+    Serial.print(F("\tHeading to target: "));
     Serial.print(CourseToLong(latCurrent, lonCurrent, lat2, lon2));
     delay(2000);
   }

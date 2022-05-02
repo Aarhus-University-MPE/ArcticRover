@@ -7,8 +7,8 @@
 */
 
 #include "_constants.h"
-#include "_shared.h"
 #include "_pinout.h"
+#include "_shared.h"
 
 // ------------------------------------------------------------ //
 //                            SETUP                             //
@@ -18,10 +18,10 @@ void setup() {
   InitAllPins();
   InitButtons();
   InitStatusLed();
-  
+
   // Debug
   DBG_ONLY(initializeDebugComm());
-  
+
   SetStatus(false);
 
   SystemEnablePrimary();
@@ -39,7 +39,7 @@ void loop() {
 
   strategyMethods[1][mode]();
 
-  HeartBeat();
+  // HeartBeat();
 
   // IridiumProcess();
 

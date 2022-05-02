@@ -30,9 +30,9 @@
         - Remove files older than X...
     
 - GNSS
-    - Coordinate Bearing + Distance (Long to Radians) @done
+    - Coordinate Heading + Distance (Long to Radians) @done
     - Test Pathing
-    - Test bearing output
+    - Test heading output
 
 - Status LED
     - Test durations

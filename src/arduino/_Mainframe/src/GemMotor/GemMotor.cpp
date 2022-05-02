@@ -10,7 +10,7 @@
 
 #include "Arduino.h"
 
-#if DIAGNOSTICS
+#if DIAGNOSTIC
 #define TIMEOUTMSG()          \
   Serial.print("Timeout - "); \
   Serial.println(TX_id, HEX)
@@ -107,12 +107,11 @@ void GemMotor::Update(float velocity) {
   //   Serial.print(velocity);
   //   Serial.print("\tcurrentVel: ");
   //   Serial.print(currentVelocity);
-  //   Serial.print("\ttargetVel: ");
-  //   Serial.print(velocity);
   //   Serial.print("\tCommand Velocity: ");
   //   Serial.print(velocitytarget);
   //   Serial.println();
   // }
+  velocity = velocitytarget;
 
   if (abs(velocity) < MIN_VELOCITY) {
     GemMotor::swEnable     = SW_DISABLE;
@@ -176,6 +175,7 @@ GemMotor::ERROR GemMotor::PrintStatus() {
   // GemMotor::PrintInverterState(true);
   if (!GemMotor::MotorError()) {
     GemMotor::PrintError(true);
+    return ERROR_MOTOR_ERROR;
   } else {
     // Serial.println(F(": OK"));
   }

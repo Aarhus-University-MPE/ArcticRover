@@ -1,6 +1,6 @@
 /*
   GeoRover CanBUS communication protocols for openCAN communication (Motors)
-  https://github.com/autowp/arduino-mcp2515
+  - Library Dependency: https://github.com/autowp/arduino-mcp2515
 
   Mads Rosenhøj Jeppesen
   Aarhus University
@@ -14,9 +14,10 @@ struct can_frame canTestMsg;
 
 long CanBusTxLast;
 
-int canTestState        = 0;
-long millisCanTestStart = 0;
-long millisLastCanPrint = 0;
+int canTestState                   = 0;
+unsigned long millisCanTestStart   = 0;
+unsigned long millisLastCanPrint   = 0;
+unsigned long maximumtimeSinceLast = 0;
 
 MCP2515 mcp2515(PO_SPISS_CANBUS);
 
@@ -66,60 +67,68 @@ void CanBusPrint() {
   }
   millisLastCanPrint = millis();
 
-  bool motorLeftStatus  = motorLeft.PrintStatus();
-  bool motorRightStatus = motorRight.PrintStatus();
+  bool motorLeftStatus  = motorLeft.PrintStatus() == GemMotor::ERROR_OK;
+  bool motorRightStatus = motorRight.PrintStatus() == GemMotor::ERROR_OK;
 
-  // status = motorLeftStatus || motorRightStatus;
+  // DEBUG_PRINT("Maximum canbus Process period: ");
+  // DEBUG_PRINTLN(maximumtimeSinceLast);
+  maximumtimeSinceLast = 0;
 
+  // if (!(motorLeftStatus && motorRightStatus)) {
+  // SystemDisable(MODULE_MOTORS);
+  // SystemEnable(MODULE_MOTORS);
+  // }
   // printChannels();
   // Serial.println(F("-------------------------------"));
 }
 
+unsigned long timeSinceLastCanProcess = 0;
 // Process CANbus commands, returns false if MCP2515 throws error
 bool CanBusProcess() {
-  if (millis() - CanBusTxLast < CANBUS_TX_PERIOD) {
+  timeSinceLastCanProcess = millis() - CanBusTxLast;
+  while (timeSinceLastCanProcess > CANBUS_TX_PERIOD) {
+    maximumtimeSinceLast = max(timeSinceLastCanProcess, maximumtimeSinceLast);
+
+    // Check motor status
+    if (!MotorStatusLeft() && MotorStatusRight() && SBusStatus()) {
+      MotorUpdate(0, 0);  // Avoid running single motor if other motor reports error
+      // return false;
+    }
+
+    int err;
+    if (motorLeft.GetCanTxStatus()) {
+      err = mcp2515.sendMessage(motorLeft.GetCanMsg());
+      // DEBUG_PRINTLN(F("Send - Left"));
+      if (err != MCP2515::ERROR_OK) {
+        DEBUG_PRINT(F("Can Error Left: "));
+        DEBUG_PRINTLN(err);
+        return false;
+      }
+    } else if (motorRight.GetCanTxStatus()) {
+      err = mcp2515.sendMessage(motorRight.GetCanMsg());
+      // DEBUG_PRINTLN(F("Send - Right"));
+      if (err != MCP2515::ERROR_OK) {
+        DEBUG_PRINT(F("Can Error Right: "));
+        DEBUG_PRINTLN(err);
+        return false;
+      }
+    }
+
+    if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
+      if (motorLeft.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
+        motorRight.SetCanTxStatus();
+        // DEBUG_PRINTLN(F("Timeout - Left"));
+      }
+      if (motorRight.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
+        motorLeft.SetCanTxStatus();
+        // DEBUG_PRINTLN(F("Timeout - Right"));
+      }
+      if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
+        ParseData();
+      }
+    }
     return true;
   }
-
-  // Check motor status
-  if (!MotorStatusLeft() && MotorStatusRight() && SBusStatus()) {
-    // MotorUpdate(0, 0);  // Avoid running single motor if other motor reports error
-    // return false;
-  }
-
-  int err;
-  if (motorLeft.GetCanTxStatus()) {
-    err = mcp2515.sendMessage(motorLeft.GetCanMsg());
-    // DEBUG_PRINTLN(F("Send - Left"));
-    if (err != MCP2515::ERROR_OK) {
-      DEBUG_PRINT(F("Can Error Left: "));
-      DEBUG_PRINTLN(err);
-      return false;
-    }
-  } else if (motorRight.GetCanTxStatus()) {
-    err = mcp2515.sendMessage(motorRight.GetCanMsg());
-    // DEBUG_PRINTLN(F("Send - Right"));
-    if (err != MCP2515::ERROR_OK) {
-      DEBUG_PRINT(F("Can Error Right: "));
-      DEBUG_PRINTLN(err);
-      return false;
-    }
-  }
-
-  if (motorLeft.GetCanRxStatus() || motorRight.GetCanRxStatus()) {
-    if (motorLeft.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
-      motorRight.SetCanTxStatus();
-      // DEBUG_PRINTLN(F("Timeout - Left"));
-    }
-    if (motorRight.CheckCanRxTimeout() == GemMotor::CAN_ERROR_TIMEOUT) {
-      motorLeft.SetCanTxStatus();
-      // DEBUG_PRINTLN(F("Timeout - Right"));
-    }
-    if (mcp2515.readMessage(&canMsg) == MCP2515::ERROR_OK) {
-      ParseData();
-    }
-  }
-  return true;
 }
 
 bool CanBusStatus() {

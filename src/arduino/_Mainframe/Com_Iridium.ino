@@ -1,6 +1,6 @@
 /*
   GeoRover Iridium communication protocols for long range communication
-  using: https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library
+  - Library Dependency: https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library
 
   Mads Rosenhøj Jeppesen
   Aarhus University
@@ -12,9 +12,9 @@
 
 IridiumSBD modem(COM_SERIAL_IRID);
 
-uint8_t sendBuffer[200];
+char sendBuffer[200];
 uint8_t receiveBuffer[200];
-
+size_t sendBuferSize;
 size_t bufferSize = 200;
 int signalQuality = -1;
 bool iridiumTxStatus;
@@ -71,7 +71,7 @@ void IridiumReceive() {
 
   err = modem.sendReceiveSBDText(NULL, receiveBuffer, bufferSize);
   if (err != ISBD_SUCCESS) {
-    DEBUG_PRINT(F("Receive msg failed, error: "));
+    DEBUG_PRINT(F("Receive msg failed, Error: "));
     DEBUG_PRINTLN(err);
   } else {
     for (int i = 0; i < bufferSize; i++) {
@@ -89,65 +89,88 @@ void IridiumReceive() {
   Serial.println(F("Clearing the MO buffer."));
   err = modem.clearBuffers(ISBD_CLEAR_MO);  // Clear MO buffer
   if (err != ISBD_SUCCESS) {
-    Serial.print(F("clearBuffers failed, error: "));
+    Serial.print(F("clearBuffers failed, Error: "));
     Serial.println(err);
   }
 }
 
 // Send iridium message awaiting to be sent
 void IridiumSend() {
-  // if (messageAwaiting) {
-  // modem.sendReceiveSBDBinary(sendBuffer,bufferSize,receiveBuffer,bufferSize);
-  // }
+  if (iridiumTxStatus) {
+    DEBUG_PRINT("Sending test message... ");
+    int err = modem.sendReceiveSBDText(sendBuffer, receiveBuffer, bufferSize);
+    if (err == ISBD_SUCCESS) {
+      iridiumTxStatus = false;
+      DEBUG_PRINTLN("Success!");
+    } else {
+      DEBUG_PRINT("Error: ");
+      DEBUG_PRINTLN(err);
+    }
+  }
+}
+
+// TODO: Fill send buffer with specified data
+void PopulateSendBuffer() {
+  // fill send buffer
+  sendBuffer[0] = 'H';
+  sendBuffer[1] = 'e';
+  sendBuffer[2] = 'l';
+  sendBuffer[3] = 'l';
+  sendBuffer[4] = 'o';
+  sendBuffer[5] = '!';
+  sendBuffer[6] = '\r';
+  sendBuffer[7] = '\n';
+  sendBuferSize = 8;
 }
 
 // Full Iridium Test
 bool IridiumTest() {
   bool status = true;
 
-  int err = modem.getSignalQuality(signalQuality);
-  if (err != ISBD_SUCCESS) {
-    status = false;
-  }
+  int err;
+  // err = modem.getSignalQuality(signalQuality);
+  // if (err != ISBD_SUCCESS) {
+  //   status = false;
+  // }
 
-  DEBUG_PRINT(F("Iridium: "));
-  if (status) {
-    DEBUG_PRINT(F("Signal Quality: "));
-    DEBUG_PRINTLN(signalQuality);
-  } else {
-    DEBUG_PRINTLN(F("ERROR"));
-  }
+  // DEBUG_PRINT(F("Iridium: "));
+  // if (status) {
+  //   DEBUG_PRINT(F("Signal Quality: "));
+  //   DEBUG_PRINTLN(signalQuality);
+  // } else {
+  //   DEBUG_PRINTLN(F("ERROR"));
+  // }
 
   // Example: Print the firmware revision
-  char version[12];
-  err = modem.getFirmwareVersion(version, sizeof(version));
-  if (err != ISBD_SUCCESS) {
-    DEBUG_PRINT(F("Firmware Version failed: error "));
-    DEBUG_PRINTLN(err);
-    status = false;
-  }
-  DEBUG_PRINT(F("Firmware Version is "));
-  DEBUG_PRINT(version);
-  DEBUG_PRINTLN(F("."));
+  // char version[12];
+  // err = modem.getFirmwareVersion(version, sizeof(version));
+  // if (err != ISBD_SUCCESS) {
+  //   DEBUG_PRINT(F("Firmware Version failed: Error "));
+  //   DEBUG_PRINTLN(err);
+  //   status = false;
+  // }
+  // DEBUG_PRINT(F("Firmware Version is "));
+  // DEBUG_PRINT(version);
+  // DEBUG_PRINTLN(F("."));
 
-  // Example: Print the IMEI
-  char IMEI[16];
-  err = modem.getIMEI(IMEI, sizeof(IMEI));
-  if (err != ISBD_SUCCESS) {
-    DEBUG_PRINT(F("getIMEI failed: error "));
-    DEBUG_PRINTLN(err);
-    status = false;
-  }
-  DEBUG_PRINT(F("IMEI is "));
-  DEBUG_PRINT(IMEI);
-  DEBUG_PRINTLN(F("."));
+  // // Example: Print the IMEI
+  // char IMEI[16];
+  // err = modem.getIMEI(IMEI, sizeof(IMEI));
+  // if (err != ISBD_SUCCESS) {
+  //   DEBUG_PRINT(F("getIMEI failed: Error "));
+  //   DEBUG_PRINTLN(err);
+  //   status = false;
+  // }
+  // DEBUG_PRINT(F("IMEI is "));
+  // DEBUG_PRINT(IMEI);
+  // DEBUG_PRINTLN(F("."));
 
   // Example: Test the signal quality.
   // This returns a number between 0 and 5.
   // 2 or better is preferred.
   err = modem.getSignalQuality(signalQuality);
   if (err != ISBD_SUCCESS) {
-    DEBUG_PRINT(F("SignalQuality failed: error "));
+    DEBUG_PRINT(F("SignalQuality failed: Error "));
     DEBUG_PRINTLN(err);
     status = false;
   }
@@ -157,6 +180,12 @@ bool IridiumTest() {
   DEBUG_PRINTLN(F("."));
 
   DEBUG_PRINTLINE();
+  if (signalQuality <= 0) {
+    return status;
+  }
+  sendBuffer[0]   = (uint8_t)BatteryLevel();
+  iridiumTxStatus = true;
+  IridiumSend();
 
   return status;
 }

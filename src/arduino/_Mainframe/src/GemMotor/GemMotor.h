@@ -1,7 +1,6 @@
 /*
   GeoRover Motor Class - Manages GEM Motor Functionalities.
-
-  Uses https://github.com/autowp/arduino-mcp2515
+  - Library Dependency: https://github.com/autowp/arduino-mcp2515
 
   Mads Rosenhøj Jeppesen
   Aarhus University
@@ -10,7 +9,7 @@
 
 #include "mcp2515.h"
 
-#define DIAGNOSTICS              false
+#define DIAGNOSTIC               false
 
 #define MIN_VELOCITY             0.25f  // kmh
 #define MOTOR_MAX_SPEED_FWD      10.0f  // kmh
@@ -34,12 +33,12 @@
 #define MAX_CONTROL_VALUE_TORQUE 100
 
 #define CAN_TIMEOUT_DURATION     1000
-#define CANBUS_TX_PERIOD         50
+#define CANBUS_TX_PERIOD         25
 #define CANBUS_PRINT_PERIOD      1000
 #define MOTOR_ERROR_TIMEOUT      5000  // Time before
 
 #define MAX_INPUT_STEP           0.1f  // maximum increase from current state
-#define MAX_VEL_CHANGE           1.5f  // Maximum change in velocity from current velocity (Form of Acceleration)
+#define MAX_VEL_CHANGE           1.0f  // Maximum change in velocity from current velocity (Form of Acceleration)
 
 class GemMotor {
   enum CONTROL_MODE {

@@ -193,7 +193,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 
 // Orientation calculations
-#define MIN_DISTANCE_VALID_BEARING      1     // min valid distance to calculate bearing (meters)
+#define MIN_DISTANCE_VALID_BEARING      1     // min valid distance to calculate heading (meters)
 #define MAX_DISTANCE_VALID_WAYPOINT     1000  // max valid waypoint distance (meters)
 
 #define MIN_DISTANCE_WAYPOINT_ACCEPT    5  // max distance in to accept waypoint (meters)

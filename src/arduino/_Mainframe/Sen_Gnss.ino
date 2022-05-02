@@ -1,9 +1,7 @@
 /*
   GeoRover GNSS functionalities, utilizing the ZED-F9P
-  (SparkFun GPS-RTK-SMA Breakout https://www.sparkfun.com/products/16481)
-
-  Primary library used:
-    https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library
+  - Sensor: SparkFun GPS-RTK-SMA Breakout https://www.sparkfun.com/products/16481)
+  - Library Dependency: https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library
 
   Mads Rosenhøj Jeppesen
   Aarhus University
@@ -22,10 +20,12 @@ long millisLastGnssPrint = 0;
 
 bool InitializeGnss() {
   Wire.begin();
+  Wire.setClock(400000);
+  // Wire.setWireTim eout(1000);
   bool status = gnss.begin();
   if (status) {
-    gnss.setI2COutput(COM_TYPE_UBX);                                // Set the I2C port to output UBX only (turn off NMEA noise)
-    gnss.setVal(UBLOX_CFG_RATE_MEAS, GNSS_QUERY_UPDATE_FREQUENCY);  // Set measurement rate to 1000ms (1Hz update rate)
+    gnss.setI2COutput(COM_TYPE_UBX);  // Set the I2C port to output UBX only (turn off NMEA noise)
+    gnss.setNavigationFrequency(5);   // Set output to 5 times a second
   }
   return status;
 }
@@ -108,17 +108,17 @@ void TerminateGnss() {
 
 // Gets positional data in Latitude in degrees * 10^-7
 long GnssGetLat() {
-  return gnss.getLatitude();
+  return gnss.getLatitude(10);
 }
 
 // Gets positional data in Longitude in degrees * 10^-7
 long GnssGetLong() {
-  return gnss.getLongitude();
+  return gnss.getLongitude(10);
 }
 
 // Returns heading in degrees * 10^-5
 long GnssGetHeading() {
-  return gnss.getHeading();
+  return gnss.getHeading(10);
 }
 
 // Query module and prints Lat, Long, Alt, Acc

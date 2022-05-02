@@ -7,13 +7,12 @@
 
 // Code in this function is executed by sending <ME23>
 bool DebugInitialize() {
-  SD.remove("WAYPOINT");
-  SD.remove("HELLO");
+  PowerSet(HIGH);
 
-  return false;
+  return true;
 }
 
 // Code in this function is executed by sending <MD23>
 void DebugTerminate() {
-  digitalWrite(PO_MOTOR_EN_PWR, false);  // TODO: Remove, temporary 12V relay power
+  PowerSet(LOW);
 }

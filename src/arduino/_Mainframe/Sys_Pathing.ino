@@ -10,15 +10,17 @@ long latRoute, lonRoute;  // Latest position buffer (degrees *10^-7)
 int idxRoute;             //
 int lengthRoute;
 int indexRoute;
+unsigned int distanceToWaypoint = 0;
 
 bool routeStatus  = false;
 bool routeTestRun = false;
 
 char operatorName[numChars];
 
+long heading;
+long targetHeading;
+
 // Target coordinate (read from EEPROM)
-long latTarget      = 0;
-long lonTarget      = 0;
 float navigationDir = 0;
 
 // Current coordinate (From GNSS)
@@ -111,15 +113,15 @@ bool CompareEepromSdRoute() {
   // if (!RouteEe(latEE, lonEE, 0)) return false;
   RouteEe(latEE, lonEE, lengthRoute - 1);
 
-  DEBUG_PRINT(F("EEPROM Last waypoint: Lat: "));
-  DEBUG_PRINT(latEE);
-  DEBUG_PRINT(F("\t lon: "));
-  DEBUG_PRINTLN(lonEE);
+  // DEBUG_PRINT(F("EEPROM Last waypoint: Lat: "));
+  // DEBUG_PRINT(latEE);
+  // DEBUG_PRINT(F("\t lon: "));
+  // DEBUG_PRINTLN(lonEE);
 
-  DEBUG_PRINT(F("Waypoint.csv Last waypoint: Lat: "));
-  DEBUG_PRINT(latRoute);
-  DEBUG_PRINT(F("\t lon: "));
-  DEBUG_PRINTLN(lonRoute);
+  // DEBUG_PRINT(F("Waypoint.csv Last waypoint: Lat: "));
+  // DEBUG_PRINT(latRoute);
+  // DEBUG_PRINT(F("\t lon: "));
+  // DEBUG_PRINTLN(lonRoute);
 
   if ((latRoute != latEE) && (lonRoute != lonEE)) return false;
 
@@ -172,13 +174,14 @@ bool RouteCheck() {
 
 // Update current position and heading and check distance to current waypoint, if below threshold, set next target
 bool PathingProcess() {
+  // Get latest position from GNSS
   GnssUpdate();
 
   // Calculate distance from current pos to target pos
   WaypointUpdate();
 
-  // Calculate bearing to target
-  BearingUpdate();
+  // Calculate heading to target
+  HeadingUpdate();
 }
 
 // Updates waypoint based on distance to target
@@ -188,59 +191,54 @@ void WaypointUpdate() {
   }
 }
 
-// Updates bearing offset based on target and current bearing
-void BearingUpdate() {
-  long heading       = GnssGetHeading();  // deg * 10^-5
-  long targetHeading = (long)(CourseToLong(latCurrent, lonCurrent, latTarget, lonTarget)) * 100000;
+// Updates heading offset based on target and current heading
+void HeadingUpdate() {
+  heading       = GnssGetHeading();  // deg * 10^-5
+  targetHeading = (long)(CourseToLong(latCurrent, lonCurrent, latRoute, lonRoute)) * 100000;
 
   headingError = targetHeading - heading;
 
   // Check headingError > 180 degree to take smallest rotation (190 degrees to avoid rotation overlap)
-  if (headingError > 190) {
-    headingError -= 360;
-  } else if (headingError < -190) {
-    headingError += 360;
+  if (headingError > 19000000) {
+    headingError -= 36000000;
+  } else if (headingError < -19000000) {
+    headingError += 36000000;
   }
+  float turnStrength = headingError / 100000.0f * 1.0f / 45.0f;  // TODO: Rewrite to constant (AUTONOMY_TURN_STRENGTH)
 
   if (abs(headingError) < MAX_VALID_BEARING) {
     navigationDir = 0;
   } else if (headingError > MAX_VALID_BEARING) {
-    navigationDir = MAX_AUTONOMOUS_TURN;
+    // navigationDir = MAX_AUTONOMOUS_TURN;
+    navigationDir = min(MAX_AUTONOMOUS_TURN, turnStrength);
   } else {
-    navigationDir = -MAX_AUTONOMOUS_TURN;
-  }
-
-  DEBUG_PRINT(F("Target Bearing: "));
-  DEBUG_PRINT(targetHeading);
-  DEBUG_PRINT(F("\tCurrent Bearing: "));
-  DEBUG_PRINTLN(heading);
-  DEBUG_PRINT(F("\tNavigation Direction: "));
-  if (navigationDir == 0) {
-    DEBUG_PRINTLN(F("Straight Forward"));
-  } else if (navigationDir < 0) {
-    DEBUG_PRINTLN(F("Turn LEFT"));
-  } else {
-    DEBUG_PRINTLN(F("Turn RIGHT"));
+    // navigationDir = -MAX_AUTONOMOUS_TURN;
+    navigationDir = max(-MAX_AUTONOMOUS_TURN, turnStrength);
   }
 }
 
 // Returns latest navigation direction
-float BearingDirection() {
+float HeadingDirection() {
   return navigationDir;
 }
 
 // Checks if distance from current position to target is < min
 bool WaypointWithinRange() {
-  long distance = DistanceBetweenLong(latCurrent, lonCurrent, latTarget, lonTarget);
-  DEBUG_PRINT("Distance to waypoint: ");
-  DEBUG_PRINTLN(distance);
-  return distance < MAX_DISTANCE_WAYPOINT_ACCEPT;
+  // write coordinate
+  // write coordinate
+  // DEBUG_PRINT(F("Current - Lat: "));
+  // DEBUG_PRINT(latCurrent);
+  // DEBUG_PRINT(F(" Lon: "));
+  // DEBUG_PRINTLN(lonCurrent);
+
+  distanceToWaypoint = DistanceBetweenLong(latCurrent, lonCurrent, latRoute, lonRoute);
+  return distanceToWaypoint < MAX_DISTANCE_WAYPOINT_ACCEPT;
 }
 
 // Increments current waypoint returns to 0 if > total number of points
 // TODO: halt after last waypoint?
 void IncrementWaypoint() {
-  if (waypointIndex == lengthRoute) {
+  if (waypointIndex >= lengthRoute - 1) {
     waypointIndex = 0;
   } else {
     waypointIndex++;
@@ -255,6 +253,42 @@ void UpdateWaypoint() {
   DEBUG_PRINTLN(waypointIndex);
   EEPROMReadLatLon(waypointIndex);
   EEPROM_WRITE_INDEX(waypointIndex);
+}
+
+unsigned long lastMillisNavPrint = 0;
+void NavigationPrint() {
+  if (millis() - lastMillisNavPrint < CANBUS_PRINT_PERIOD * 5) {
+    return;
+  }
+  lastMillisNavPrint = millis();
+
+  DEBUG_PRINTLINE();
+  // DEBUG_PRINT(F("Target - Lat: "));
+  // DEBUG_PRINT(latRoute);
+  // DEBUG_PRINT(F(" Lon: "));
+  // DEBUG_PRINTLN(lonRoute);
+
+  // DEBUG_PRINT(F("Current - Lat: "));
+  // DEBUG_PRINT(latCurrent);
+  // DEBUG_PRINT(F(" Lon: "));
+  // DEBUG_PRINTLN(lonCurrent);
+  DEBUG_PRINT("Distance to waypoint: ");
+  DEBUG_PRINTLN(distanceToWaypoint);
+
+  // DEBUG_PRINT(F("Target Heading: "));
+  // DEBUG_PRINT(targetHeading);
+  // DEBUG_PRINT(F("\tCurrent Heading: "));
+  // DEBUG_PRINT(heading);
+  // DEBUG_PRINT(F("\tHeading Error: "));
+  // DEBUG_PRINT(headingError);
+  // if (navigationDir == 0) {
+  //   DEBUG_PRINTLN(F("\tStraight Forward"));
+  // } else if (navigationDir < 0) {
+  //   DEBUG_PRINTLN(F("\tTurn LEFT"));
+  // } else {
+  //   DEBUG_PRINTLN(F("\tTurn RIGHT"));
+  // }
+  // DEBUG_PRINTLINE();
 }
 
 // Reads latitude and longitude at given index
@@ -461,6 +495,10 @@ void EEPROMWriteRouteLength(int routeLength) {
 void EEPROMReadLatLon(int index) {
   EEPROM_READ_LAT(index, latRoute);
   EEPROM_READ_LON(index, lonRoute);
+  DEBUG_PRINT(F("Target - Lat: "));
+  DEBUG_PRINT(latRoute);
+  DEBUG_PRINT(F(" Lon: "));
+  DEBUG_PRINTLN(lonRoute);
 }
 
 // Checks validity of coordinate format (-90 <= lat <= 90 && -180 <= lon <= 180)

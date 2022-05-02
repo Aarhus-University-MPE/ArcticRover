@@ -1,6 +1,6 @@
 /*
   GeoRover SBUS communication protocols for RF communication
-  using: https://github.com/zendes/SBUS
+  - Library Dependency: https://github.com/zendes/SBUS
 
   Mads Rosenhøj Jeppesen
   Aarhus University
@@ -127,30 +127,38 @@ bool SBusProcess() {
 
   millisLastSBusUpdate = millis();
 
-  // First timeout error returns true (catches large first read getLastTime)
-  if (millis() - (unsigned long)sbus.getLastTime() > SBUS_TIMEOUT) {
-    if (sBusStatus) {
-      sBusStatus = false;
-      return true;
-    } else {
-      if (millis() - millisLastSbusPrint > CANBUS_PRINT_PERIOD) {
-        millisLastSbusPrint = millis();
-        DEBUG_PRINTLN("SBUS Timeout");
-        SystemDisable(MODULE_RF);
-        SystemEnable(MODULE_RF);
-        // ResetSBUS();
-      }
-      MotorUpdate(0, 0);
-      return sBusStatus;
-    }
-  }
+  SbusTimeout();
 
-  sBusStatus = true;
   if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
     MotorUpdate(0, 0);
   } else {
     SBusController();
   }
+
+  return sBusStatus;
+}
+
+// Read RF signal and update motors accordingly
+bool SBusAutonomyProcess() {
+  sbus.process();
+
+  if (millis() - millisLastSBusUpdate < REMOTE_PROCESS_DT) {
+    return true;
+  }
+
+  millisLastSBusUpdate = millis();
+
+  SbusTimeout();
+
+  if (getChannel(6) < REMOTE_CHANNEL_HIGH) {  // Enable (SF)
+    AutonomySpeedUpdate(0);
+  } else {
+    SBusAutonomyController();
+  }
+
+  // TODO: Move Motor Update elsewhere once remote control is removed
+  // Set motor controls based on current target waypoint
+  MotorUpdate(HeadingDirection(), MAX_AUTONOMOUS_SPEED * AutonomySpeedScale());
 
   return sBusStatus;
 }
@@ -196,6 +204,20 @@ void SBusController() {
   }
 }
 
+// Reads controller input and navigates motors
+void SBusAutonomyController() {
+  float throttle = getChannelFloatFull(1);  // Left stick Vertical
+
+  sbus.process();
+
+  // Primary input (Left Stick)
+  if (throttle > CONTROLLER_DEADZONE_FLOAT) {
+    AutonomySpeedUpdate(throttle);
+  } else {
+    AutonomySpeedUpdate(0);
+  }
+}
+
 void SBusPrint() {
   if (millis() - millisLastSbusPrint < 1000) {
     return;
@@ -226,6 +248,30 @@ void printChannels() {
   DEBUG_PRINTLN(millis() - (unsigned long)sbus.getLastTime());
 }
 
+bool SbusTimeout() {
+  // First timeout error returns true (catches large first read getLastTime)
+  if (millis() - (unsigned long)sbus.getLastTime() > SBUS_TIMEOUT) {
+    if (sBusStatus) {
+      sBusStatus = false;
+      return true;
+    } else {
+      if (millis() - millisLastSbusPrint > CANBUS_PRINT_PERIOD) {
+        millisLastSbusPrint = millis();
+        DEBUG_PRINTLN("SBUS Timeout");
+        SystemDisable(MODULE_RF);
+        SystemEnable(MODULE_RF);
+        // ResetSBUS();
+      }
+      // TODO: only stop 3rd time
+      AutonomySpeedUpdate(0);
+      return sBusStatus;
+    }
+  }
+
+  sBusStatus = true;
+
+  return true;
+}
 // Timer2 triggers ever 1ms and processes the incoming SBUS datastream
 // ISR(TIMER2_COMPA_vect)
 // {

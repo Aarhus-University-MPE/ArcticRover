@@ -12,15 +12,15 @@
     1.2 Distance < min distance?
         -> Valid gps fix? (time since last)
     else break
-  2. Calculate current bearing
+  2. Calculate current heading
     2.1 Distance between previous waypoints > Min Distance?
         -> Calculate using Forward Azimuth
-    2.2 Else skip (Set bearing: 0)
-  3. Calculate target bearing (Difference between current position and target waypoint)
-    3.1 Is bearing valid?
+    2.2 Else skip (Set heading: 0)
+  3. Calculate target heading (Difference between current position and target waypoint)
+    3.1 Is heading valid?
         -> Calculate using forward Azimuth
-    3.2 Else skip (Set target bearing: 0)
-  4. Calculate change bearing
+    3.2 Else skip (Set target heading: 0)
+  4. Calculate change heading
     4.1 difference between current and target
 
 */
@@ -30,7 +30,7 @@
 
 bool navigationPreCheck = false;
 unsigned long millisLastNavUpdate;
-float maxSpeedScale;
+float maxSpeedScale, autonomySpeedOverride = 0;
 
 // Autonomous Navigation, update current position and heading, update target waypoint and update motor controls
 bool Navigate() {
@@ -40,22 +40,9 @@ bool Navigate() {
   millisLastNavUpdate = millis();
 
   // Update pos, heading and target waypoint
-  DEBUG_PRINTLINE();
   PathingProcess();
 
-  // Set motor controls based on current target waypoint
-  NavigationMotorUpdate();
-
   return true;
-}
-
-// Autonomous Motor Controller, maximum autonomous speed time dependent (increases )
-void NavigationMotorUpdate() {
-  DEBUG_PRINT("Bearing Direction: ");
-  DEBUG_PRINT(BearingDirection());
-  DEBUG_PRINT("\tAutonomy Speed: ");
-  DEBUG_PRINTLN(MAX_AUTONOMOUS_SPEED * AutonomySpeedScale());
-  // MotorUpdate(BearingDirection(), MAX_AUTONOMOUS_SPEED * AutonomySpeedScale());
 }
 
 // Increases top speed based on time since autonomy start to avoid high speed start up
@@ -63,11 +50,17 @@ float AutonomySpeedScale() {
   unsigned long timeSinceAutonomyStart = millis() - millisAutonomyStart;
 
   if (timeSinceAutonomyStart > TIME_UNTIL_AUTONOMY_MAX_SPEED) {
-    return 1.0f;
+    // return 1.0f;
+    return autonomySpeedOverride;
   }
 
   float timeScaledSpeed = timeSinceAutonomyStart * (1.0f - MIN_AUTONOMOUS_SPEED) / TIME_UNTIL_AUTONOMY_MAX_SPEED;
-  return min(1.0f, timeScaledSpeed);
+  // return min(1.0f, timeScaledSpeed);
+  return autonomySpeedOverride;
+}
+
+void AutonomySpeedUpdate(float speed) {
+  autonomySpeedOverride = speed;
 }
 
 void NavigationPreCheckReset() {
