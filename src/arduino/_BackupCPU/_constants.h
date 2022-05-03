@@ -11,7 +11,7 @@
 // ------------------------------------------------------------ //
 
 // Debug configuration flag - Comment out to unset
-// #define DEBUG 
+#define DEBUG
 
 // Executes one line of code only if DEBUG flag is set.
 #if defined(DEBUG)

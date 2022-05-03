@@ -123,8 +123,6 @@ bool TemperatureTest() {
         DEBUG_PRINT(ThermTemp(2));
         DEBUG_PRINT(F("\tMean: "));
         DEBUG_PRINTLN(meanTemp);
-
-        // SetStatus(MODULE_TEMP, meanTemp > TEMP_SYSTEM_MIN); // TODO: Readd?
       }
 
       if (millis() - millisTempTestStart > SYS_TEST_DURATION) tempTestState++;

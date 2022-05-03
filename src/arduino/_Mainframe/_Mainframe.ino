@@ -39,7 +39,7 @@ void loop() {
 
   strategyMethods[1][mode]();
 
-  // HeartBeat();
+  HeartBeat();
 
   // IridiumProcess();
 

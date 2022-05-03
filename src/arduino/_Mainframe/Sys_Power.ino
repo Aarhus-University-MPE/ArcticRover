@@ -40,10 +40,11 @@ bool BatteryStatus(bool print) {
 int BatteryLevel() {
   int voltage = analogRead(PA_SENSOR_BATT);
 
-  int i;
+  int i = 0;
 
   while (voltage < batteryLevelVoltage[i]) {
     i++;
+    if (i > 10) return 0;
   }
 
   return batteryLevelPct[i];
