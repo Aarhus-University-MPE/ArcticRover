@@ -1,2 +1,2 @@
 # ArcticRover
-Autonomous Researech Platform for arctic research on the Greenland icesheet.
+Autonomous Arctic Rover is a fully autonomous arctic research mobility platform. Designed to perform autonomous data logging on the Greenland ice sheets. Powered by solar energy the rover can operate continuously. Utilizing iridium communication data can be transmitted to and from the rover. This allows for updating routes as well as progress monitoring. The modular platform allows for a multitude of research application. The initial operation is based around a Leica GPS 1200, allowing for high-precision positional data, used to determine topography and changes in topography. 
