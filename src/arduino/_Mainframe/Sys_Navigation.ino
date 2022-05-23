@@ -55,7 +55,7 @@ float AutonomySpeedScale() {
   }
 
   float timeScaledSpeed = timeSinceAutonomyStart * (1.0f - MIN_AUTONOMOUS_SPEED) / TIME_UNTIL_AUTONOMY_MAX_SPEED;
-  // return min(1.0f, timeScaledSpeed);
+  // return min(1.0f, timeScaledSpeed);  // TODO: Remote control override
   return autonomySpeedOverride;
 }
 

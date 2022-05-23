@@ -37,11 +37,12 @@ void setup() {
 void loop() {
   ModeUpdater();
 
+  // Primary mode function
   strategyMethods[1][mode]();
 
   HeartBeat();
 
-  // IridiumProcess();
+  IridiumProcess();
 
   DBG_ONLY(recvWithStartEndMarkers());
   DBG_ONLY(PerformCommand());

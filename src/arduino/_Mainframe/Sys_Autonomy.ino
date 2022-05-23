@@ -26,14 +26,14 @@ void AutonomousProcess() {
   // Autonomous Navigation towards waypoints based on current GNSS position and heading
   Navigate();
 
-  NavigationPrint();
+  NavigationPrint();  // TODO: Debug prints
 
   SBusAutonomyProcess();  // TODO: Remove Manual Control
 
   // Transmit motor controls based on Navigation alogrithm
   CanBusProcess();  // TODO: Handle CAN Error
 
-  CanBusPrint();
+  CanBusPrint();  // TODO: Debug prints
 }
 
 // Runs necessary autonomy pre-runs (Power, Communication, Navigation)

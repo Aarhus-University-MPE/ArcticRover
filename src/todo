@@ -9,7 +9,7 @@
     - Handle power down/reboot (continue where left off) if autonomous
     - Handle distance to current waypoint > maximum length (in case waypoint gets corrupted)
         - Cycle alternative targets until sufficient
-    - Return to Home location
+    - Return to Home location (Hardcoded in firmware)
     - Direction updates based on (linear?) regression of previous X points @done
     - Waypoints reached @done
 
@@ -29,15 +29,15 @@
     - Backup every X lines, to reduce filesizes
         - Remove files older than X...
     
-- GNSS
+- GNSS @done
     - Coordinate Heading + Distance (Long to Radians) @done
-    - Test Pathing
-    - Test heading output
+    - Test Pathing @done
+    - Test heading output @done
 
-- Status LED
-    - Test durations
-    - Test run-time LED (non-blocking)
-    - Remove 12V enable (temp dcdc)
+- Status LED @done
+    - Test durations @done
+    - Test run-time LED (non-blocking) @done
+    - Remove 12V enable (temp dcdc) @done
 
 - Iridium
     - Test Send
@@ -46,9 +46,9 @@
     - Create Message Parser
     - Create Standardized Packages
 
-- Motors
-    - Test Error timeout
-    - Add input smoothing
+- Motors @done
+    - Test Error timeout @done
+    - Add input smoothing @done
 
 
 - General Software

@@ -19,11 +19,10 @@
 void setup() {
   // System initialization
   InitAllPins();
-  
+
   // Debug
   DBG_ONLY(initializeDebugComm());
   DEBUG_PRINT("Debug mode. Entered Setup... ");
-
 
   // Setup finished
   DEBUG_PRINTLN("Setup complete.");
@@ -35,5 +34,5 @@ void setup() {
 void loop() {
   HeartBeat();
 
-  recvWithStartEndMarkers();
+  DBG_ONLY(recvWithStartEndMarkers());
 }

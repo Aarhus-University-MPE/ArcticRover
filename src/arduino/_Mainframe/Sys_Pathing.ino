@@ -225,7 +225,6 @@ float HeadingDirection() {
 // Checks if distance from current position to target is < min
 bool WaypointWithinRange() {
   // write coordinate
-  // write coordinate
   // DEBUG_PRINT(F("Current - Lat: "));
   // DEBUG_PRINT(latCurrent);
   // DEBUG_PRINT(F(" Lon: "));

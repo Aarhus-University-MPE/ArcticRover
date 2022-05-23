@@ -248,8 +248,6 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define MAX_LAT_VALUE                     900000000   // deg * 10^-7
 #define MAX_LON_VALUE                     1800000000  // deg * 10^-7
 
-#define MAX_ROUTE_LEN                     1
-
 #define MIN_ACCEL_TILT                    0.8f  // approx 35°
 
 #define MAX_AUTONOMOUS_SPEED              1.0f      // 0-1 (0-100%) of maxspeed
@@ -258,6 +256,12 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define MAX_AUTONOMOUS_TURN               0.75f
 
 #define COORDINATE_DEGREE_SCALE           1.0d / 10000000.0d
+
+#define COORDINATE_HOME_LAT               900000000
+#define COORDINATE_HOME_LON               1800000000
+
+#define COORDINATE_HOME_LAT_ALT           900000000
+#define COORDINATE_HOME_LON_ALT           1800000000
 
 // ------------------------------------------------------------ //
 //                       REMOTE CONTROL                         //
@@ -289,7 +293,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                           HEATING                            //
 // ------------------------------------------------------------ //
-#define TEMP_SYSTEM_MIN                   25     // ~28 V
+#define TEMP_SYSTEM_MIN                   25     // °C
 #define TEMP_SYSTEM_HYSTERESIS            5      // K
 #define TEMP_CHECK_PERIOD                 5000   // 5 sec
 #define HEATING_DURATION                  20000  // ON Period (20 sec) to avoid running heating elements too hot

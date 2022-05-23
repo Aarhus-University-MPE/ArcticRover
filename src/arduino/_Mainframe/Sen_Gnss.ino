@@ -21,7 +21,7 @@ long millisLastGnssPrint = 0;
 bool InitializeGnss() {
   Wire.begin();
   Wire.setClock(400000);
-  // Wire.setWireTim eout(1000);
+  // Wire.setWireTimeout(1000);
   bool status = gnss.begin();
   if (status) {
     gnss.setI2COutput(COM_TYPE_UBX);  // Set the I2C port to output UBX only (turn off NMEA noise)
