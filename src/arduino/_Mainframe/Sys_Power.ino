@@ -77,7 +77,7 @@ bool PowerCycle() {
     }
   }
 
-  if (charge&& batteryLevel = < BATTERY_STD_CHARGE) {
+  if (charge && batteryLevel <= BATTERY_STD_CHARGE) {
     DEBUG_PRINTLINE();
     DEBUG_PRINTLN(F("Battery Level < 20%, starting charge cycle"));
     DEBUG_PRINTLINE();
