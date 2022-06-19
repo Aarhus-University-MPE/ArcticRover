@@ -192,7 +192,6 @@ void WaypointUpdate() {
 }
 
 // Home position override, navigate towards home
-// TODO: halt once at home position
 bool HomePosOverride() {
   if (!navigationOverride) return false;
 
@@ -203,6 +202,9 @@ bool HomePosOverride() {
     latRoute = COORDINATE_HOME_LAT;
     lonRoute = COORDINATE_HOME_LON;
   }
+
+  // Check distance to waypoint and halt once reached
+  if (WaypointWithinRange()) AutonomyReset();
 
   return navigationOverride;
 }
@@ -270,7 +272,8 @@ bool WaypointWithinRange() {
 // TODO: halt after last waypoint? Currently repeats last steps
 void IncrementWaypoint() {
   if (waypointIndex >= lengthRoute - 1) {
-    waypointIndex = 0;
+    AutonomyReset();
+    // waypointIndex = 0; // TODO: add reset to waypoint 0, if set to repeat route
   } else {
     waypointIndex++;
   }
