@@ -129,12 +129,13 @@ bool MotorCycle() {
   }
 
   MotorUpdate(0, 0);
-  unsigned long millisMotorStart = millis();
+  unsigned long millisMotorStart      = millis();
+  unsigned long lastMillisUpdateMotor = millis();
 
-  // (!motorLeft.CanStatus() || !motorRight.CanStatus()) && 1
+  // Run canbus for a while to get motor states and test data connection, minimum 2 seconds
+  while ((((!motorLeft.CanStatus() || !motorRight.CanStatus()) && (millis() - millisMotorStart) < MOTOR_STARTUP_TIMEOUT)) || (millis() - millisMotorStart) < MOTOR_STARTUP_MIN_CYCLE) {
+    if (millis() - lastMillisUpdateMotor > 200) MotorUpdate(0, 0);  // Ensure velocity reaches 0
 
-  // Run canbus for a while to get motor states and test data connection
-  while ((!motorLeft.CanStatus() || !motorRight.CanStatus()) && (millis() - millisMotorStart) < MOTOR_STARTUP_TIMEOUT) {
     if (!CanBusProcess()) {
       return false;
     }

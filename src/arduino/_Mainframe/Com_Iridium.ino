@@ -57,7 +57,6 @@ void IridiumProcess() {
   // Sets motor speed to 0 and halts - TODO: alternatively power off motors
   MotorCycle();
 
-  //
   IridiumReceive();
   IridiumSend();
 
@@ -65,6 +64,7 @@ void IridiumProcess() {
 }
 
 // Check modem for waiting messages
+// TODO: add retry receive msg if error
 void IridiumReceive() {
   if (!modem.getWaitingMessageCount() > 0) return;
 
@@ -99,6 +99,7 @@ void IridiumReceive() {
 }
 
 // Send iridium message awaiting to be sent
+// TODO: add retry send msg if error
 void IridiumSend() {
   if (iridiumTxStatus) {
     DEBUG_PRINT("Sending test message... ");

@@ -285,6 +285,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
 //                           MOTORS                             //
 // ------------------------------------------------------------ //
 #define MOTOR_STARTUP_TIMEOUT             30000
+#define MOTOR_STARTUP_MIN_CYCLE           2000
 
 // CAN BUS
 #define CANBUS_TX_MOTOR_LEFT              0x12
