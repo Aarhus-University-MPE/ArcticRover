@@ -20,9 +20,11 @@
 IridiumSBD modem(COM_SERIAL_IRID);
 
 uint8_t buffer[200];
-uint8_t sendBuffer[1];
+uint8_t sendBuffer[2] = {0x12, 0x34};
 size_t bufferSize     = 200;
-size_t bufferSizeSend = 1;
+size_t bufferSizeSend = 2;
+
+bool msgSent = false;
 
 int signalQuality = -1;
 
@@ -58,6 +60,7 @@ void loop() {
   Serial.print("Sending test message... ");
   err = modem.sendSBDBinary(sendBuffer, bufferSizeSend);
   if (err == ISBD_SUCCESS) {
+    msgSent = true;
     Serial.println("Success!");
   } else {
     Serial.print("Error: ");

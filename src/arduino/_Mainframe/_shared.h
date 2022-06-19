@@ -117,6 +117,12 @@ long lonCurrent = 0;
 
 int waypointIndex = 0;
 
+bool navigationOverride = false;
+bool alternativeHome    = false;
+bool maxAutonomySpeed   = false;
+
+void SetHomePosOverride(bool overrideRoute, bool alternative);
+
 boolean isModeUpdated = false;
 
 bool GetStatus(int module) {

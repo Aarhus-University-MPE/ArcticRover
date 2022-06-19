@@ -24,7 +24,7 @@ void AutonomousProcess() {
   // if (!AutonomyRunCheck()) return;
 
   // Autonomous Navigation towards waypoints based on current GNSS position and heading
-  Navigate();
+  Navigate();  // TODO: Enable motor update in this function once fully autonomous (not using remote control to control autonomy speed)
 
   NavigationPrint();  // TODO: Debug prints
 
@@ -123,6 +123,8 @@ void AutonomyToggle() {
   autonomyActive = !autonomyActive;
   autonomyStart  = autonomyActive;
   NavigationPreCheckReset();
+
+  EEPROM.put(MEMADDR_AUTONOMY_START, autonomyActive);
 }
 
 // Full autonomy reset
@@ -130,8 +132,22 @@ void AutonomyReset() {
   NavigationPreCheckReset();
   ResetNavigation();
   ResetPowerCycle();
-  autonomyActive = false;
-  autonomyStart  = false;
+  autonomyActive     = false;
+  autonomyStart      = false;
+  navigationOverride = false;
+  maxAutonomySpeed   = false;
+
+  EEPROM.put(MEMADDR_AUTONOMY_START, autonomyActive);
+
+  DEBUG_PRINT(F("Saving autonomyActive bool to EEPROM: "));
+  DEBUG_PRINTLN(AutonomyReboot());
+}
+
+// Load autonomyActive from EEPROM, returns true in case of power down while autonomy is active
+bool AutonomyReboot() {
+  EEPROM.get(MEMADDR_AUTONOMY_START, autonomyActive);
+
+  return autonomyActive;
 }
 
 // Power down system

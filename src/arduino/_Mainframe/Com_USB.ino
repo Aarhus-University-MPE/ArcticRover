@@ -315,6 +315,14 @@ void parseCommandRoute() {
       DEBUG_PRINT(F(" Lon: "));
       DEBUG_PRINTLN(lonLong);
       break;
+    case CMD_ROUTE_OVERRIDE:
+      DEBUG_PRINTLN(F("Setting Home Position Override Flag."));
+      SetHomePosOverride(true, false);
+      break;
+    case CMD_ROUTE_OVERRIDE_ALT:
+      DEBUG_PRINTLN(F("Setting Alternative Home Position Override Flag."));
+      SetHomePosOverride(true, false);
+      break;
     default:
       break;
   }

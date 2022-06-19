@@ -42,6 +42,9 @@ bool Navigate() {
   // Update pos, heading and target waypoint
   PathingProcess();
 
+  // Update motor parameters
+  // MotorUpdate(HeadingDirection(), MAX_AUTONOMOUS_SPEED * AutonomySpeedScale());  // TODO: uncomment once fully autonomous
+
   return true;
 }
 
@@ -49,14 +52,15 @@ bool Navigate() {
 float AutonomySpeedScale() {
   unsigned long timeSinceAutonomyStart = millis() - millisAutonomyStart;
 
-  if (timeSinceAutonomyStart > TIME_UNTIL_AUTONOMY_MAX_SPEED) {
-    // return 1.0f;
-    return autonomySpeedOverride;
+  if (timeSinceAutonomyStart > TIME_UNTIL_AUTONOMY_MAX_SPEED || maxAutonomySpeed) {
+    maxAutonomySpeed = true;
+    // return 1.0f; // TODO: Uncomment for full autonomy
+    return autonomySpeedOverride;  // TODO: Comment to remove Remote control override
   }
 
   float timeScaledSpeed = timeSinceAutonomyStart * (1.0f - MIN_AUTONOMOUS_SPEED) / TIME_UNTIL_AUTONOMY_MAX_SPEED;
-  // return min(1.0f, timeScaledSpeed);  // TODO: Remote control override
-  return autonomySpeedOverride;
+  // return max(0.0f, min(1.0f, timeScaledSpeed)); // TODO: Uncomment for full autonomy
+  return autonomySpeedOverride;  // TODO: Comment to remove Remote control override
 }
 
 void AutonomySpeedUpdate(float speed) {

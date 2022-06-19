@@ -186,8 +186,40 @@ bool PathingProcess() {
 
 // Updates waypoint based on distance to target
 void WaypointUpdate() {
-  if (WaypointWithinRange()) {
-    IncrementWaypoint();
+  if (HomePosOverride()) return;
+
+  if (WaypointWithinRange()) IncrementWaypoint();
+}
+
+// Home position override, navigate towards home
+// TODO: halt once at home position
+bool HomePosOverride() {
+  if (!navigationOverride) return false;
+
+  if (alternativeHome) {
+    latRoute = COORDINATE_HOME_LAT_ALT;
+    lonRoute = COORDINATE_HOME_LON_ALT;
+  } else {
+    latRoute = COORDINATE_HOME_LAT;
+    lonRoute = COORDINATE_HOME_LON;
+  }
+
+  return navigationOverride;
+}
+
+// Set override flags, head home
+void SetHomePosOverride(bool overrideRoute, bool alternative) {
+  navigationOverride = overrideRoute;
+  alternativeHome    = alternative;
+
+  if (!navigationOverride) return;
+
+  if (alternativeHome) {
+    latRoute = COORDINATE_HOME_LAT_ALT;
+    lonRoute = COORDINATE_HOME_LON_ALT;
+  } else {
+    latRoute = COORDINATE_HOME_LAT;
+    lonRoute = COORDINATE_HOME_LON;
   }
 }
 
@@ -235,7 +267,7 @@ bool WaypointWithinRange() {
 }
 
 // Increments current waypoint returns to 0 if > total number of points
-// TODO: halt after last waypoint?
+// TODO: halt after last waypoint? Currently repeats last steps
 void IncrementWaypoint() {
   if (waypointIndex >= lengthRoute - 1) {
     waypointIndex = 0;

@@ -156,7 +156,6 @@ bool SBusAutonomyProcess() {
     SBusAutonomyController();
   }
 
-  // TODO: Move Motor Update elsewhere once remote control is removed
   // Set motor controls based on current target waypoint
   MotorUpdate(HeadingDirection(), MAX_AUTONOMOUS_SPEED * AutonomySpeedScale());
 

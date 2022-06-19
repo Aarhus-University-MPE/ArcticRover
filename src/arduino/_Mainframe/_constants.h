@@ -196,6 +196,8 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define CMD_ROUTE_SET          'S'
 #define CMD_ROUTE_PRINT        'P'
 #define CMD_ROUTE_STREAM       'B'
+#define CMD_ROUTE_OVERRIDE     'O'
+#define CMD_ROUTE_OVERRIDE_ALT 'o'
 
 // ------------------------------------------------------------ //
 //                       STRATEGY MODES                         //
@@ -257,11 +259,11 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 #define COORDINATE_DEGREE_SCALE           1.0d / 10000000.0d
 
-#define COORDINATE_HOME_LAT               900000000
-#define COORDINATE_HOME_LON               1800000000
+#define COORDINATE_HOME_LAT               756333330   // Hardcoded values, not saved in EEPROM
+#define COORDINATE_HOME_LON               -359666670  // Hardcoded values, not saved in EEPROM
 
-#define COORDINATE_HOME_LAT_ALT           900000000
-#define COORDINATE_HOME_LON_ALT           1800000000
+#define COORDINATE_HOME_LAT_ALT           756333330   // Hardcoded values, not saved in EEPROM
+#define COORDINATE_HOME_LON_ALT           -359666670  // Hardcoded values, not saved in EEPROM
 
 // ------------------------------------------------------------ //
 //                       REMOTE CONTROL                         //
@@ -359,7 +361,13 @@ const unsigned long SYSREQ_AUTONOMOUS =
 #define MEMADDR_HOME_START                1
 #define MEMADDR_HOME_END                  MEMADDR_HOME_START + 8
 
-#define MEMADDR_ROUTEIDX_START            MEMADDR_HOME_END
+#define MEMADDR_HOME_ALT_START            MEMADDR_HOME_END
+#define MEMADDR_HOME_ALT_END              MEMADDR_HOME_ALT_START + 8
+
+#define MEMADDR_AUTONOMY_START            MEMADDR_HOME_ALT_END
+#define MEMADDR_AUTONOMY_END              MEMADDR_AUTONOMY_START + 1
+
+#define MEMADDR_ROUTEIDX_START            MEMADDR_AUTONOMY_END
 #define MEMADDR_ROUTEIDX_END              MEMADDR_ROUTEIDX_START + 2
 
 #define MEMADDR_ROUTELEN_START            MEMADDR_ROUTEIDX_END
