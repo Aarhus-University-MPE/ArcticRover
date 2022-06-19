@@ -55,11 +55,20 @@ void IridiumProcess() {
 
   millisLastIridiumProcess = millis();
 
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN(F("Starting Iridium Transmit Process, halting motors"));
+  DEBUG_PRINTLINE();
+
   // Sets motor speed to 0 and halts - TODO: alternatively power off motors
   MotorCycle();
 
   IridiumReceive();
+  DEBUG_PRINTLINE();
   IridiumSend();
+
+  DEBUG_PRINTLINE();
+  DEBUG_PRINTLN(F("Iridium Transmit Process Complete"));
+  DEBUG_PRINTLINE();
 
   // TODO: Potentialy reenable motors
 }
@@ -67,7 +76,13 @@ void IridiumProcess() {
 // Check modem for waiting messages
 // TODO: add retry receive msg if error
 void IridiumReceive() {
-  if (!modem.getWaitingMessageCount() > 0) return;
+  DEBUG_PRINTLN(F("Checking Messages"));
+
+  if (!modem.getWaitingMessageCount() > 0) {
+    DEBUG_PRINTLN(F("No New messages"));
+    return;
+  }
+  DEBUG_PRINTLN(F("New message available"));
 
   int err;
 
@@ -76,26 +91,15 @@ void IridiumReceive() {
     DEBUG_PRINT(F("Receive msg failed, Error: "));
     DEBUG_PRINTLN(err);
   } else {
-    for (int i = 0; i < bufferSize; i++) {
-      Serial.print(receiveBuffer[i], HEX);
-      if (isprint(receiveBuffer[i])) {
-        Serial.print(F("("));
-        Serial.write(receiveBuffer[i]);
-        Serial.print(F(")"));
-      }
-      Serial.print(F(" "));
-    }
-    Serial.println();
-
     // Parse iridium message and act upon
     parseIridium();
   }
   // Clear the Mobile Originated message buffer to avoid re-sending the message during subsequent loops
-  Serial.println(F("Clearing the MO buffer."));
+  DEBUG_PRINTLN(F("Clearing the MO buffer."));
   err = modem.clearBuffers(ISBD_CLEAR_MO);  // Clear MO buffer
   if (err != ISBD_SUCCESS) {
-    Serial.print(F("clearBuffers failed, Error: "));
-    Serial.println(err);
+    DEBUG_PRINT(F("clearBuffers failed, Error: "));
+    DEBUG_PRINTLN(err);
   }
 }
 
@@ -106,8 +110,9 @@ void IridiumSend() {
 
   millisLastIridiumSend = millis();
 
+  DEBUG_PRINTLN(F("Populating Iridium Message"));
   PopulateSendBuffer();
-  DEBUG_PRINT("Sending Iridium Broadcast Message");
+  DEBUG_PRINT(F("Sending Iridium Broadcast Message"));
 
   int err = modem.sendSBDBinary(sendBuffer, sendBuferSize);
   if (err == ISBD_SUCCESS) {
@@ -354,7 +359,7 @@ void parseCommandRouteIridium() {
   }
 }
 
-// TODO: Modify iridium package
+// Populate Iridium Package with latest data
 void PopulateSendBuffer() {
   union package pack;
 
