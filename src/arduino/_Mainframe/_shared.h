@@ -142,6 +142,13 @@ void SetStatus(bool status) {
   SystemStatus[MODULE_ESTOP]    = true;
   SystemStatus[MODULE_RESERVED] = true;
 }
+union package {
+  long l;
+  unsigned long ul;
+  int i;
+  char c;
+  uint8_t ui8[4];
+};
 
 // Run full system check
 void GetStatus(bool printRes);

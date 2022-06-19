@@ -12,14 +12,15 @@
 
 IridiumSBD modem(COM_SERIAL_IRID);
 
-char sendBuffer[200];
+uint8_t sendBuffer[200];
 uint8_t receiveBuffer[200];
 const byte numCharsIridium = 32;
 size_t sendBuferSize;
 size_t bufferSize = 200;
 int signalQuality = -1;
-bool iridiumTxStatus;
-unsigned long millisLastIridiumProcess;
+
+unsigned long millisLastIridiumProcess = 0;
+unsigned long millisLastIridiumSend    = 0;
 
 bool InitializeIridium() {
   bool status = true;
@@ -50,7 +51,7 @@ void IridiumProcess() {
 
   if (signalQuality < 1) return;
 
-  if (!(millis() - millisLastIridiumProcess > IRID_PROCESS_PERIOD)) return;
+  if ((millis() - millisLastIridiumProcess < IRID_PROCESS_PERIOD)) return;
 
   millisLastIridiumProcess = millis();
 
@@ -100,20 +101,20 @@ void IridiumReceive() {
 
 // Send iridium message awaiting to be sent
 // TODO: add retry send msg if error
-// TODO: add data cycle (send data every X min/hour)
-// TODO: change to send binary instead of text
 void IridiumSend() {
-  if (iridiumTxStatus) {
-    PopulateSendBuffer();
-    DEBUG_PRINT("Sending test message... ");
-    int err = modem.sendReceiveSBDText(sendBuffer, receiveBuffer, bufferSize);
-    if (err == ISBD_SUCCESS) {
-      iridiumTxStatus = false;
-      DEBUG_PRINTLN("Success!");
-    } else {
-      DEBUG_PRINT("Error: ");
-      DEBUG_PRINTLN(err);
-    }
+  if (millis() - millisLastIridiumSend < IRID_BROADCAST_PERIOD) return;
+
+  millisLastIridiumSend = millis();
+
+  PopulateSendBuffer();
+  DEBUG_PRINT("Sending Iridium Broadcast Message");
+
+  int err = modem.sendSBDBinary(sendBuffer, sendBuferSize);
+  if (err == ISBD_SUCCESS) {
+    DEBUG_PRINTLN("Success!");
+  } else {
+    DEBUG_PRINT("Error: ");
+    DEBUG_PRINTLN(err);
   }
 }
 
@@ -353,18 +354,37 @@ void parseCommandRouteIridium() {
   }
 }
 
-// TODO: Fill send buffer with specified data
+// TODO: Modify iridium package
 void PopulateSendBuffer() {
-  // fill send buffer
-  sendBuffer[0] = 'H';
-  sendBuffer[1] = 'e';
-  sendBuffer[2] = 'l';
-  sendBuffer[3] = 'l';
-  sendBuffer[4] = 'o';
-  sendBuffer[5] = '!';
-  sendBuffer[6] = '\r';
-  sendBuffer[7] = '\n';
-  sendBuferSize = 8;
+  union package pack;
+
+  // Battery Level
+  pack.i        = BatteryLevel();
+  sendBuffer[0] = pack.ui8[0];
+  sendBuffer[1] = pack.ui8[1];
+
+  // Current Latitude Position
+  pack.l        = GnssGetLat();
+  sendBuffer[2] = pack.ui8[0];
+  sendBuffer[3] = pack.ui8[1];
+  sendBuffer[4] = pack.ui8[2];
+  sendBuffer[5] = pack.ui8[3];
+
+  // Current Longitude Position
+  pack.l        = GnssGetLong();
+  sendBuffer[6] = pack.ui8[0];
+  sendBuffer[7] = pack.ui8[1];
+  sendBuffer[8] = pack.ui8[2];
+  sendBuffer[9] = pack.ui8[3];
+
+  // System Status
+  pack.ul        = ToLong(SystemStatus);
+  sendBuffer[10] = pack.ui8[0];
+  sendBuffer[11] = pack.ui8[1];
+  sendBuffer[12] = pack.ui8[2];
+  sendBuffer[13] = pack.ui8[3];
+
+  sendBuferSize = 14;
 }
 
 // Full Iridium Test
@@ -427,8 +447,7 @@ bool IridiumTest() {
   if (signalQuality <= 0) {
     return status;
   }
-  sendBuffer[0]   = (uint8_t)BatteryLevel();
-  iridiumTxStatus = true;
+  sendBuffer[0] = (uint8_t)BatteryLevel();
   IridiumSend();
 
   return status;

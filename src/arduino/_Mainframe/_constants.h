@@ -328,9 +328,10 @@ const unsigned long SYSREQ_AUTONOMOUS =
 
 // Iridium
 #define IRID_BAUDRATE                     19200
-#define IRID_START_TIMEOUT                6       // default value = 240 sec
-#define IRID_ATT_TIMEOUT                  3       // default value = 20 sec
-#define IRID_PROCESS_PERIOD               900000  // 15 min
+#define IRID_START_TIMEOUT                6        // default value = 240 sec
+#define IRID_ATT_TIMEOUT                  3        // default value = 20 sec
+#define IRID_PROCESS_PERIOD               900000   // 15 min
+#define IRID_BROADCAST_PERIOD             3600000  // 60 min
 
 // SBUS
 #define SBUS_TIMEOUT                      2000
