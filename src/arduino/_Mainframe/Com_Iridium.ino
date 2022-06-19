@@ -19,8 +19,8 @@ size_t sendBuferSize;
 size_t bufferSize = 200;
 int signalQuality = -1;
 
-unsigned long millisLastIridiumProcess = 0;
-unsigned long millisLastIridiumSend    = 0;
+unsigned long millisLastIridiumProcess = -IRID_PROCESS_PERIOD;    // Set to 0 to not run at startup
+unsigned long millisLastIridiumSend    = -IRID_BROADCAST_PERIOD;  // Set to 0 to not run at startup
 
 bool InitializeIridium() {
   bool status = true;
