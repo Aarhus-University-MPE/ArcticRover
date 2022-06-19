@@ -100,8 +100,11 @@ void IridiumReceive() {
 
 // Send iridium message awaiting to be sent
 // TODO: add retry send msg if error
+// TODO: add data cycle (send data every X min/hour)
+// TODO: change to send binary instead of text
 void IridiumSend() {
   if (iridiumTxStatus) {
+    PopulateSendBuffer();
     DEBUG_PRINT("Sending test message... ");
     int err = modem.sendReceiveSBDText(sendBuffer, receiveBuffer, bufferSize);
     if (err == ISBD_SUCCESS) {
