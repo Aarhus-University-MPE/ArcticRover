@@ -6,16 +6,16 @@ body:
 - type: markdown
   attributes:
     value: |
-      Please make sure to [search for existing issues](https://github.com/Aarhus-University-MPE/Ice-Nucleation-Controller/issues) before filing a new one!
+      Please make sure to [search for existing issues](https://github.com/Aarhus-University-MPE/ArcticRover/issues) before filing a new one!
 - type: input
   attributes:
-    label: Ice-Nucleation-Controller version
+    label: ArcticRover firmware version
     placeholder: |
-      1.2.12
+      0.98.064
     description: |
-      Check software description
+      Check Blackbox file or boot-up message
   validations:
-    required: true
+    required: false
 
 - type: dropdown
   id: issueAreas
@@ -25,13 +25,14 @@ body:
     multiple: true
     options:
       - General
-      - Ice Nucleation Controller
-      - Thermal Camera Evaluation
-      - Thermal Camera Calibration
       - Hardware Issue
-      - Freezing Point Detection
-      - Temperature Controller
-      - Performance
+      - Navigation
+      - Autonomy
+      - Remote Control
+      - Batteries
+      - Iridium
+      - Serial Commands
+      - Serial Communication
       - Other
   validations:
     required: true
