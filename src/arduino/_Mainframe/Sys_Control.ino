@@ -70,7 +70,7 @@ bool SystemEnable(int module) {
       status = HeatingStart();
       break;
     case MODULE_TEMP:
-      status = TemperatureStatus();  // Can't run temp test if below min temp
+      status = TemperatureStatus();
       break;
     case MODULE_BACKUPCPU:
       status = GetStatus(MODULE_BACKUPCPU);
@@ -103,6 +103,7 @@ void SystemEnablePrimary() {
   SystemEnable(MODULE_BLACKBOX);
   SystemEnable(MODULE_GNSS);
   SystemEnable(MODULE_IRIDIUM);
+  SystemEnable(MODULE_TEMP);
 }
 
 // Enables module then flash LED indicating success or error
@@ -535,6 +536,7 @@ void SystemCheck() {
   DEBUG_PRINTLN(F("Running full system check"));
   DEBUG_PRINTLINE();
   BatteryStatus(true);
+  PrintTemperature();
   for (int i = 0; i < MODULE_COUNT - 3; i++) {
     SystemCheckModule(i);
   }

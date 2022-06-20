@@ -60,6 +60,18 @@ int ThermTemp(int thermistor) {
   return temp;
 }
 
+void PrintTemperature() {
+  DEBUG_PRINT(F("System Temperatures: "));
+  DEBUG_PRINT(F("\tT1: "));
+  DEBUG_PRINT(ThermTemp(0));
+  DEBUG_PRINT(F("\tT2: "));
+  DEBUG_PRINT(ThermTemp(1));
+  DEBUG_PRINT(F("\tT3: "));
+  DEBUG_PRINT(ThermTemp(2));
+  DEBUG_PRINT(F("\tMean: "));
+  DEBUG_PRINTLN(MeanThermTemp());
+}
+
 /* Thermistor Equation
   Temp(V_out) = B25_85 / (ln ((V_s * R_k / V_out)  - R_K ) / (R_25 * e^(-B25_85/T1))) - 273.15K
 */
@@ -91,6 +103,16 @@ bool HeatingStatus() {
 }
 
 bool TemperatureStatus() {
+  return TemperatureAboveMin() && TemperatureBelowMax();
+}
+
+// Returns true if temperature is below maximum temperature
+bool TemperatureBelowMax() {
+  return MeanThermTemp() < TEMP_SYSTEM_MAX;
+}
+
+// Returns true if temperature is above minimum temperature (+hysteresis if currently heating)
+bool TemperatureAboveMin() {
   if (!GetStatus(MODULE_HEATING)) {
     return MeanThermTemp() > TEMP_SYSTEM_MIN;
   } else {
@@ -140,12 +162,11 @@ bool TemperatureTest() {
 
 // If temp < minimum temp runs heating period
 void HeatingProcess() {
-  if (millis() - lastMillisTempCheck < TEMP_CHECK_PERIOD) {
-    return;
-  }
+  if (millis() - lastMillisTempCheck < TEMP_CHECK_PERIOD) return;
+
   lastMillisTempCheck = millis();
 
-  if (TemperatureStatus()) {
+  if (TemperatureAboveMin()) {
     SystemDisable(MODULE_HEATING);
     return;
   }

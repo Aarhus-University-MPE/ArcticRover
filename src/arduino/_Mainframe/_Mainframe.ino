@@ -22,8 +22,10 @@ void setup() {
   // Debug
   DBG_ONLY(initializeDebugComm());
 
+  // Clear System status flags
   SetStatus(false);
 
+  // Enable all primary systems
   SystemEnablePrimary();
 
   // Strategy initialization
@@ -35,15 +37,22 @@ void setup() {
 //                          MAIN LOOP                           //
 // ------------------------------------------------------------ //
 void loop() {
+  // Update new mode based on input
   ModeUpdater();
 
   // Primary mode function
   strategyMethods[1][mode]();
 
+  // System Heartbeat (Backup-CPU & Blackbox)
   HeartBeat();
 
+  // Send/Read Iridium messages
   IridiumProcess();
 
+  // Control Heating Element
+  HeatingProcess();
+
+  // Receive Serial Commands (DEBUG)
   DBG_ONLY(recvWithStartEndMarkers());
   DBG_ONLY(PerformCommand());
 }

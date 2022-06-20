@@ -152,7 +152,7 @@ union package {
 
 // Run full system check
 void GetStatus(bool printRes);
-
+void PrintTemperature();
 bool AccelTest(bool printRes);
 
 GemMotor motorLeft  = GemMotor(CANBUS_TX_MOTOR_LEFT, CANBUS_RX_MOTOR_LEFT);

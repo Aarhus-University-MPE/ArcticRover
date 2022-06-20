@@ -139,6 +139,7 @@ const unsigned long SYSREQ_REMOTE_CONTROL =
     (1L << MODULE_MOTORS) +
     (1L << MODULE_RF) +
     (1L << MODULE_CANBUS) +
+    (1L << MODULE_TEMP) +
     (1L << MODULE_ESTOP);
 
 const unsigned long SYSREQ_AUTONOMOUS =
@@ -151,6 +152,7 @@ const unsigned long SYSREQ_AUTONOMOUS =
     (1L << MODULE_ACCEL) +
     (1L << MODULE_SD) +
     (1L << MODULE_BLACKBOX) +
+    (1L << MODULE_TEMP) +
     (1L << MODULE_BACKUPCPU) +
     (1L << MODULE_ESTOP);
 
@@ -296,7 +298,8 @@ const unsigned long SYSREQ_AUTONOMOUS =
 // ------------------------------------------------------------ //
 //                           HEATING                            //
 // ------------------------------------------------------------ //
-#define TEMP_SYSTEM_MIN                   25     // °C
+#define TEMP_SYSTEM_MIN                   15     // °C
+#define TEMP_SYSTEM_MAX                   40     // °C
 #define TEMP_SYSTEM_HYSTERESIS            5      // K
 #define TEMP_CHECK_PERIOD                 5000   // 5 sec
 #define HEATING_DURATION                  20000  // ON Period (20 sec) to avoid running heating elements too hot
