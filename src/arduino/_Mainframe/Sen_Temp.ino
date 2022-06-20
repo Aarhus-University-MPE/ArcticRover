@@ -70,6 +70,12 @@ void PrintTemperature() {
   DEBUG_PRINT(ThermTemp(2));
   DEBUG_PRINT(F("\tMean: "));
   DEBUG_PRINTLN(MeanThermTemp());
+
+  if (TemperatureBelowMax) {
+    DEBUG_PRINTLINE();
+    DEBUG_PRINTLN(F("WARNING: System Overheated!"));
+    DEBUG_PRINTLINE();
+  }
 }
 
 /* Thermistor Equation
