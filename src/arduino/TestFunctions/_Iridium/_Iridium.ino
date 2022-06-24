@@ -19,15 +19,16 @@
 
 IridiumSBD modem(COM_SERIAL_IRID);
 
-uint8_t buffer[200];
-uint8_t sendBuffer[2] = {0x12, 0x34};
-size_t bufferSize     = 200;
-size_t bufferSizeSend = 2;
+uint8_t receiveBuffer[200];
+uint8_t sendBuffer[2]        = {0x12, 0x34};
+size_t bufferSize            = 200;
+size_t bufferSizeSend        = 2;
+unsigned long lastMillisSend = 0;
 
-bool msgSent = false;
-
+bool msgSent      = false;
 int signalQuality = -1;
 
+// Arduino Setup
 void setup() {
   Serial.begin(115200);
   pinMode(PO_POWER_IRIDIUM, OUTPUT);
@@ -36,12 +37,80 @@ void setup() {
   InitializeIridium();
 }
 
-unsigned long lastMillisSend = 0;
+// Primary Loop
 void loop() {
-  if (millis() - lastMillisSend < 1500) {
+  if (millis() - lastMillisSend < 1500) return;
+
+  lastMillisSend = millis();
+
+  // Await sufficient signal quality before processing
+  if (!IridiumSignalQuality()) {
+    Serial.println(F("Waiting for signal..."));
     return;
   }
-  lastMillisSend = millis();
+
+  // Iridium Process
+  IridiumReceive();
+
+  IridiumSend();
+}
+
+// Send test message
+void IridiumSend() {
+  if (msgSent) return;
+  int err;
+
+  Serial.print("Sending test message... ");
+
+  // Send message
+  err = modem.sendSBDBinary(sendBuffer, bufferSizeSend);
+  if (err == ISBD_SUCCESS) {
+    msgSent = true;
+    Serial.println("Success!");
+  } else {
+    Serial.print("Error: ");
+    Serial.println(err);
+  }
+}
+
+// Check for new messages
+void IridiumReceive() {
+  Serial.println(F("Checking Messages"));
+
+  // Check message count
+  if (!modem.getWaitingMessageCount() > 0) {
+    Serial.println(F("No New messages"));
+    return;
+  }
+  Serial.println(F("New message available"));
+
+  int err;
+
+  // Download new message
+  err = modem.sendReceiveSBDText(NULL, receiveBuffer, bufferSize);
+  if (err != ISBD_SUCCESS) {
+    Serial.print(F("Receive msg failed, Error: "));
+    Serial.println(err);
+  } else {
+    // Print Iridium Buffer
+    Serial.print(F("Received message (HEX): \""));
+    for (uint8_t i = 0; i < bufferSize; i++) {
+      Serial.print(receiveBuffer[i], HEX);
+    }
+    Serial.println(F("\""));
+  }
+
+  // Clear the Mobile Originated message buffer to avoid re-sending the message during subsequent loops
+  Serial.println(F("Clearing the MO buffer."));
+  err = modem.clearBuffers(ISBD_CLEAR_MO);  // Clear MO buffer
+  if (err != ISBD_SUCCESS) {
+    Serial.print(F("clearBuffers failed, Error: "));
+    Serial.println(err);
+  }
+}
+
+// Check signal quality
+bool IridiumSignalQuality() {
   int err;
 
   err = modem.getSignalQuality(signalQuality);
@@ -54,20 +123,10 @@ void loop() {
   Serial.print(signalQuality);
   Serial.println(F("."));
 
-  if (signalQuality <= 0) {
-    return;
-  }
-  Serial.print("Sending test message... ");
-  err = modem.sendSBDBinary(sendBuffer, bufferSizeSend);
-  if (err == ISBD_SUCCESS) {
-    msgSent = true;
-    Serial.println("Success!");
-  } else {
-    Serial.print("Error: ");
-    Serial.println(err);
-  }
+  return signalQuality >= 0;
 }
 
+// Configure Iridium
 void InitializeIridium() {
   int signalQuality = -1;
   int err;
@@ -98,19 +157,11 @@ void InitializeIridium() {
   Serial.print(IMEI);
   Serial.println(F("."));
 
-  err = modem.getSignalQuality(signalQuality);
-  if (err != ISBD_SUCCESS) {
-    Serial.print(F("SignalQuality failed: error "));
-    Serial.println(err);
-  }
+  // Check signal quality
+  IridiumSignalQuality();
 
-  Serial.print(F("On a scale of 0 to 5, signal quality is currently "));
-  Serial.print(signalQuality);
-  Serial.println(F("."));
-
+  // Configure timeout
   modem.adjustSendReceiveTimeout(1);
-
-  sendBuffer[0] = 80;
 }
 
 #if DIAGNOSTICS

@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:mega",
-    "sketch": "src\\arduino\\_Mainframe\\_Mainframe.ino",
+    "sketch": "src\\arduino\\TestFunctions\\_Iridium\\_Iridium.ino",
     "port": "COM7",
     "programmer": "AVR ISP",
     "output": "src/arduino/out",
