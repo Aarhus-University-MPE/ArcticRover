@@ -13,7 +13,8 @@
 // ------------------------------------------------------------ //
 //                            SETUP                             //
 // ------------------------------------------------------------ //
-void setup() {
+void setup()
+{
   // System initialization
   InitAllPins();
   InitButtons();
@@ -36,7 +37,8 @@ void setup() {
 // ------------------------------------------------------------ //
 //                          MAIN LOOP                           //
 // ------------------------------------------------------------ //
-void loop() {
+void loop()
+{
   // Update new mode based on input
   ModeUpdater();
 
@@ -50,7 +52,7 @@ void loop() {
   IridiumProcess();
 
   // Control Heating Element
-  // HeatingProcess(); // TODO: Verify heating process works before enabling this
+  HeatingProcess(); // TODO: Verify heating process works before enabling this
 
   // Receive Serial Commands (DEBUG)
   DBG_ONLY(recvWithStartEndMarkers());
