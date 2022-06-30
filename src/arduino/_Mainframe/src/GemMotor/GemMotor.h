@@ -12,8 +12,8 @@
 #define DIAGNOSTIC false
 
 #define MIN_VELOCITY 0.25f        // kmh
-#define MOTOR_MAX_SPEED_FWD 10.0f // kmh
-#define MOTOR_MAX_SPEED_BWD 5.0f  // kmh
+#define MOTOR_MAX_SPEED_FWD 12.0f // kmh
+#define MOTOR_MAX_SPEED_BWD 6.0f  // kmh
 
 #define MIN_TORQUE 0.1f           // %
 #define MOTOR_MAX_TORQUE_FWD 1.0f // %
@@ -22,8 +22,9 @@
 #define MAX_RPM 200
 #define MAX_TORQUE 60 // Nm
 
-#define RPM_VEL 1000.0f / 60.0f                     // Conversion from km/h to rpm
-#define WHEEL_CIRCUMFERENCE 1.200f                  // m (original wheel had 32-36cm Ø).
+#define RPM_VEL 1000.0f / 60.0f    // Conversion from km/h to rpm
+#define WHEEL_CIRCUMFERENCE 1.200f // m (original wheel had 32-36cm Ø).
+#define RPM_TO_KMH WHEEL_CIRCUMFERENCE * 60.0f / 1000.0f
 #define VEL_RPM_SCALE RPM_VEL / WHEEL_CIRCUMFERENCE // Scale from linear velocity (kmh) to RPM
 #define RPM_VEL_SCALE 1.0f / VEL_RPM_SCALE          // Scale from RPM to linear velocity (kmh)
 #define RPM_CONTROL_SCALE 10
@@ -38,7 +39,8 @@
 #define MOTOR_ERROR_TIMEOUT 5000 // Time before
 
 #define MAX_INPUT_STEP 0.1f // maximum increase from current state
-#define MAX_VEL_CHANGE 1.0f // Maximum change in velocity from current velocity (Form of Acceleration)
+#define MAX_VEL_CHANGE 2.0f // Maximum change in velocity from current velocity (Form of Acceleration)
+// MAX_VEL_CHANGE has units of (km/h)/dt_motorupdate.
 
 class GemMotor
 {
