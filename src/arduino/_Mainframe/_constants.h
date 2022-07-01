@@ -78,7 +78,7 @@
 // ------------------------------------------------------------ //
 //                           SYSTEM                             //
 // ------------------------------------------------------------ //
-#define SystemVersion "0.98.075"
+#define SystemVersion "0.98.076"
 
 // Binary codes for Status LED flags, Red Yellow Green
 #define BINARY_CODE_LED_GRN B001 // 001
