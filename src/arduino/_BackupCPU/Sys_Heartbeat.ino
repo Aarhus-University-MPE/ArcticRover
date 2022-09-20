@@ -8,7 +8,7 @@
 */
 
 unsigned long lastMillisResetPrimary = 0;
-bool receivedHeartBeat = false;
+bool receivedHeartBeat               = false;
 
 // Runs heartbeat in and out
 void HeartBeat() {
